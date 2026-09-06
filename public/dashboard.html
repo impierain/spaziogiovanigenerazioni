@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La mia area - Spazio Giovani</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">Spazio<br>Giovani <span class="accent">Generazioni</span></div>
+  <div>
+    <span class="text-dim" id="nome-utente"></span>
+    <button class="secondary small" id="btn-logout" style="margin-left:12px;">Esci</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="margin-top:0;">Chi c'è dentro adesso</h3>
+      <table>
+        <thead><tr><th>Nome</th><th>Dal</th></tr></thead>
+        <tbody id="tabella-presenti"><tr><td colspan="2" class="text-dim">Carico...</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <h3 style="margin-top:0;">La mia tessera digitale</h3>
+      <p class="text-dim" style="margin-bottom:0;">Mostrala al lettore all'ingresso, oppure salvala in Apple/Google Wallet.</p>
+      <div class="qr-box"><div id="qr"></div></div>
+      <button id="btn-checkin">Segna ingresso / uscita da qui</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Registra una faccenda</h3>
+    <form id="form-faccenda">
+      <label for="tipo-faccenda">Cosa hai fatto?</label>
+      <select id="tipo-faccenda">
+        <option value="spazzatura">Buttato la spazzatura</option>
+        <option value="pulizia">Pulizia</option>
+        <option value="sistemazione">Sistemazione spazio</option>
+        <option value="altro">Altro</option>
+      </select>
+
+      <label for="note-faccenda">Note (facoltative)</label>
+      <textarea id="note-faccenda" rows="2"></textarea>
+
+      <button type="submit">Registra</button>
+      <div class="error-msg" id="errore-faccenda"></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Le mie faccende di questo mese</h3>
+    <table>
+      <thead><tr><th>Data</th><th>Tipo</th><th>Note</th></tr></thead>
+      <tbody id="tabella-faccende"><tr><td colspan="3" class="text-dim">Carico...</td></tr></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accesso rapido - Spazio Giovani</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<div class="center-screen">
+  <div class="card" style="width:100%; max-width:380px; text-align:center;">
+
+    <div id="blocco-login">
+      <div class="brand">Spazio<br>Giovani <span class="accent">Generazioni</span></div>
+      <div class="subtitle">Accedi per vedere la tua tessera</div>
+      <form id="form-login-rapido" style="text-align:left;">
+        <label>Email</label>
+        <input type="email" id="email" required autocomplete="username">
+        <label>Password</label>
+        <input type="password" id="password" required autocomplete="current-password">
+        <button type="submit" style="width:100%;">Accedi e mostra la tessera</button>
+        <div class="error-msg" id="errore"></div>
+      </form>
+    </div>
+
+    <div id="blocco-qr" class="hidden">
+      <div class="brand" id="saluto"></div>
+      <div class="subtitle">Mostra questo QR alla telecamera d'ingresso</div>
+      <div class="qr-box"><div id="qr"></div></div>
+      <p class="text-dim" style="margin-top:16px;">
+        <a href="/dashboard.html" style="color:inherit;">Vai alla mia area &rarr;</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+async function mostraQr(utente) {
+  document.getElementById('blocco-login').classList.add('hidden');
+  document.getElementById('blocco-qr').classList.remove('hidden');
+  document.getElementById('saluto').textContent = 'Ciao, ' + utente.nome;
+  new QRCode(document.getElementById('qr'), {
+    text: utente.qr_token || ('utente-' + utente.id),
+    width: 200,
+    height: 200,
+  });
+}
+
+document.getElementById('form-login-rapido').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errore = document.getElementById('errore');
+  errore.textContent = '';
+  try {
+    const risultato = await apiCall('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+      }),
+    });
+    mostraQr(risultato.utente);
+  } catch (err) {
+    errore.textContent = err.message;
+  }
+});
+
+// Se il tag NFC viene ritoccato quando sei già loggato, salta dritto al QR
+utenteCorrente().then((u) => { if (u) mostraQr(u); });
+</script>
+</body>
+</html>

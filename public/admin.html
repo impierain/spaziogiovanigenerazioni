@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Spazio Giovani</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">Spazio Giovani · Admin</div>
+  <div>
+    <span class="text-dim" id="nome-utente"></span>
+    <a href="/dashboard.html" class="text-dim" style="margin-left:12px;">La mia area</a>
+    <button class="secondary small" id="btn-logout" style="margin-left:12px;">Esci</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab active" data-tab="soci">Soci</button>
+    <button class="tab" data-tab="storico">Storico presenze</button>
+    <button class="tab" data-tab="sconosciute">Tessere sconosciute</button>
+    <button class="tab" data-tab="faccende">Faccende</button>
+    <button class="tab" data-tab="statistiche">Statistiche</button>
+    <button class="tab" data-tab="sistema">Sistema</button>
+  </div>
+
+  <!-- SOCI -->
+  <div id="tab-soci">
+    <div class="card">
+      <h3 style="margin-top:0;">Aggiungi socio</h3>
+      <form id="form-nuovo-socio">
+        <div class="grid-2">
+          <div><label>Nome</label><input type="text" id="n-nome" required></div>
+          <div><label>Email (per il login al sito)</label><input type="email" id="n-email"></div>
+          <div class="text-dim" style="grid-column:1/-1;">Se inserisci un'email, al socio arriverà un link per scegliere la propria password. Senza email, potrà comunque entrare con tessera/QR ma non accedere al sito.</div>
+          <div><label>Ruolo</label>
+            <select id="n-ruolo"><option value="guest">Guest</option><option value="admin">Admin</option></select>
+          </div>
+          <div>
+            <label>UID tessera RFID (facoltativo, si può aggiungere dopo)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="n-uid" style="flex:1;">
+              <button type="button" class="secondary" id="btn-ascolta-tessera" style="margin-top:0; white-space:nowrap;">Ascolta tessera</button>
+            </div>
+            <div class="text-dim" id="stato-ascolto" style="margin-top:6px;"></div>
+          </div>
+        </div>
+        <button type="submit">Aggiungi</button>
+        <div class="error-msg" id="errore-socio"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;">Elenco soci</h3>
+      <table>
+        <thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Ruolo</th><th>Tessera</th><th>Stato</th><th></th></tr></thead>
+        <tbody id="tabella-soci"><tr><td colspan="6" class="text-dim">Carico...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STORICO -->
+  <div id="tab-storico" class="hidden">
+
+    <div class="grid-2">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0;">Ore medie di apertura al giorno</h3>
+          <div>
+            <button class="secondary small tab active" id="btn-7gg">7gg</button>
+            <button class="secondary small tab" id="btn-30gg">30gg</button>
+          </div>
+        </div>
+        <div class="text-dim" id="media-apertura" style="margin-top:12px;">Carico...</div>
+        <canvas id="grafico-apertura" style="margin-top:16px; max-height:180px;"></canvas>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Ambiente in sede</h3>
+        <div class="text-dim" id="stato-ambiente">Carico...</div>
+        <canvas id="grafico-ambiente" style="margin-top:16px; max-height:180px;"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;">Storico ingressi/uscite</h3>
+      <div class="grid-2">
+        <div><label>Da</label><input type="date" id="filtro-da"></div>
+        <div><label>A</label><input type="date" id="filtro-a"></div>
+      </div>
+      <button id="btn-filtra-storico">Filtra</button>
+      <table style="margin-top:16px;">
+        <thead><tr><th>Nome</th><th>Data</th><th>Dettaglio</th><th>Fonte</th></tr></thead>
+        <tbody id="tabella-storico"><tr><td colspan="4" class="text-dim">Carico...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SCONOSCIUTE -->
+  <div id="tab-sconosciute" class="hidden">
+    <div class="card">
+      <h3 style="margin-top:0;">Tessere / QR non riconosciuti</h3>
+      <p class="text-dim">Appoggia una tessera nuova sul lettore: comparirà qui entro pochi secondi (questa lista si aggiorna da sola). Scegli il socio e clicca "Assegna".</p>
+      <table>
+        <thead><tr><th>UID</th><th>Quando</th><th>Assegna a</th><th></th></tr></thead>
+        <tbody id="tabella-sconosciute"><tr><td colspan="4" class="text-dim">Carico...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FACCENDE -->
+  <div id="tab-faccende" class="hidden">
+    <div class="card">
+      <h3 style="margin-top:0;">Registra una faccenda per un socio</h3>
+      <form id="form-faccenda-admin">
+        <div class="grid-2">
+          <div>
+            <label>Socio</label>
+            <select id="fa-socio" required></select>
+          </div>
+          <div>
+            <label>Tipo</label>
+            <select id="fa-tipo">
+              <option value="spazzatura">Spazzatura</option>
+              <option value="pulizia">Pulizia</option>
+              <option value="sistemazione">Sistemazione spazio</option>
+              <option value="altro">Altro</option>
+            </select>
+          </div>
+        </div>
+        <label>Note (facoltative)</label>
+        <textarea id="fa-note" rows="2"></textarea>
+        <button type="submit">Registra</button>
+        <div class="error-msg" id="errore-faccenda-admin"></div>
+      </form>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">Faccende di tutti i soci</h3>
+      <table>
+        <thead><tr><th>Data</th><th>Nome</th><th>Tipo</th><th>Note</th></tr></thead>
+        <tbody id="tabella-tutte-faccende"><tr><td colspan="4" class="text-dim">Carico...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STATISTICHE -->
+  <div id="tab-statistiche" class="hidden">
+    <div class="card">
+      <h3 style="margin-top:0;">Ore di apertura al giorno</h3>
+      <div class="tabs" style="margin-bottom:8px;">
+        <button class="tab subtab active" id="btn-7gg">Ultimi 7 giorni</button>
+        <button class="tab subtab" id="btn-30gg">Ultimi 30 giorni</button>
+      </div>
+      <p class="text-dim" id="media-apertura">Carico...</p>
+      <canvas id="grafico-apertura" height="180"></canvas>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">Temperatura e umidità in sede</h3>
+      <p class="text-dim" id="stato-ambiente">Carico...</p>
+      <canvas id="grafico-ambiente" height="180"></canvas>
+    </div>
+  </div>
+
+  <div id="tab-sistema" class="hidden">
+    <div class="card">
+      <h3 style="margin-top:0;">Stato delle stazioni</h3>
+      <p class="text-dim">Ogni stazione manda un "battito" periodico: se non arriva da un po', il pallino diventa giallo o rosso.</p>
+      <div id="lista-diagnostica">Carico...</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="/js/api.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

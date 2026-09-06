@@ -35,29 +35,33 @@ router.post('/users', async (req, res) => {
     resetScadenza = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(); // 48 ore
   }
 
+  let idNuovoSocio;
   try {
     const result = await db.execute({
       sql: `INSERT INTO users (nome, email, ruolo, uid_tessera, qr_token, reset_token, reset_scadenza)
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
       args: [nome, email || null, ruolo || 'guest', uid_tessera || null, qrToken, resetToken, resetScadenza],
     });
-
-    if (email) {
-      const link = `${process.env.SITE_URL}/imposta-password.html?token=${resetToken}`;
-      await inviaEmail({
-        a: email,
-        oggetto: 'Benvenuto su Spazio Giovani Generazioni',
-        html: `<p>Ciao ${nome},</p>
-               <p>Il tuo account per il sito dello Spazio Giovani è pronto.</p>
-               <p><a href="${link}">Clicca qui per scegliere la tua password</a></p>
-               <p>Il link scade tra 48 ore.</p>`,
-      });
-    }
-
-    res.status(201).json({ ok: true, id: Number(result.lastInsertRowid), qr_token: qrToken });
+    idNuovoSocio = Number(result.lastInsertRowid);
   } catch (err) {
-    res.status(400).json({ errore: 'Email o tessera già in uso.' });
+    return res.status(400).json({ errore: 'Email o tessera già in uso.' });
   }
+
+  // L'email è "a parte": se fallisce non deve far sembrare fallita la
+  // creazione del socio, che a questo punto è già salvato correttamente.
+  if (email) {
+    const link = `${process.env.SITE_URL}/imposta-password.html?token=${resetToken}`;
+    await inviaEmail({
+      a: email,
+      oggetto: 'Benvenuto su Spazio Giovani Generazioni',
+      html: `<p>Ciao ${nome},</p>
+             <p>Il tuo account per il sito dello Spazio Giovani è pronto.</p>
+             <p><a href="${link}">Clicca qui per scegliere la tua password</a></p>
+             <p>Il link scade tra 48 ore.</p>`,
+    });
+  }
+
+  res.status(201).json({ ok: true, id: idNuovoSocio, qr_token: qrToken });
 });
 
 // Modifica un socio esistente
@@ -67,6 +71,16 @@ router.put('/users/:id', async (req, res) => {
     sql: `UPDATE users SET nome = ?, email = ?, ruolo = ?, uid_tessera = ?, attivo = ?
           WHERE id = ?`,
     args: [nome, email || null, ruolo, uid_tessera || null, attivo ? 1 : 0, req.params.id],
+  });
+  res.json({ ok: true });
+});
+
+// Toglie solo la tessera a un socio (es. persa/smarrita), senza toccare
+// il resto: il socio resta attivo e può ricevere una nuova tessera dopo.
+router.post('/users/:id/rimuovi-tessera', async (req, res) => {
+  await db.execute({
+    sql: 'UPDATE users SET uid_tessera = NULL WHERE id = ?',
+    args: [req.params.id],
   });
   res.json({ ok: true });
 });

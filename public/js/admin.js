@@ -65,7 +65,10 @@ async function caricaSoci() {
         <td>${s.uid_tessera || '<span class="text-dim">nessuna</span>'}<br>
             <span class="text-dim" style="font-size:0.75em;">qr: ${s.qr_token}</span></td>
         <td>${s.attivo ? '<span class="badge in">attivo</span>' : '<span class="badge out">disattivo</span>'}</td>
-        <td><button class="secondary small" onclick="disattivaSocio(${s.id})">Disattiva</button></td>
+        <td>
+          <button class="secondary small" onclick="rimuoviTessera(${s.id})" ${s.uid_tessera ? '' : 'disabled'}>Rimuovi tessera</button>
+          <button class="secondary small" onclick="disattivaSocio(${s.id})">Disattiva</button>
+        </td>
       </tr>
     `).join('');
   } catch (e) {
@@ -76,6 +79,12 @@ async function caricaSoci() {
 async function disattivaSocio(id) {
   if (!confirm('Disattivare questo socio? Lo storico resta comunque salvato.')) return;
   await apiCall('/api/admin/users/' + id, { method: 'DELETE' });
+  await caricaSoci();
+}
+
+async function rimuoviTessera(id) {
+  if (!confirm('Rimuovere la tessera da questo socio? Potrai assegnargliene una nuova, o dare questa a qualcun altro.')) return;
+  await apiCall('/api/admin/users/' + id + '/rimuovi-tessera', { method: 'POST' });
   await caricaSoci();
 }
 

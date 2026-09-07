@@ -59,15 +59,15 @@ async function caricaSoci() {
     }
 
     tbody.innerHTML = soci.map(s => `
-      <tr>
+      <tr style="cursor:pointer;" onclick="window.location.href='/socio.html?id=${s.id}'">
         <td>${s.id}</td>
-        <td>${s.nome}</td>
+        <td><strong>${s.nome}</strong></td>
         <td>${s.email || '-'}</td>
         <td>${s.ruolo}</td>
         <td>${s.uid_tessera || '<span class="text-dim">nessuna</span>'}<br>
             <span class="text-dim" style="font-size:0.75em;">qr: ${s.qr_token}</span></td>
         <td>${s.attivo ? '<span class="badge in">attivo</span>' : '<span class="badge out">disattivo</span>'}</td>
-        <td>
+        <td onclick="event.stopPropagation()">
           <button class="secondary small" onclick="rimuoviTessera(${s.id})" ${s.uid_tessera ? '' : 'disabled'}>Rimuovi tessera</button>
           <button class="secondary small" onclick="disattivaSocio(${s.id})">Disattiva</button>
         </td>
@@ -290,54 +290,111 @@ function ultimiGiorni(n) {
   return giorni;
 }
 
-async function caricaStatisticheApertura() {
+let graficiSede = {};
+
+function distruggiGrafici() {
+  Object.values(graficiSede).forEach(g => { if (g) g.destroy(); });
+  graficiSede = {};
+}
+
+async function caricaStatisticheSede() {
   try {
-    const dati = await apiCall('/api/admin/stats/apertura?giorni=' + periodoStatistiche);
-    const mappa = {};
-    dati.forEach(d => { mappa[d.giorno] = d.ore_apertura; });
+    const d = await apiCall('/api/stats/sede?giorni=' + periodoStatistiche);
 
-    const giorni = ultimiGiorni(periodoStatistiche);
-    const ore = giorni.map(g => mappa[g] || 0);
-    const media = ore.reduce((a, b) => a + b, 0) / ore.length;
+    // Stat box
+    document.getElementById('stat-media-ore').textContent = d.mediaOre + 'h';
+    document.getElementById('stat-streak').textContent = d.streak + ' gg';
+    const dm = d.durataMediaSessione;
+    document.getElementById('stat-durata-media').textContent =
+      (Math.floor(dm/60) > 0 ? Math.floor(dm/60) + 'h ' : '') + (dm % 60) + 'min';
+    if (d.confronto.length >= 2) {
+      const delta = d.confronto[0].entrate - d.confronto[1].entrate;
+      document.getElementById('stat-confronto').textContent =
+        (delta >= 0 ? '+' : '') + delta + ' ingressi';
+    }
 
+    // Grafico apertura al giorno
+    const ctxA = document.getElementById('grafico-apertura');
+    if (graficiSede.apertura) graficiSede.apertura.destroy();
     document.getElementById('media-apertura').textContent =
-      `Media: ${media.toFixed(1)} ore al giorno (ultimi ${periodoStatistiche} giorni)`;
-
-    const ctx = document.getElementById('grafico-apertura');
-    if (graficoApertura) graficoApertura.destroy();
-    graficoApertura = new Chart(ctx, {
+      `Media: ${d.mediaOre}h/giorno`;
+    graficiSede.apertura = new Chart(ctxA, {
       type: 'bar',
       data: {
-        labels: giorni.map(g => g.slice(5)),
-        datasets: [{ label: 'Ore aperta', data: ore, backgroundColor: '#ff2e2e' }],
+        labels: d.oreApertura.map(r => r.giorno.slice(5)),
+        datasets: [{ data: d.oreApertura.map(r => r.ore), backgroundColor: '#e8380d88', borderColor: '#e8380d', borderWidth: 2, borderRadius: 4 }],
       },
       options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
     });
+
+    // Grafico trend mensile
+    const ctxT = document.getElementById('grafico-trend');
+    if (graficiSede.trend) graficiSede.trend.destroy();
+    graficiSede.trend = new Chart(ctxT, {
+      type: 'line',
+      data: {
+        labels: d.trendMensile.map(r => r.mese),
+        datasets: [{ label: 'Ingressi', data: d.trendMensile.map(r => r.ingressi), borderColor: '#e8380d', backgroundColor: '#e8380d22', tension: 0.3, fill: true }],
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+    });
+
+    // Grafico giorno della settimana
+    const ctxD = document.getElementById('grafico-dow');
+    if (graficiSede.dow) graficiSede.dow.destroy();
+    graficiSede.dow = new Chart(ctxD, {
+      type: 'bar',
+      data: {
+        labels: d.perGiornoSettimana.map(r => r.giorno),
+        datasets: [{ data: d.perGiornoSettimana.map(r => r.ingressi), backgroundColor: '#ffb70388', borderColor: '#ffb703', borderWidth: 2, borderRadius: 4 }],
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+    });
+
+    // Grafico fasce orarie
+    const ctxO = document.getElementById('grafico-orari');
+    if (graficiSede.orari) graficiSede.orari.destroy();
+    graficiSede.orari = new Chart(ctxO, {
+      type: 'bar',
+      data: {
+        labels: d.perFasceOrarie.map(r => r.fascia),
+        datasets: [{ data: d.perFasceOrarie.map(r => r.ingressi), backgroundColor: '#1d9e7588', borderColor: '#1d9e75', borderWidth: 2, borderRadius: 4 }],
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+    });
+
+    // Classifica soci
+    const tbody = document.getElementById('tbody-classifica');
+    tbody.innerHTML = d.classifica.map((r, i) => `
+      <tr><td>${i + 1}</td><td>${r.nome}</td><td>${r.ingressi}</td></tr>
+    `).join('') || '<tr><td colspan="3" class="text-dim">Nessun ingresso questo mese.</td></tr>';
+
   } catch (e) {
-    document.getElementById('media-apertura').textContent = e.message;
+    console.error('Errore statistiche sede:', e);
   }
 }
 
+// Grafico ambiente (separato perché non dipende dal periodo)
 async function caricaStatisticheAmbiente() {
   try {
-    const letture = await apiCall('/api/admin/stats/ambiente?ore=48');
+    const letture = await apiCall('/api/stats/ambiente?ore=48');
     if (letture.length === 0) {
       document.getElementById('stato-ambiente').textContent =
-        'Nessun dato ancora: serve la stazione ambientale (sensore temperatura/umidità) collegata.';
+        'Nessun dato: collega la stazione con il sensore DHT11.';
       return;
     }
     document.getElementById('stato-ambiente').textContent =
       `Ultime ${letture.length} letture (48 ore)`;
 
     const ctx = document.getElementById('grafico-ambiente');
-    if (graficoAmbiente) graficoAmbiente.destroy();
-    graficoAmbiente = new Chart(ctx, {
+    if (graficiSede.ambiente) graficiSede.ambiente.destroy();
+    graficiSede.ambiente = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: letture.map(l => formattaOra(l.timestamp)),
+        labels: letture.map(l => l.timestamp.slice(11, 16)),
         datasets: [
-          { label: 'Temperatura (°C)', data: letture.map(l => l.temperatura), borderColor: '#ff2e2e', tension: 0.3 },
-          { label: 'Umidità (%)', data: letture.map(l => l.umidita), borderColor: '#ff8a1e', tension: 0.3 },
+          { label: 'Temperatura (°C)', data: letture.map(l => l.temperatura), borderColor: '#e8380d', tension: 0.3 },
+          { label: 'Umidità (%)', data: letture.map(l => l.umidita), borderColor: '#ffb703', tension: 0.3 },
         ],
       },
     });
@@ -346,17 +403,22 @@ async function caricaStatisticheAmbiente() {
   }
 }
 
+// Alias per compatibilità con init() che chiama il vecchio nome
+async function caricaStatisticheApertura() {
+  await caricaStatisticheSede();
+}
+
 document.getElementById('btn-7gg').addEventListener('click', () => {
   periodoStatistiche = 7;
   document.getElementById('btn-7gg').classList.add('active');
   document.getElementById('btn-30gg').classList.remove('active');
-  caricaStatisticheApertura();
+  caricaStatisticheSede();
 });
 document.getElementById('btn-30gg').addEventListener('click', () => {
   periodoStatistiche = 30;
   document.getElementById('btn-30gg').classList.add('active');
   document.getElementById('btn-7gg').classList.remove('active');
-  caricaStatisticheApertura();
+  caricaStatisticheSede();
 });
 
 document.getElementById('btn-logout').addEventListener('click', async () => {

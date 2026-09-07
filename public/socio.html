@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheda socio - Spazio Giovani</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">Spazio Giovani <span class="accent">Generazioni</span></div>
+  <div>
+    <a href="#" id="link-back" class="text-dim">← Indietro</a>
+    <button class="secondary small" id="btn-logout" style="margin-left:12px;">Esci</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card" id="card-intestazione">
+    <div style="display:flex; align-items:center; gap:20px;">
+      <div id="iniziali" style="width:56px;height:56px;border-radius:50%;background:var(--accent);
+           display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+           font-weight:900;color:#0a0a0a;flex-shrink:0;"></div>
+      <div>
+        <div class="brand" id="nome-socio" style="font-size:1.4rem;margin:0;"></div>
+        <div class="text-dim" id="ruolo-socio"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="stat-box"><div class="stat-value" id="stat-ore-mese">-</div><div class="stat-label">Ore in sede questo mese</div></div>
+    <div class="stat-box"><div class="stat-value" id="stat-ore-totali">-</div><div class="stat-label">Ore totali in sede</div></div>
+    <div class="stat-box"><div class="stat-value" id="stat-visite">-</div><div class="stat-label">Visite totali</div></div>
+    <div class="stat-box"><div class="stat-value" id="stat-media-ore">-</div><div class="stat-label">Media ore per visita</div></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Presenze negli ultimi 12 mesi</h3>
+    <canvas id="grafico-presenze" height="120"></canvas>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Storico ingressi/uscite</h3>
+    <table>
+      <thead><tr><th>Data</th><th>Dettaglio</th><th>Fonte</th></tr></thead>
+      <tbody id="tabella-storico-socio"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Faccende</h3>
+    <table>
+      <thead><tr><th>Data</th><th>Tipo</th><th>Note</th></tr></thead>
+      <tbody id="tabella-faccende-socio"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const socioId = params.get('id');
+
+async function init() {
+  const utente = await utenteCorrente();
+  if (!utente) { window.location.href = '/index.html'; return; }
+
+  document.getElementById('link-back').href = utente.ruolo === 'admin' ? '/admin.html' : '/dashboard.html';
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await apiCall('/api/logout', { method: 'POST' });
+    window.location.href = '/index.html';
+  });
+
+  const idTarget = socioId || utente.id;
+
+  try {
+    const dati = await apiCall('/api/stats/socio/' + idTarget);
+    const s = dati.utente;
+
+    document.title = s.nome + ' - Spazio Giovani';
+    document.getElementById('nome-socio').textContent = s.nome;
+    document.getElementById('ruolo-socio').textContent = s.ruolo;
+    document.getElementById('iniziali').textContent = s.nome.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+
+    document.getElementById('stat-ore-mese').textContent = dati.oreMese + 'h';
+    document.getElementById('stat-ore-totali').textContent = dati.oreTotali + 'h';
+    document.getElementById('stat-visite').textContent = dati.numVisite;
+    document.getElementById('stat-media-ore').textContent = dati.mediaOrePerVisita + 'h';
+
+    // Grafico presenze
+    const ctx = document.getElementById('grafico-presenze').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: dati.graficoPres.map(r => r.mese),
+        datasets: [{
+          label: 'Ingressi',
+          data: dati.graficoPres.map(r => r.ingressi),
+          backgroundColor: '#e8380d88',
+          borderColor: '#e8380d',
+          borderWidth: 2,
+          borderRadius: 4,
+        }]
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Storico con calcolo durata
+    const tbody = document.getElementById('tabella-storico-socio');
+    let lastIn = null;
+    const righe = [...dati.storico].reverse();
+    const righeConDurata = righe.map(r => {
+      const ora = r.timestamp.slice(11, 16);
+      let desc;
+      if (r.tipo === 'IN') { lastIn = r.timestamp; desc = 'Entrata alle ' + ora; }
+      else if (r.tipo === 'OUT' && lastIn) {
+        const min = Math.round((new Date(r.timestamp) - new Date(lastIn)) / 60000);
+        const h = Math.floor(min / 60), m = min % 60;
+        desc = 'Uscita alle ' + ora + ' (dentro ' + (h > 0 ? h + 'h ' : '') + m + 'min)';
+        lastIn = null;
+      } else { desc = 'Uscita alle ' + ora; }
+      return { ...r, desc };
+    }).reverse();
+
+    tbody.innerHTML = righeConDurata.length ? righeConDurata.map(r => `
+      <tr>
+        <td>${r.timestamp.slice(0, 10)}</td>
+        <td><span class="badge ${r.tipo === 'IN' ? 'in' : 'out'}">${r.desc}</span></td>
+        <td>${r.fonte}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="3" class="text-dim">Nessun ingresso registrato.</td></tr>';
+
+    // Faccende
+    const tbodyF = document.getElementById('tabella-faccende-socio');
+    tbodyF.innerHTML = dati.faccende.length ? dati.faccende.map(f => `
+      <tr><td>${f.data}</td><td>${f.tipo_faccenda}</td><td>${f.note || '-'}</td></tr>
+    `).join('') : '<tr><td colspan="3" class="text-dim">Nessuna faccenda registrata.</td></tr>';
+
+  } catch (e) {
+    alert('Errore: ' + e.message);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -149,20 +149,58 @@
 
   <!-- STATISTICHE -->
   <div id="tab-statistiche" class="hidden">
-    <div class="card">
-      <h3 style="margin-top:0;">Ore di apertura al giorno</h3>
-      <div class="tabs" style="margin-bottom:8px;">
-        <button class="tab subtab active" id="btn-7gg">Ultimi 7 giorni</button>
-        <button class="tab subtab" id="btn-30gg">Ultimi 30 giorni</button>
+
+    <div class="grid-2">
+      <div class="stat-box"><div class="stat-value" id="stat-media-ore">-</div><div class="stat-label">Ore medie di apertura al giorno</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-streak">-</div><div class="stat-label">Giorni consecutivi di apertura (streak)</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-durata-media">-</div><div class="stat-label">Durata media sessione in sede</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-confronto">-</div><div class="stat-label">Ingressi questo mese vs mese scorso</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h3 style="margin:0;">Ore di apertura al giorno</h3>
+          <div>
+            <button class="secondary small tab" id="btn-7gg">7gg</button>
+            <button class="secondary small tab active" id="btn-30gg">30gg</button>
+          </div>
+        </div>
+        <p class="text-dim" id="media-apertura" style="margin:8px 0 0;"></p>
+        <canvas id="grafico-apertura" height="160" style="margin-top:8px;"></canvas>
       </div>
-      <p class="text-dim" id="media-apertura">Carico...</p>
-      <canvas id="grafico-apertura" height="180"></canvas>
+      <div class="card">
+        <h3 style="margin-top:0;">Trend mensile (ultimi 6 mesi)</h3>
+        <canvas id="grafico-trend" height="160"></canvas>
+      </div>
     </div>
-    <div class="card">
-      <h3 style="margin-top:0;">Temperatura e umidità in sede</h3>
-      <p class="text-dim" id="stato-ambiente">Carico...</p>
-      <canvas id="grafico-ambiente" height="180"></canvas>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">Giorno della settimana più frequentato</h3>
+        <canvas id="grafico-dow" height="160"></canvas>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Fasce orarie più frequentate</h3>
+        <canvas id="grafico-orari" height="160"></canvas>
+      </div>
     </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">Classifica soci più presenti (questo mese)</h3>
+        <table id="tabella-classifica">
+          <thead><tr><th>#</th><th>Nome</th><th>Ingressi</th></tr></thead>
+          <tbody id="tbody-classifica"><tr><td colspan="3" class="text-dim">Carico...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Temperatura e umidità in sede</h3>
+        <p class="text-dim" id="stato-ambiente">Carico...</p>
+        <canvas id="grafico-ambiente" height="160"></canvas>
+      </div>
+    </div>
+
   </div>
 
   <div id="tab-sistema" class="hidden">

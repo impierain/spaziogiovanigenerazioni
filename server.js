@@ -17,6 +17,7 @@ const sensorsRoutes = require('./routes/sensors');
 const diagnosticsRoutes = require('./routes/diagnostics');
 const esp32syncRoutes = require('./routes/esp32sync');
 const passwordRoutes = require('./routes/password');
+const stationlogRoutes = require('./routes/stationlog');
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use('/api', sensorsRoutes);
 app.use('/api', diagnosticsRoutes);
 app.use('/api', esp32syncRoutes);
 app.use('/api', passwordRoutes);
+app.use('/api', stationlogRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

@@ -23,11 +23,13 @@ async function init() {
   await caricaStatisticheApertura();
   await caricaStatisticheAmbiente();
   await caricaDiagnostica();
+  await caricaLog();
 
   // Aggiorna da sola le tessere sconosciute: così appoggiando una tessera
   // sul lettore la vedi comparire qui senza dover ricaricare la pagina
   setInterval(caricaSconosciute, 4000);
   setInterval(caricaDiagnostica, 15000);
+  setInterval(caricaLog, 10000);
 }
 
 // ---------- TABS ----------
@@ -408,5 +410,25 @@ async function caricaDiagnostica() {
     }).join('');
   } catch (e) {
     contenitore.innerHTML = `<p class="error-msg">${e.message}</p>`;
+  }
+}
+
+// ---------- LOG REMOTO (monitor seriale via sito) ----------
+async function caricaLog() {
+  const contenitore = document.getElementById('lista-log');
+  if (!contenitore) return;
+
+  try {
+    const righe = await apiCall('/api/admin/station-log');
+    if (righe.length === 0) {
+      contenitore.innerHTML = '<span class="text-dim">Nessun log ricevuto ancora.</span>';
+      return;
+    }
+    contenitore.innerHTML = righe.map(r => {
+      const ora = r.timestamp.slice(11, 19) || r.timestamp;
+      return `<div>[${ora}] <span class="text-dim">${r.station_id}</span> - ${r.messaggio}</div>`;
+    }).join('');
+  } catch (e) {
+    contenitore.innerHTML = `<span class="error-msg">${e.message}</span>`;
   }
 }

@@ -95,3 +95,29 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 });
 
 init();
+
+// ---------- CAMBIO PASSWORD ----------
+const formCambiaPassword = document.getElementById('form-cambia-password');
+if (formCambiaPassword) {
+  formCambiaPassword.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errore = document.getElementById('errore-pw');
+    errore.textContent = '';
+    const p1 = document.getElementById('nuova-pw').value;
+    const p2 = document.getElementById('nuova-pw2').value;
+    if (p1 !== p2) { errore.textContent = 'Le due password non coincidono.'; return; }
+    try {
+      await apiCall('/api/cambia-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          vecchia_password: document.getElementById('vecchia-pw').value || undefined,
+          nuova_password: p1,
+        }),
+      });
+      alert('Password aggiornata con successo!');
+      formCambiaPassword.reset();
+    } catch (err) {
+      errore.textContent = err.message;
+    }
+  });
+}

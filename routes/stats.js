@@ -146,7 +146,8 @@ router.get('/stats/sede', richiediAdmin, async (req, res) => {
 // ================================================================
 router.get('/stats/socio/:id', richiediLogin, async (req, res) => {
   const idRichiesto = parseInt(req.params.id);
-  const { id: idSessione, ruolo } = req.session.user;
+  const idSessione = Number(req.session.user.id);
+  const ruolo = req.session.user.ruolo;
 
   if (ruolo !== 'admin' && idSessione !== idRichiesto) {
     return res.status(403).json({ errore: 'Puoi vedere solo le tue statistiche.' });

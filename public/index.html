@@ -3,51 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Accedi - Spazio Giovani Generazioni</title>
+<title>Accedi - Spazio Giovani</title>
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 <div class="center-screen">
   <div class="card" style="width:100%; max-width:380px;">
-    <div class="brand">Spazio Giovani <span class="accent">Generazioni</span></div>
-    <div class="subtitle">Gestionale ingressi &amp; attività</div>
+    <div class="brand">Spazio<br>Giovani <span class="accent">Generazioni</span></div>
 
-    <form id="form-login">
-      <label for="email">Email</label>
-      <input type="email" id="email" required autocomplete="username">
+    <!-- Form login normale -->
+    <div id="blocco-login">
+      <div class="subtitle">Accedi alla tua area</div>
+      <form id="form-login">
+        <label>Email</label>
+        <input type="email" id="email" required autocomplete="username">
+        <label>Password <span class="text-dim" style="font-size:0.8em;">(lascia vuoto se è il tuo primo accesso)</span></label>
+        <input type="password" id="password" autocomplete="current-password">
+        <button type="submit">Accedi</button>
+        <div class="error-msg" id="errore"></div>
+      </form>
+    </div>
 
-      <label for="password">Password</label>
-      <input type="password" id="password" required autocomplete="current-password">
+    <!-- Form primo accesso: imposta la password -->
+    <div id="blocco-primo-accesso" class="hidden">
+      <div class="subtitle">Benvenuto/a! Scegli la tua password</div>
+      <p class="text-dim">È il tuo primo accesso. Imposta una password per i prossimi accessi.</p>
+      <form id="form-prima-password">
+        <label>Nuova password (almeno 8 caratteri)</label>
+        <input type="password" id="nuova-password" required minlength="8">
+        <label>Ripeti la password</label>
+        <input type="password" id="nuova-password2" required minlength="8">
+        <button type="submit">Salva e accedi</button>
+        <div class="error-msg" id="errore-prima-pw"></div>
+      </form>
+    </div>
 
-      <button type="submit">Accedi</button>
-      <div class="error-msg" id="errore"></div>
-    </form>
   </div>
 </div>
 
 <script src="/js/api.js"></script>
 <script>
+// Se sei già loggato, vai alla pagina giusta
+utenteCorrente().then((u) => {
+  if (!u) return;
+  if (u.primoAccesso) {
+    // Sessione di primo accesso aperta ma password non ancora impostata
+    document.getElementById('blocco-login').classList.add('hidden');
+    document.getElementById('blocco-primo-accesso').classList.remove('hidden');
+    return;
+  }
+  window.location.href = u.ruolo === 'admin' ? '/admin.html' : '/dashboard.html';
+});
+
 document.getElementById('form-login').addEventListener('submit', async (e) => {
   e.preventDefault();
   const errore = document.getElementById('errore');
   errore.textContent = '';
   try {
-    const risultato = await apiCall('/api/login', {
+    const r = await apiCall('/api/login', {
       method: 'POST',
       body: JSON.stringify({
         email: document.getElementById('email').value,
-        password: document.getElementById('password').value,
+        password: document.getElementById('password').value || undefined,
       }),
     });
-    window.location.href = risultato.utente.ruolo === 'admin' ? '/admin.html' : '/dashboard.html';
+    if (r.primoAccesso) {
+      document.getElementById('blocco-login').classList.add('hidden');
+      document.getElementById('blocco-primo-accesso').classList.remove('hidden');
+    } else {
+      window.location.href = r.utente.ruolo === 'admin' ? '/admin.html' : '/dashboard.html';
+    }
   } catch (err) {
     errore.textContent = err.message;
   }
 });
 
-// Se sei già loggato, saltiamo direttamente alla pagina giusta
-utenteCorrente().then((u) => {
-  if (u) window.location.href = u.ruolo === 'admin' ? '/admin.html' : '/dashboard.html';
+document.getElementById('form-prima-password').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errore = document.getElementById('errore-prima-pw');
+  errore.textContent = '';
+  const p1 = document.getElementById('nuova-password').value;
+  const p2 = document.getElementById('nuova-password2').value;
+  if (p1 !== p2) { errore.textContent = 'Le due password non coincidono.'; return; }
+  try {
+    const r = await apiCall('/api/imposta-password-primo-accesso', {
+      method: 'POST',
+      body: JSON.stringify({ password: p1 }),
+    });
+    window.location.href = r.utente.ruolo === 'admin' ? '/admin.html' : '/dashboard.html';
+  } catch (err) {
+    errore.textContent = err.message;
+  }
 });
 </script>
 </body>

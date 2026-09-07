@@ -41,12 +41,9 @@
             <select id="n-ruolo"><option value="guest">Guest</option><option value="admin">Admin</option></select>
           </div>
           <div>
-            <label>UID tessera RFID (facoltativo, si può aggiungere dopo)</label>
-            <div style="display:flex; gap:8px;">
-              <input type="text" id="n-uid" style="flex:1;">
-              <button type="button" class="secondary" id="btn-ascolta-tessera" style="margin-top:0; white-space:nowrap;">Ascolta tessera</button>
-            </div>
-            <div class="text-dim" id="stato-ascolto" style="margin-top:6px;"></div>
+            <label>UID tessera RFID</label>
+            <p class="text-dim" style="margin:4px 0 8px;">Lascia vuoto: usa la sezione "Tessere sconosciute" per assegnare una tessera dopo che è stata avvicinata al lettore.</p>
+            <input type="text" id="n-uid" placeholder="Es. A1B2C3D4">
           </div>
         </div>
         <button type="submit">Aggiungi</button>

@@ -1,5 +1,6 @@
 // routes/auth.js
-// Login/logout per guest e admin.
+// Login/logout. Al primo accesso (nessuna password impostata), il socio
+// viene reindirizzato a sceglierla direttamente, senza link via email.
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
@@ -9,8 +10,8 @@ const router = express.Router();
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ errore: 'Email e password sono obbligatorie.' });
+  if (!email) {
+    return res.status(400).json({ errore: 'Email obbligatoria.' });
   }
 
   const result = await db.execute({
@@ -19,8 +20,26 @@ router.post('/login', async (req, res) => {
   });
   const utente = result.rows[0];
 
-  if (!utente || !utente.password_hash) {
+  if (!utente) {
     return res.status(401).json({ errore: 'Credenziali non valide.' });
+  }
+
+  // Primo accesso: nessuna password impostata ancora.
+  // Lasciamo passare il login (senza controllare la password) e
+  // segnaliamo al frontend di portare l'utente alla pagina di setup.
+  if (!utente.password_hash) {
+    req.session.user = {
+      id: Number(utente.id),
+      nome: utente.nome,
+      ruolo: utente.ruolo,
+      qr_token: utente.qr_token,
+      primoAccesso: true,
+    };
+    return res.json({ ok: true, primoAccesso: true, utente: req.session.user });
+  }
+
+  if (!password) {
+    return res.status(400).json({ errore: 'Password obbligatoria.' });
   }
 
   const passwordOk = bcrypt.compareSync(password, utente.password_hash);
@@ -28,7 +47,12 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ errore: 'Credenziali non valide.' });
   }
 
-  req.session.user = { id: utente.id, nome: utente.nome, ruolo: utente.ruolo, qr_token: utente.qr_token };
+  req.session.user = {
+    id: Number(utente.id),
+    nome: utente.nome,
+    ruolo: utente.ruolo,
+    qr_token: utente.qr_token,
+  };
   res.json({ ok: true, utente: req.session.user });
 });
 

@@ -69,6 +69,7 @@ async function caricaSoci() {
         <td>${s.attivo ? '<span class="badge in">attivo</span>' : '<span class="badge out">disattivo</span>'}</td>
         <td onclick="event.stopPropagation()">
           <button class="secondary small" onclick="rimuoviTessera(${s.id})" ${s.uid_tessera ? '' : 'disabled'}>Rimuovi tessera</button>
+          <button class="secondary small" onclick="resetPassword(${s.id}, '${s.nome}')">Reset password</button>
           <button class="secondary small" onclick="disattivaSocio(${s.id})">Disattiva</button>
         </td>
       </tr>
@@ -84,45 +85,17 @@ async function disattivaSocio(id) {
   await caricaSoci();
 }
 
+async function resetPassword(id, nome) {
+  if (!confirm(`Azzerare la password di ${nome}? Al prossimo login dovrà sceglierne una nuova.`)) return;
+  await apiCall('/api/admin/users/' + id + '/reset-password', { method: 'POST' });
+  alert('Password azzerata. ' + nome + ' dovrà impostarne una nuova al prossimo accesso.');
+}
+
 async function rimuoviTessera(id) {
   if (!confirm('Rimuovere la tessera da questo socio? Potrai assegnargliene una nuova, o dare questa a qualcun altro.')) return;
   await apiCall('/api/admin/users/' + id + '/rimuovi-tessera', { method: 'POST' });
   await caricaSoci();
 }
-
-document.getElementById('btn-ascolta-tessera').addEventListener('click', async () => {
-  const btn = document.getElementById('btn-ascolta-tessera');
-  const stato = document.getElementById('stato-ascolto');
-  const inizioAscolto = Date.now() - 5000; // 5s di margine per eventuali differenze di orologio
-
-  btn.disabled = true;
-  btn.textContent = 'In ascolto...';
-  stato.textContent = 'Avvicina la tessera al lettore entro 30 secondi.';
-
-  let secondiPassati = 0;
-  const intervallo = setInterval(async () => {
-    secondiPassati += 1.5;
-    try {
-      const righe = await apiCall('/api/admin/unknown-cards');
-      const nuova = righe.find(r => new Date(r.timestamp).getTime() > inizioAscolto);
-      if (nuova) {
-        clearInterval(intervallo);
-        document.getElementById('n-uid').value = nuova.uid_tessera;
-        stato.textContent = 'Tessera rilevata: ' + nuova.uid_tessera;
-        btn.disabled = false;
-        btn.textContent = 'Ascolta tessera';
-        return;
-      }
-    } catch (e) { /* riprova al prossimo giro */ }
-
-    if (secondiPassati >= 30) {
-      clearInterval(intervallo);
-      stato.textContent = 'Nessuna tessera rilevata, riprova.';
-      btn.disabled = false;
-      btn.textContent = 'Ascolta tessera';
-    }
-  }, 1500);
-});
 
 document.getElementById('form-nuovo-socio').addEventListener('submit', async (e) => {
   e.preventDefault();

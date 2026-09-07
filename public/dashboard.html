@@ -63,6 +63,20 @@
     </table>
   </div>
 
+  <div class="card">
+    <h3 style="margin-top:0;">Cambia password</h3>
+    <form id="form-cambia-password">
+      <label>Password attuale (lascia vuoto se è il primo accesso)</label>
+      <input type="password" id="vecchia-pw">
+      <label>Nuova password (almeno 8 caratteri)</label>
+      <input type="password" id="nuova-pw" minlength="8" required>
+      <label>Ripeti la nuova password</label>
+      <input type="password" id="nuova-pw2" minlength="8" required>
+      <button type="submit">Aggiorna password</button>
+      <div class="error-msg" id="errore-pw"></div>
+    </form>
+  </div>
+
 </div>
 
 <script src="/js/api.js"></script>

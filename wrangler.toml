@@ -12,6 +12,5 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "spaziogiovanigenerazioni"
-# Compilare dopo: wrangler d1 create cca-siemmu
-database_id = "DA_COMPILARE"
+database_id = "dcaae33c-5fe3-4967-80f5-b6fd1dd456dd"
 migrations_dir = "migrations"

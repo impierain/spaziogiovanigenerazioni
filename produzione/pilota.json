@@ -1,0 +1,15 @@
+{
+  "organizzazione": "Spazio Giovani Generazioni",
+  "mittenteInviti": "spaziogiovanigenerazioni@gmail.com",
+  "contattoPrivacy": "spaziogiovanigenerazioni@gmail.com",
+  "primaAttivita": {
+    "id": "giornata-contro-violenza-donne-2026",
+    "titolo": "Giornata internazionale contro la violenza sulle donne",
+    "data": "2026-11-25",
+    "fusoOrario": "Europe/Rome",
+    "orario": "17:30",
+    "capienza": 25,
+    "stato": "draft",
+    "criterioConvalida": "Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."
+  }
+}

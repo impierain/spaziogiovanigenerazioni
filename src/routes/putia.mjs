@@ -1,4 +1,4 @@
-import {fail, json, readJson, integer, text} from '../lib/http.mjs';
+import {tumazzi, fail, json, readJson, integer, text} from '../lib/http.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
 import {mailMember, redemptionEmail} from '../lib/emails.mjs';
 
@@ -58,10 +58,10 @@ export async function redeem({env, db, member, params}) {
    AND (SELECT cheese_earned - cheese_spent FROM member_totals WHERE member_id = ?1) >= r.cost`).bind(member.id, params.id).run();
  if (!res.meta.changes) {
   const bal = await balance(db, member.id);
-  fail(409, bal.balance < reward.cost ? `Ti servono ${reward.cost} Formaggi: ne hai ${bal.balance}.` : 'Questo premio è esaurito.');
+  fail(409, bal.balance < reward.cost ? `Ti servono ${tumazzi(reward.cost)}: ne hai ${bal.balance}.` : 'Questo premio è esaurito.');
  }
  const bal = await balance(db, member.id);
- await notify(db, member.id, {kind: 'putia', level: 'ok', title: `Premio riscattato: ${reward.name}`, body: `Passa in sede per ritirarlo. Ti restano ${bal.balance} Formaggi.`});
+ await notify(db, member.id, {kind: 'putia', level: 'ok', title: `Premio riscattato: ${reward.name}`, body: `Passa in sede per ritirarlo. Ti restano ${tumazzi(bal.balance)}.`});
  await notifyOrganizers(db, member.id, {kind: 'putia', level: 'info', title: `Premio da consegnare: ${reward.name}`, body: `Richiesto da ${member.pseudonym}. Vai in Referenti → Putìa.`});
  const mail = await mailMember(env, db, member.id, name => redemptionEmail(name, {reward: reward.name, cost: reward.cost, balance: bal.balance, status: 'pending'}));
  return json({redemption: {rewardId: reward.id, cost: reward.cost}, balance: bal.balance, emailSent: !!mail.sent}, 201);
@@ -102,12 +102,12 @@ export async function deliver({env, db, member, params}) {
  return json({status: 'delivered'});
 }
 
-// Annulla il riscatto: lo può fare chi l'ha chiesto o un referente, finché non è consegnato. I Formaggi tornano nel saldo.
+// Annulla il riscatto: lo può fare chi l'ha chiesto o un referente, finché non è consegnato. I Tumazzi tornano nel saldo.
 export async function cancel({db, member, params}) {
  const row = await loadRedemption(db, params.id);
  if (row.memberId !== member.id && member.role !== 'organizer') fail(403, 'Operazione non consentita.');
  const res = await db.prepare(`UPDATE redemptions SET status = 'cancelled', decided_at = unixepoch(), decided_by = ? WHERE id = ? AND status = 'pending'`).bind(member.id, row.id).run();
  if (!res.meta.changes) fail(409, 'Questo riscatto è già stato chiuso.');
- if (row.memberId !== member.id) await notify(db, row.memberId, {kind: 'putia', level: 'info', title: `Riscatto annullato: ${row.rewardName}`, body: 'I Formaggi sono tornati nel tuo saldo.'});
+ if (row.memberId !== member.id) await notify(db, row.memberId, {kind: 'putia', level: 'info', title: `Riscatto annullato: ${row.rewardName}`, body: 'I Tumazzi sono tornati nel tuo saldo.'});
  return json({status: 'cancelled'});
 }

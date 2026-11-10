@@ -1,9 +1,9 @@
-import {fail, json, readJson, integer, text} from '../lib/http.mjs';
+import {tumazzi, fail, json, readJson, integer, text} from '../lib/http.mjs';
 import {romeWeekStart} from '../lib/time.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
 import {checkTrophies} from '../lib/trophies.mjs';
 
-// Come per le missioni ripetibili: al massimo 12 Formaggi a settimana dalle missioni.
+// Come per le missioni ripetibili: al massimo 12 Tumazzi a settimana dalle missioni.
 export const WEEKLY_CHEESE_CAP = 12;
 export const PATHS = ['studio', 'creativita', 'socialita', 'cittadinanza', 'solidarieta'];
 const pathOf = value => PATHS.includes(value) ? value : fail(400, 'Percorso non valido.');
@@ -25,7 +25,7 @@ export async function createType({request, db}) {
  const id = `${slug(name)}-${crypto.randomUUID().slice(0, 6)}`;
  await db.prepare('INSERT INTO chore_types (id, name, description, xp, cheese, path) VALUES (?, ?, ?, ?, ?, ?)').bind(
   id, name, text(body.description, 'Descrizione', {max: 400, optional: true}) ?? '',
-  integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Formaggi', {max: 200}), pathOf(body.path ?? 'solidarieta')
+  integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Tumazzi', {max: 200}), pathOf(body.path ?? 'solidarieta')
  ).run();
  const row = await db.prepare('SELECT id, name, description, xp, cheese, active, path FROM chore_types WHERE id = ?').bind(id).first();
  return json({type: typeShape(row)}, 201);
@@ -39,7 +39,7 @@ export async function updateType({request, db, params}) {
  if ('name' in body) put('name', text(body.name, 'Nome', {max: 80}));
  if ('description' in body) put('description', text(body.description, 'Descrizione', {max: 400, optional: true}) ?? '');
  if ('xp' in body) put('xp', integer(body.xp, 'XP', {max: 500}));
- if ('cheese' in body) put('cheese', integer(body.cheese, 'Formaggi', {max: 200}));
+ if ('cheese' in body) put('cheese', integer(body.cheese, 'Tumazzi', {max: 200}));
  if ('path' in body) put('path', pathOf(body.path));
  if ('active' in body) put('active', body.active ? 1 : 0);
  if (!sets.length) fail(400, 'Nessuna modifica indicata.');
@@ -70,7 +70,7 @@ export async function listLogs({url, db, member}) {
  return json({chores: results});
 }
 
-// Applica la decisione del referente. Il tetto settimanale taglia i Formaggi, non gli XP.
+// Applica la decisione del referente. Il tetto settimanale taglia i Tumazzi, non gli XP.
 async function decide(db, logId, organizerId, verdict, env = {}) {
  const log = await db.prepare(`SELECT l.id, l.member_id, l.status, c.xp, c.cheese, c.name
   FROM chore_logs l JOIN chore_types c ON c.id = l.chore_type_id WHERE l.id = ?`).bind(logId).first();
@@ -94,7 +94,7 @@ async function decide(db, logId, organizerId, verdict, env = {}) {
  }
  const cheeseCapped = verdict === 'verified' && cheese < log.cheese;
  await notify(db, log.member_id, verdict === 'verified'
-  ? {kind: 'faccenda', level: 'ok', title: `Missione confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${cheese} Formaggi.${cheeseCapped ? ' I Formaggi sono ridotti per il limite settimanale.' : ''}`}
+  ? {kind: 'faccenda', level: 'ok', title: `Missione confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${tumazzi(cheese)}.${cheeseCapped ? ' I Tumazzi sono ridotti per il limite settimanale.' : ''}`}
   : {kind: 'faccenda', level: 'info', title: `Missione non confermata: ${log.name}`, body: 'Un referente non l’ha convalidata. Chiedi a lui il motivo.'});
  if (verdict === 'verified') await checkTrophies(env, db, log.member_id);
  return {id: logId, status: verdict, xp, cheese, cheeseCapped};

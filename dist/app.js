@@ -4,6 +4,7 @@ const navIcons = {
  calendario:'<path d="M4 1h2v2h4V1h2v2h3v12H1V3h3z"/><path fill="#fe4400" d="M3 5h10v2H3z"/><path fill="#fff3d5" d="M3 8h10v5H3z"/><path fill="#6f440f" d="M4 9h2v1H4z M7 9h2v1H7z M10 9h2v1h-2z M4 11h2v1H4z M7 11h2v1H7z"/>',
  missioni:'<path d="M4 1h8v2h3v5h-2v2h-3v2h3v3H3v-3h3v-2H3V8H1V3h3z"/><path fill="#b9954b" d="M5 3h6v5h-1v1H6V8H5z M7 10h2v2H7z M5 13h6v1H5z"/><path fill="#fff3d5" d="M7 4h2v2H7z M3 5h1v2H3z M12 5h1v2h-1z"/>',
  comunita:'<path d="M2 2h4v1h1v4H6v1h4V7H9V3h1V2h4v1h1v4h-1v2h1v1h1v4H0v-4h1V9h1V7H1V3h1z"/><path fill="#8feafc" d="M3 4h2v2H3z M2 10h4v2H2z"/><path fill="#caff4d" d="M11 4h2v2h-2z M10 10h4v2h-4z"/>',
+ referenti:'<path d="M5 1h6v2h3v9h-2v2H4v-2H2V3h3z"/><path fill="#8feafc" d="M4 5h8v6h-2v2H6v-2H4z"/><path fill="#caff4d" d="M6 3h4v2H6z"/><path d="M6 7h2v2h2v1H6z M9 6h2v2H9z"/>',
  profilo:'<path d="M2 1h12v1h1v12h-1v1H2v-1H1V2h1z"/><path fill="#fff3d5" d="M3 3h10v10H3z"/><path d="M6 4h4v4H6z M5 9h6v1h1v2H4v-2h1z"/><path fill="#b9954b" d="M7 5h2v2H7z"/><path fill="#fe4400" d="M6 10h4v1H6z"/>'
 };
 const shapes = {
@@ -21,7 +22,8 @@ const avatarColors = {
  rosa:['Rosa fichidindia','#ff55a1'],verde:['Verde salvia','#bce98d'],blu:['Blu cielo','#699cff'],
  sole:['Giallo ginestra','#ffce39'],terracotta:['Terracotta','#dc7046'],viola:['Viola tramonto','#ad82ed'],
  ottanio:['Verde ottanio','#138f91'],crema:['Crema pietra','#fff3d5'],rosso:['Rosso melograno','#e9435d'],
- bosco:['Verde bosco','#428357'],cobalto:['Blu cobalto','#3456c7'],prugna:['Prugna','#953c83']
+ bosco:['Verde bosco','#428357'],cobalto:['Blu cobalto','#3456c7'],prugna:['Prugna','#953c83'],
+ arcobaleno:['Arcobaleno','linear-gradient(90deg,#ff697b 0 17%,#ffaf55 17% 34%,#f6df6c 34% 51%,#8bd294 51% 68%,#77bde9 68% 85%,#be9af0 85%)']
 };
 const animals = {
  mucca:{name:'Mucca',art:'<path fill="#b9954b" d="M4 2h2v3H4z M10 2h2v3h-2z"/><path fill="#171523" d="M2 4h4V3h4v1h4v4h-2v4H4V8H2z"/><path fill="#fffdf4" d="M4 5h8v5H4z"/><path fill="#73584e" d="M4 5h3v3H4z"/><path fill="#171523" d="M6 6h1v2H6z M10 6h1v2h-1z"/><path fill="#ee99aa" d="M5 9h6v2H5z"/><path fill="#171523" d="M6 9h1v1H6z M9 9h1v1H9z"/>'},
@@ -50,6 +52,7 @@ const pixelIcon = (path,kind='')=>`<svg class="pixel-icon ${kind}" viewBox="0 0 
 const LEVELS=[['Noviziu',0],['Esploratore',60],['Cumpagnu',150],['Custode',300],['Capufila',520],['Maestru',800],['Pilastru',1150],['Leggenda di cca',1600]];
 const WEEKLY_CHEESE=12;
 const main=document.querySelector('main');
+const tumazzi=n=>`${n} ${Number(n)===1?'Tumuzzu':'Tumazzi'}`;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const S={me:null,totals:{xp:0,cheese:0},invite:null,loaded:false,unread:0};
 const bellIcon=()=>pixelIcon('<path fill="currentColor" d="M7 1h2v2h3v2h1v6h2v2H1v-2h2V5h1V3h3zM6 14h4v2H6z"/>','bell-icon');
@@ -89,10 +92,36 @@ const dateLong=sec=>fmt(sec,{weekday:'short',day:'numeric',month:'long',hour:'2-
 const dateShort=sec=>fmt(sec,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const duration=min=>min>=60?`${Math.floor(min/60)} h ${min%60?String(min%60).padStart(2,'0')+' min':''}`.trim():`${min} min`;
 const statusText={pending:'In attesa',verified:'Verificata',rejected:'Respinta',confirmed:'Confermata',declined:'Rifiutata',cancelled:'Annullata',draft:'Bozza',published:'Pubblicata',approved:'Attivo',disabled:'Disattivato'};
+const avatarDetails={
+ mucca:['#fff7ef','M10 11h2v2h-2z M18 13h2v2h-2z'],
+ pecora:['#c6c4ea','M10 6h3v1h-3z M20 7h2v2h-2z M9 12h2v2H9z'],
+ gallina:['#f5b16b','M9 16h4v1H9z M14 16h2v1h-2z'],
+ asino:['#dfc8d6','M9 4h1v4H9z M23 4h1v4h-1z M13 18h2v1h-2z'],
+ maiale:['#ffd0d5','M8 7h2v3H8z M24 7h2v3h-2z M14 13h4v1h-4z'],
+ capra:['#cfb3e2','M12 16h2v1h-2z M20 16h2v1h-2z M15 20h2v2h-2z'],
+ ricotta:['#e1cfaf','M13 8h4v1h-4z M11 10h2v1h-2z M19 11h3v1h-3z'],
+ ficodindia:['#d7f17d','M12 10h1v3h-1z M11 11h3v1h-3z M18 14h3v1h-3z M19 13h1v3h-1z'],
+ torre:['#d28e54','M9 12h3v1H9z M20 9h3v1h-3z M21 19h3v1h-3z'],
+ serpente:['#f1db7f','M21 7h3v1h-3z M8 20h2v1H8z M15 18h2v1h-2z'],
+ cane:['#f7c58f','M8 9h2v3H8z M24 9h2v3h-2z M14 15h4v1h-4z'],
+ civetta:['#f8cc80','M8 9h3v1H8z M22 9h3v1h-3z M13 18h2v1h-2z M19 18h2v1h-2z']
+};
 const avatar=(species=pref.get('species','mucca'),color=pref.get('color','rosa'))=>{
- const animal=Object.hasOwn(animals,species)?animals[species]:animals.mucca;
+ const key=Object.hasOwn(animals,species)?species:'mucca';
+ const animal=animals[key];
  const accent=(Object.hasOwn(avatarColors,color)?avatarColors[color]:avatarColors.rosa)[1];
- return `<svg class="avatar" viewBox="0 0 16 16" shape-rendering="crispEdges" role="img" aria-label="Avatar pixel · ${animal.name}"><path fill="#fff3d5" d="M0 0h16v16H0z"/>${animal.art}<path fill="#171523" d="M4 13h8v1h1v2H3v-2h1z"/><path fill="${accent}" d="M4 14h8v2H4z"/></svg>`;
+ const [highlight,detail]=avatarDetails[key];
+ const colors=['#ff697b','#ffaf55','#f6df6c','#8bd294','#77bde9','#be9af0'];
+ const backdrop=color==='arcobaleno'
+  ?colors.map((fill,i)=>`<path fill="${fill}" d="M${1+i*5} 1h5v30h-5z"/>`).join('')
+  :`<path fill="${accent}" d="M1 1h30v30H1z"/>`;
+ return `<svg class="avatar" viewBox="0 0 32 32" shape-rendering="crispEdges" role="img" aria-label="Avatar pixel · ${animal.name}">
+  ${backdrop}<path fill="#fff3d5" opacity=".68" d="M9 3h14v2h4v4h2v12h-2v4H5v-4H3V9h2V5h4z"/>
+  <path fill="#fffdf4" d="M3 4h2v2H3z M27 5h2v2h-2z M3 21h1v1H3z M28 19h1v1h-1z"/>
+  <g transform="translate(0 1) scale(2)">${animal.art}</g><path fill="${highlight}" d="${detail}"/>
+  <path fill="#171523" d="M7 24h18v1h1v6H6v-6h1z"/><path fill="#fff3d5" d="M8 25h16v5H8z"/>
+  <path fill="#171523" d="M10 26h3v1h-2v1h2v2h-3v-1h2v-1h-2z M15 26h3v1h-2v2h1v-1h1v2h-3z M20 26h3v1h-2v2h1v-1h1v2h-3z"/>
+ </svg>`;
 };
 function level(xp){
  const i=LEVELS.findLastIndex(([,t])=>xp>=t),[name,t]=LEVELS[i],next=LEVELS[i+1];
@@ -110,7 +139,7 @@ const needOrganizer=()=>title('Area referenti','Riservata ai referenti.')+card('
 /* ---- navigazione ---- */
 const navDefs={
  home:['Home','home'],calendario:['Calendario','calendario'],spazio:['Spazio','comunita'],comunita:['Comunità','comunita'],accedi:['Accedi','profilo'],
- missioni:['Missioni','missioni'],presenze:['Statistiche','comunita'],trofei:['Trofei','comunita'],putia:['Putìa','comunita'],banca:['Banca','comunita'],proposte:['Proposte','comunita'],referenti:['Referenti','comunita'],profilo:['Profilo','profilo']
+ missioni:['Missioni','missioni'],presenze:['Statistiche','comunita'],trofei:['Trofei','comunita'],putia:['Putìa','comunita'],banca:['Banca','comunita'],proposte:['Proposte','comunita'],referenti:['Referenti','referenti'],profilo:['Profilo','profilo']
 };
 function renderChrome(active){
  const ids=!S.me?['home','calendario','spazio','accedi']:isOrganizer()?['home','calendario','missioni','comunita','referenti','profilo']:['home','calendario','missioni','comunita','profilo'];
@@ -123,7 +152,7 @@ function renderChrome(active){
  if(S.me){bell.setAttribute('aria-label',S.unread?`Notifiche, ${S.unread} da leggere`:'Notifiche');bell.innerHTML=bellIcon()+(S.unread?`<span class="unread" aria-hidden="true">${S.unread}</span>`:'');}
  const wallet=document.querySelector('#wallet-link');
  wallet.hidden=!S.me;
- if(S.me){wallet.innerHTML=pixelIcon(cheese)+`<span>${S.totals.cheese}</span>`;wallet.setAttribute('aria-label',`${S.totals.cheese} Formaggi · apri la Putìa`);wallet.setAttribute('href','#putia');}
+ if(S.me){wallet.innerHTML=pixelIcon(cheese)+`<span>${S.totals.cheese}</span>`;wallet.setAttribute('aria-label',`${tumazzi(S.totals.cheese)} · apri la Putìa`);wallet.setAttribute('href','#putia');}
 }
 
 /* ---- orari, stato live, Mù, paese, albero, festa ---- */
@@ -156,14 +185,22 @@ function muSays(page,extra={}){
  return ['normale','E boni siemmu!'];
 }
 const MU_TIPS={
- home:['Hai già visto le missioni di oggi?','Hai un’idea per lo spazio? Scrivila nelle Proposte.','Controlla la Putìa: forse hai abbastanza Formaggi!','Hai un’ora libera? La Banca del tempo ti aspetta.','Quando arrivi, inquadra il QR all’ingresso.'],
- missioni:['Ogni missione verificata ti avvicina al prossimo livello.','Le missioni ripetibili danno al massimo 12 Formaggi a settimana.','Chiedi la verifica a un referente: non puoi verificare le tue.'],
+ home:['Hai già visto le missioni di oggi?','Hai un’idea per lo spazio? Scrivila nelle Proposte.','Controlla la Putìa: forse hai abbastanza Tumazzi!','Hai un’ora libera? La Banca del tempo ti aspetta.','Quando arrivi, inquadra il QR all’ingresso.'],
+ missioni:['Ogni missione verificata ti avvicina al prossimo livello.','Le missioni ripetibili danno al massimo 12 Tumazzi a settimana.','Chiedi la verifica a un referente: non puoi verificare le tue.'],
  calendario:['Prenota presto: i posti volano!','Le attività consigliate per te hanno il bollino verde.','Non puoi più venire? Annulla, così il posto va a un altro.'],
  profilo:['Scegli i tuoi interessi: ti consiglio le attività giuste.','Puoi cambiare il tuo nome utente quando vuoi.','Guarda l’albero: ogni ramo cresce con le tue esperienze.'],
  paese:['Ogni presenza fa crescere il paese.','Il paese è di tutte e tutti: grazie di esserci!'],
  generic:['E boni siemmu!','Un passo alla volta si arriva lontano.','Cca si sta bene insieme.']
 };
-const mu=(page,extra)=>{const [m,t]=muSays(page,extra);return cowMascot(m,t,[...(MU_TIPS[page]||[]),...MU_TIPS.generic]);};
+function mu(page,extra){
+ const [m,t]=muSays(page,extra);
+ return `<button type="button" class="mu-launch" popovertarget="mu-popover" aria-label="Apri i consigli di Mù">${pixelIcon(animals.mucca.art)}<span>Mù</span></button>
+ <aside id="mu-popover" class="mu-popover" popover aria-label="I consigli di Mù">
+  <button type="button" class="secondary mu-close" popovertarget="mu-popover" popovertargetaction="hide" aria-label="Chiudi i consigli">×</button>
+  ${cowMascot(m,t)}
+  <button type="button" data-action="mu-next" data-tips="${esc(JSON.stringify([...(MU_TIPS[page]||[]),...MU_TIPS.generic]))}" data-i="0">Altro consiglio</button>
+ </aside>`;
+}
 function nextTip(el){
  if(!el||!el.dataset.tips)return;
  let tips;try{tips=JSON.parse(el.dataset.tips);}catch{return;}
@@ -198,14 +235,22 @@ async function paese(){
 const PATHS=[['studio','Studio e conoscenza','book'],['creativita','Creatività e cultura','camera'],['socialita','Socialità e comunità','heart'],['cittadinanza','Cittadinanza e partecipazione','star'],['solidarieta','Solidarietà e cura','plant']];
 const pathInfo=id=>PATHS.find(p=>p[0]===id)||PATHS[4];
 function treeGraphic(counts){
- const xs=[9,25,41,57,73],cols=['#8feafc','#ff9fc8','#ff8a4d','#c8a8ff','#caff4d'];
- let svg='<rect x="0" y="52" width="82" height="4" fill="#6f440f"/><rect x="38" y="34" width="6" height="19" fill="#6f440f"/>';
- PATHS.forEach(([id],i)=>{
-  const x=xs[i],n=counts[id]||0;
-  svg+=`<rect x="${Math.min(x,41)}" y="34" width="${Math.abs(x-41)+1}" height="2" fill="#6f440f"/><rect x="${x}" y="8" width="2" height="28" fill="#6f440f"/>`;
-  [[1,28],[3,19],[5,10]].forEach(([need,y])=>{const on=n>=need;svg+=`<rect x="${x-3}" y="${y}" width="8" height="8" fill="#171523"/><rect x="${x-2}" y="${y+1}" width="6" height="6" fill="${on?cols[i]:'#e6e0cf'}" class="${on?'tree-on':''}"/>`;});
+ const xs=[15,37,60,83,105],cols=['#8feafc','#ff9fc8','#ffb56b','#c8a8ff','#caff4d'];
+ let svg=`<path class="tree-sky" d="M0 0h120v78H0z"/><path fill="#fff3d5" opacity=".65" d="M7 13h9v2H7z M97 7h15v2H97z"/>
+ <path class="tree-leaves" d="M3 27h5V16h9v-5h13V7h14v5h8V4h16v8h11V8h13v5h11v7h10v9h4v24h-9v7H12v-6H3z"/>
+ <path fill="#1d473c" d="M0 72h120v6H0z"/><path fill="#8ab66b" d="M4 72h8v2H4z M25 72h6v2h-6z M94 72h8v2h-8z M108 72h8v2h-8z"/>
+ <path fill="#231b25" d="M55 49h10v20h8v3H45v-3h10z"/><path fill="#a16639" d="M57 49h6v22H52v-2h5z"/><path fill="#e1ad6d" d="M60 55h2v12h-2z"/>`;
+ PATHS.forEach(([id,name,icon],i)=>{
+  const x=xs[i],n=counts[id]||0,y=[20,15,12,15,20][i];
+  svg+=`<path fill="none" stroke="#262031" stroke-width="4" d="M60 58V${y+37}H${x}V${y+9}"/><path fill="none" stroke="#b67b49" stroke-width="2" d="M60 58V${y+37}H${x}V${y+9}"/>
+   <g transform="translate(${x-6} ${y-7}) scale(.75)">${shapes[icon]}</g>`;
+  [5,3,1].forEach((need,step)=>{
+   const node=y+8+step*10,on=n>=need;
+   svg+=`<rect x="${x-4}" y="${node-4}" width="8" height="8" rx="1" fill="#171523"/><rect x="${x-3}" y="${node-3}" width="6" height="6" fill="${on?cols[i]:'#344653'}"/>
+   <text x="${x}" y="${node+1.65}" text-anchor="middle" font-size="4.5" font-weight="800" fill="${on?'#171523':'#fff3d5'}">${need}</text>`;
+  });
  });
- return `<div class="tree-box"><svg viewBox="0 0 82 56" shape-rendering="crispEdges" role="img" aria-label="Albero delle competenze: cinque rami, tre tappe ciascuno">${svg}</svg></div>`;
+ return `<div class="tree-box"><svg viewBox="0 0 120 78" role="img" aria-label="Albero delle competenze: cinque rami, tre tappe ciascuno">${svg}</svg></div>`;
 }
 function skillTree(counts,types){
  return section('Albero delle competenze',`<p class="section-intro">Le tappe raccontano le esperienze verificate in sede. Prima tappa a 1 esperienza, poi 3 e 5.</p>`+card(treeGraphic(counts))+grid(PATHS.map(([id,name,icon])=>{
@@ -249,11 +294,11 @@ async function comunita(){
  const [tr,prop]=await Promise.all([api('/trophies').catch(()=>({trophies:[]})),api('/proposals').catch(()=>({proposals:[]}))]);
  const got=tr.trophies.filter(t=>t.earned).length;
  const open=prop.proposals.filter(p=>p.status==='open').length;
- return title('Comunità','Qui si spendono i Formaggi, si scambia tempo, si propone e si vota.')+
+ return title('Comunità','Qui si spendono i Tumazzi, si scambia tempo, si propone e si vota.')+
  section('Assemblea e decisioni',card('<p>Consulta il prossimo incontro, l’ordine del giorno e le decisioni prese insieme.</p>'+link('Vai all’assemblea','assemblea')))+
  section('Scambia tempo e competenze',timeBankCard())+
  section('Cosa vuoi fare?',grid([
-  card(`<span class="metric">${S.totals.cheese}</span><h3>A Putìa</h3><p>Spendi i tuoi Formaggi in premi dello spazio.</p>${link('Apri la Putìa','putia')}`,'green'),
+  card(`<span class="metric">${S.totals.cheese}</span><h3>A Putìa</h3><p>Spendi i tuoi Tumazzi in premi dello spazio.</p>${link('Apri la Putìa','putia')}`,'green'),
   card(`<span class="metric">${got}/${tr.trophies.length}</span><h3>Trofei</h3><p>Si conquistano da soli: basta esserci.</p>${link('I miei trofei','trofei')}`),
   card(`<span class="metric">${open}</span><h3>Proposte e consultazioni</h3><p>Proponi un’attività e indica quali idee ti interessano. I voti orientano la discussione.</p>${link('Proponi e vota','proposte')}`),
   card(`<h3>U paisi crisci</h3><p>Come cresce il borgo con quello che facciamo insieme.</p>${link('Guarda il paese','paese')}`),
@@ -273,11 +318,11 @@ async function putia(){
  const [rw,rd]=await Promise.all([api('/rewards'),api('/redemptions')]);
  const bal=rw.balance;
  const list=rw.rewards.filter(r=>r.active);
- return title('A Putìa','Il negozietto dello spazio: spendi i Formaggi guadagnati in premi. Si ritirano in sede.')+
- section('Il mio saldo',card(`<div class="stat-figure">${pixelIcon(cheese)}<strong class="metric">${bal} Formaggi</strong></div><p class="muted">${rw.earned} guadagnati · ${rw.spent} spesi</p>`))+
+ return title('A Putìa','Il negozietto dello spazio: spendi i Tumazzi guadagnati in premi. Si ritirano in sede.')+
+ section('Il mio saldo',card(`<div class="stat-figure">${pixelIcon(cheese)}<strong class="metric">${tumazzi(bal)}</strong></div><p class="muted">${rw.earned} guadagnati · ${rw.spent} spesi</p>`))+
  section('Premi',list.length?grid(list.map(r=>{
   const out=r.stock!==null&&r.stock<=0,poor=bal<r.cost;
-  return card(`${art(r.art)}<h3>${esc(r.name)}</h3><p>${esc(r.description)}</p><p><strong>${r.cost} Formaggi</strong>${r.stock!==null?` · ${out?'esaurito':`${r.stock} disponibili`}`:''}</p>${out?badge('Esaurito'):poor?`<p class="muted">Ti mancano ${r.cost-bal} Formaggi.</p>`:btn('Riscatta','redeem',r.id)}`);
+  return card(`${art(r.art)}<h3>${esc(r.name)}</h3><p>${esc(r.description)}</p><p><strong>${tumazzi(r.cost)}</strong>${r.stock!==null?` · ${out?'esaurito':`${r.stock} disponibili`}`:''}</p>${out?badge('Esaurito'):poor?`<p class="muted">Ti mancano ${tumazzi(r.cost-bal)}.</p>`:btn('Riscatta','redeem',r.id)}`);
  }),'three'):card('<p>I referenti non hanno ancora messo premi in vetrina.</p>'))+
  section('I miei riscatti',rd.redemptions.length?card(`<ul class="list">${rd.redemptions.map(x=>`<li><strong>${esc(x.rewardName)}</strong> · ${x.cost} F. · ${dateShort(x.createdAt)} · ${badge(x.status==='pending'?'Da ritirare':x.status==='delivered'?'Consegnato':'Annullato')}${x.status==='pending'?` ${btn('Annulla','redeemCancel',x.id,{secondary:true})}`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora riscattato nulla.</p>'))+
  `<p class="muted">Ogni premio riscattato ti arriva anche via email, con le istruzioni per il ritiro.</p>`;
@@ -289,7 +334,7 @@ async function banca(){
  const d=await api('/time-offers');
  const mine=d.offers.filter(o=>o.mine),others=d.offers.filter(o=>!o.mine);
  const statusLabel={requested:'In attesa',accepted:'Accettata',done:'Conclusa'};
- return title('Banca del tempo',`Offri un’ora di qualcosa che sai fare e chiedi l’ora di qualcun altro. Ogni scambio concluso vale ${d.reward.xp} XP e ${d.reward.cheese} Formaggio a testa (massimo ${d.reward.weekly} premiati a settimana).`)+
+ return title('Banca del tempo',`Offri un’ora di qualcosa che sai fare e chiedi l’ora di qualcun altro. Ogni scambio concluso vale ${d.reward.xp} XP e ${tumazzi(d.reward.cheese)} a testa (massimo ${d.reward.weekly} premiati a settimana).`)+
  `<div class="row subpage-back"><a class="btn" href="#banca/offri">Offri un’ora ↓</a><a class="btn" href="#banca/scambi">I miei scambi ↓</a></div>`+
  section('Offerte dei soci',others.length?grid(others.map(o=>card(`<h3>${esc(o.title)}</h3><p>${esc(o.description)}</p><p class="muted">di ${esc(o.memberName)}</p>${o.myStatus?badge(statusLabel[o.myStatus]):form('request',field('note','Un messaggio (facoltativo)','text','maxlength="300"').replace(' required',''),'Chiedi quest’ora',{id:o.id,cls:'inline-form'})}`)),'two'):card('<p>Ancora nessuna offerta. Pubblica la prima!</p>'))+
  section('I miei scambi',d.exchanges.length?card(`<ul class="list">${d.exchanges.map(x=>{
@@ -331,14 +376,16 @@ async function assemblea(){
 }
 
 /* ---- viste pubbliche ---- */
+const venueAddress='Corso Francesco Crispi 34, San Giovanni Gemini';
+const activityDescription=a=>`<details class="activity-description"><summary>Descrizione</summary><p>${esc(a.description||'La descrizione non è ancora disponibile.')}</p></details>`;
 const activityBadges=a=>badge(a.access_mode==='open'?'Accesso libero':'Su prenotazione')+(a.public_event?' '+badge('Evento pubblico'):'');
 const nextActivity=activities=>activities.find(a=>a.starts_at>Date.now()/1000);
 const visitInfo=async()=>{try{return (await api('/space/visit')).visit;}catch{return null;}};
 function firstVisit(st,details,upcoming){
  return section('Vieni per la prima volta',card(`
   <div class="grid two">
-   <div><h3>Dove e quando</h3><p>${details?.address?esc(details.address):'Indirizzo da confermare. Scrivici prima di venire.'}</p>${openingDetails(st)}</div>
-   <div><h3>Prossima attività</h3>${upcoming?`<p><strong>${esc(upcoming.name)}</strong><br>${dateLong(upcoming.starts_at)}</p><p>${activityBadges(upcoming)}</p>`:'<p>Consulta il calendario per i prossimi appuntamenti.</p>'}</div>
+   <div><h3>Dove e quando</h3><p>${esc(details?.address||venueAddress)}</p><p class="muted">alla partenza del Carro</p>${openingDetails(st)}</div>
+   <div><h3>Prossima attività</h3>${upcoming?`<p><strong>${esc(upcoming.name)}</strong><br>${dateLong(upcoming.starts_at)}</p><p>${activityBadges(upcoming)}</p>${activityDescription(upcoming)}`:'<p>Consulta il calendario per i prossimi appuntamenti.</p>'}</div>
    <div><h3>Come si entra</h3><p class="meeting-notes">${esc(details?.access||'Lo spazio è gratuito. Il calendario indica se puoi presentarti direttamente o se serve prenotare.')}</p></div>
    <div><h3>Accessibilità</h3><p class="meeting-notes">${esc(details?.accessibility||'Per informazioni sull’accesso alla sede, scrivici prima di venire.')}</p></div>
   </div>
@@ -352,7 +399,7 @@ function homeIntro(){
  ${S.me?'':'<p class="entry-hint">Il calendario si apre senza account.</p>'}</div>
  <div class="home-scenery"><img class="scenery-day" src="sicani.svg" alt="${artLabel}"><img class="scenery-night" src="sicani-notte.svg" alt="${artLabel} di notte"></div></header>
  <section class="space-signpost"><div><span class="eyebrow">LO SPAZIO GIOVANI</span><h2>Un posto da usare, uno spazio da fare insieme</h2>
- <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Vieni per la prima volta','spazio')}</section>`;
+ <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Vieni per la prima volta?','spazio')}</section>`;
 }
 async function home(){
  const [st,metrics,details,acts]=await Promise.all([getStatus(),getCommunity(),visitInfo(),api('/activities').catch(()=>({activities:[]}))]);
@@ -361,7 +408,7 @@ async function home(){
   section('Scambia tempo e competenze',timeBankCard())+
   section('Come funziona',grid([
    card('<h3>Vieni in sede</h3><p>Ingresso e uscita vengono registrati dai referenti: così sappiamo quante ore lo spazio resta vivo.</p>'),
-   card('<h3>Partecipa</h3><p>Prenota le attività del calendario e dai una mano con le missioni: ogni impegno verificato vale XP e Formaggi.</p>'),
+   card('<h3>Partecipa</h3><p>Prenota le attività del calendario e dai una mano con le missioni: ogni impegno verificato vale XP e Tumazzi.</p>'),
    card('<h3>Cresci</h3><p>Sali di livello, guarda le tue presenze e contribuisci a far crescere lo spazio.</p>')
   ]))+villageCard(metrics)+mu('home');
 }
@@ -380,14 +427,14 @@ async function homeMember(){
   ],'two'));
  }
  return homeIntro()+firstVisit(st,details,nextActivity(acts.activities))+
-  `<div class="grid stats home-stats" aria-label="Il mio personaggio, Formaggi e orari">${card(profileChip(),'profile-stat')}
-   ${card(`<span class="eyebrow">FORMAGGI</span><div class="stat-figure">${pixelIcon(cheese)}<div><strong class="metric">${S.totals.cheese}</strong><span class="stat-label">Formaggi disponibili</span></div></div>${link('A Putìa','putia')}`,'wallet')}
+  `<div class="grid stats home-stats" aria-label="Il mio personaggio, Tumazzi e orari">${card(profileChip(),'profile-stat')}
+   ${card(`<span class="eyebrow">TUMAZZI</span><div class="stat-figure">${pixelIcon(cheese)}<div><strong class="metric">${S.totals.cheese}</strong><span class="stat-label">${S.totals.cheese===1?'Tumuzzu disponibile':'Tumazzi disponibili'}</span></div></div>${link('A Putìa','putia')}`,'wallet')}
    ${openingCard(st)}</div>`+
   section('Scambia tempo e competenze',timeBankCard())+
   section('Le mie richieste',card(`<p>${chores.chores.length} missioni in attesa di verifica.</p><div class="row">${link('Vai alle missioni','missioni')}${link('Le mie statistiche','presenze')}</div>`))+
   (presenceCard?section('Presenza',presenceCard):'')+
   extra+
-  section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p><p>${a.access_mode==='open'?'Puoi venire direttamente.':a.available>0?`${a.available} posti liberi su ${a.capacity}`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}`)),'three')+`<p>${link('Tutto il calendario','calendario')}</p>`:card('<p>Non ci sono ancora attività in calendario.</p>'))+villageCard(metrics)+mu('home');
+  section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p><p>${a.access_mode==='open'?'Puoi venire direttamente.':a.available>0?`${a.available} posti liberi su ${a.capacity}`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}${activityDescription(a)}`)),'three')+`<p>${link('Tutto il calendario','calendario')}</p>`:card('<p>Non ci sono ancora attività in calendario.</p>'))+villageCard(metrics)+mu('home');
 }
 
 async function calendario(){
@@ -403,10 +450,10 @@ async function calendario(){
   else if(a.available<=0)action=badge('Posti esauriti');
   else action=btn('Prenota un posto','reserve',a.id)+(b&&b.status==='declined'?`<p class="muted">La richiesta precedente è stata rifiutata.</p>`:'');
   const rec=S.me&&a.path&&(S.me.interests||[]).includes(a.path);
-  return card(`${rec?`<p>${badge('Consigliata per te')}</p>`:''}<h3>${esc(a.name)}</h3><p><strong>${dateLong(a.starts_at)}</strong></p><p>${activityBadges(a)}</p>${a.access_mode==='open'?'':`<p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p>`}<p class="muted">${esc(a.verification_rule)}</p>${action}`);
+  return card(`${rec?`<p>${badge('Consigliata per te')}</p>`:''}<h3>${esc(a.name)}</h3><p><strong>${dateLong(a.starts_at)}</strong></p><p>${activityBadges(a)}</p>${a.access_mode==='open'?'':`<p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p>`}${activityDescription(a)}<p class="muted">${esc(a.verification_rule)}</p>${action}`);
  }),'two'):card('<h3>Ancora nulla in calendario</h3><p>I referenti pubblicheranno qui le prossime attività.</p>');
  return title('Calendario','Per le attività ad accesso libero puoi presentarti direttamente. Dove serve una prenotazione, un referente conferma il posto.')+section('Prossime attività',body)+
-  (S.me?section('Come funziona',card('<p>Quando prenoti, il posto resta riservato finché un referente decide. Alla fine il referente verifica di persona la tua presenza e ti assegna XP e Formaggi.</p>')):'')+mu('calendario');
+  (S.me?section('Come funziona',card('<p>Quando prenoti, il posto resta riservato finché un referente decide. Alla fine il referente verifica di persona la tua presenza e ti assegna XP e Tumazzi.</p>')):'')+mu('calendario');
 }
 
 async function spazio(){
@@ -429,7 +476,7 @@ function privacy(){
  section('Quali dati registriamo',grid([
   card('<h3>Account</h3><p>Nome e cognome, email, telefono (facoltativo), pseudonimo, ruolo e stato dell’account. La password è conservata solo come impronta crittografica, mai in chiaro. Il codice della tessera, se assegnata.</p>'),
   card('<h3>Presenze in sede</h3><p>Data e ora di ingresso e uscita, e chi le ha registrate. Servono a calcolare le ore di apertura e le tue statistiche personali.</p>'),
-  card('<h3>Attività e missioni</h3><p>Prenotazioni, presenze convalidate, richieste di missioni con eventuale nota, decisioni dei referenti, XP e Formaggi.</p>'),
+  card('<h3>Attività e missioni</h3><p>Prenotazioni, presenze convalidate, richieste di missioni con eventuale nota, decisioni dei referenti, XP e Tumazzi.</p>'),
   card('<h3>Diario Youthpass</h3><p>Se lo usi, salviamo obiettivi, esperienze e riflessioni nel tuo account. Puoi modificare o svuotare i campi in ogni momento. Evita nomi di altre persone e informazioni sensibili.</p>'),
   card('<h3>Sessione</h3><p>Dopo l’accesso usiamo un solo cookie tecnico di sessione, necessario al funzionamento. Non usiamo cookie di analisi o pubblicità. Le preferenze di tema e suono restano nel browser. I tentativi di accesso falliti sono registrati per un breve periodo per limitare gli abusi.</p>')
  ],'two'))+
@@ -459,10 +506,10 @@ async function missioni(){
  const [types,logs]=await Promise.all([api('/chore-types'),api('/chores?limit=30&memberId='+encodeURIComponent(S.me.id))]);
  const active=types.types.filter(t=>t.active);
  const pending=logs.chores.filter(c=>c.status==='pending').length;
- return title('Missioni','Le missioni che tengono vivo lo spazio. Falla, chiedi la verifica a un referente e ricevi XP e Formaggi.')+
- section('Missioni disponibili',active.length?grid(active.map(t=>card(`${art(pathInfo(t.path)[2])}<h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}${(S.me.interests||[]).includes(t.path)?' '+badge('Consigliata per te'):''}</p><p>${esc(t.description)}</p><p><strong>${t.xp} XP</strong> · <strong>${t.cheese} Formaggi</strong></p>${form('chore',field('note','Nota (facoltativa)','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"').replace(' required',''),'Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
- `<p class="muted">Le missioni ripetibili danno al massimo ${WEEKLY_CHEESE} Formaggi a settimana (da lunedì a domenica). Gli XP si contano sempre.</p>`+
- section(`Le mie richieste${pending?` · ${pending} in attesa`:''}`,logs.chores.length?card(`<ul class="list">${logs.chores.map(c=>`<li><strong>${esc(c.choreName)}</strong> · ${dateShort(c.requestedAt)} · ${badge(statusText[c.status])}${c.status==='verified'?` · ${c.xp} XP, ${c.cheese} Formaggi`:''}${c.note?`<br><span class="muted">${esc(c.note)}</span>`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora richiesto nessuna missione.</p>'))+mu('missioni',{pending});
+ return title('Missioni','Le missioni che tengono vivo lo spazio. Falla, chiedi la verifica a un referente e ricevi XP e Tumazzi.')+
+ section('Missioni disponibili',active.length?grid(active.map(t=>card(`${art(pathInfo(t.path)[2])}<h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}${(S.me.interests||[]).includes(t.path)?' '+badge('Consigliata per te'):''}</p><p>${esc(t.description)}</p><p><strong>${t.xp} XP</strong> · <strong>${tumazzi(t.cheese)}</strong></p>${form('chore',field('note','Nota (facoltativa)','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"').replace(' required',''),'Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
+ `<p class="muted">Le missioni ripetibili danno al massimo ${tumazzi(WEEKLY_CHEESE)} a settimana (da lunedì a domenica). Gli XP si contano sempre.</p>`+
+ section(`Le mie richieste${pending?` · ${pending} in attesa`:''}`,logs.chores.length?card(`<ul class="list">${logs.chores.map(c=>`<li><strong>${esc(c.choreName)}</strong> · ${dateShort(c.requestedAt)} · ${badge(statusText[c.status])}${c.status==='verified'?` · ${c.xp} XP, ${tumazzi(c.cheese)}`:''}${c.note?`<br><span class="muted">${esc(c.note)}</span>`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora richiesto nessuna missione.</p>'))+mu('missioni',{pending});
 }
 
 /* ---- presenze personali ---- */
@@ -482,7 +529,7 @@ async function presenze(){
  ]))+
  section('I miei guadagni',grid([
   card(`<span class="metric">${t.xp}</span><h3>XP</h3><p>${stats.activitiesAttended} attività · ${stats.choresVerified} missioni verificate</p>`),
-  card(`<span class="metric">${t.cheese}</span><h3>Formaggi guadagnati</h3><p>Il riscatto dei premi arriverà più avanti.</p>`)
+  card(`<span class="metric">${t.cheese}</span><h3>Tumazzi guadagnati</h3><p>Il riscatto dei premi arriverà più avanti.</p>`)
  ],'two'))+
  section('Ore in sede per mese',stats.months.length?card(stats.months.map(m=>bar(m.hours,monthMax,m.month.slice(2),' h')).join('')):card('<p>Ancora nessun dato.</p>'))+
  section('Quando vieni',card(weekdayBars(stats.weekdays,'visits')))+
@@ -520,13 +567,13 @@ async function profilo(){
  const recActs=acts.activities.filter(a=>a.path&&mine.includes(a.path)&&a.starts_at>Date.now()/1000-3600).slice(0,3);
  const interestsForm=`<h3>I miei interessi</h3><p class="muted">Scegli cosa ti piace: ti consigliamo missioni e attività.</p><fieldset><legend>Percorsi</legend>${PATHS.map(([id,name])=>`<label><input type="checkbox" name="interest" value="${id}" ${mine.includes(id)?'checked':''}> ${esc(name)}</label>`).join('')}</fieldset>`;
  const recommend=section('Consigliato per te',mine.length?(recMissions.length||recActs.length?grid([
-   ...recActs.map(a=>card(`<span class="eyebrow">ATTIVITÀ</span><h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p>${link('Apri il calendario','calendario')}`)),
+   ...recActs.map(a=>card(`<span class="eyebrow">ATTIVITÀ</span><h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p>${activityDescription(a)}${link('Apri il calendario','calendario')}`)),
    ...recMissions.map(t=>card(`<span class="eyebrow">MISSIONE</span><h3>${esc(t.name)}</h3><p>${esc(t.description)}</p>${link('Vai alle missioni','missioni')}`))
   ],'two'):card('<p>Per ora non ci sono attività o missioni nei tuoi percorsi. Controlla più avanti!</p>')):card('<p>Scegli i tuoi interessi qui sotto e ti consigliamo missioni e attività su misura.</p>'));
  const species=pref.get('species','mucca'),color=pref.get('color','rosa');
- const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="sr">${name}</span></label>`).join('')}</div></fieldset>`;
+ const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="swatch-name">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
- section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}`),
+ section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}`),
   card(`<details class="disclosure"><summary>Cambia avatar</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`)],'two'))+
  section('Diario di apprendimento Youthpass',journal)+
  recommend+skillTree(prog.counts,types.types.filter(t=>t.active))+
@@ -575,7 +622,7 @@ async function panSoci(){
  const newForm=form('member','<h3>Registra un nuovo socio</h3>'+field('fullName','Nome e cognome','text','required maxlength="80"')+field('email','Email','email','required')+field('pseudonym','Nome da mostrare (facoltativo)','text','maxlength="28"').replace(' required','')+field('phone','Telefono (facoltativo)','tel','maxlength="30"')+`<label>Ruolo<select name="role"><option value="participant">Socio</option><option value="organizer">Referente</option></select></label>`,'Registra e crea il link d’invito');
  const cards=members.map(m=>{
   const self=m.id===S.me.id;
-  return card(`<h3>${esc(m.fullName||m.pseudonym)}</h3><p>${esc(m.email)}</p><p>${badge(m.role==='organizer'?'Referente':'Socio')} ${badge(statusText[m.status])} ${m.hasPassword?badge('Profilo completo'):badge('Password da impostare')}</p><p class="muted">${m.xp} XP · ${m.cheese} Formaggi${m.phone?' · '+esc(m.phone):''}</p>
+  return card(`<h3>${esc(m.fullName||m.pseudonym)}</h3><p>${esc(m.email)}</p><p>${badge(m.role==='organizer'?'Referente':'Socio')} ${badge(statusText[m.status])} ${m.hasPassword?badge('Profilo completo'):badge('Password da impostare')}</p><p class="muted">${m.xp} XP · ${tumazzi(m.cheese)}${m.phone?' · '+esc(m.phone):''}</p>
   <p class="muted">Tessera: ${m.uidTessera?`<code>${esc(m.uidTessera)}</code>`:'nessuna'}</p>
   <div class="row">${btn(m.hasPassword?'Link reset password':'Nuovo link d’invito','invite',m.id,{secondary:true,extra:`data-phone="${esc(m.phone||'')}"`})}${m.uidTessera?btn('Togli tessera','cardRemove',m.id,{secondary:true}):''}${!self?btn(m.role==='organizer'?'Rendi socio':'Rendi referente','role',m.id,{secondary:true,extra:`data-role="${m.role==='organizer'?'participant':'organizer'}"`}):''}${!self?btn(m.status==='disabled'?'Riattiva':'Disattiva','status',m.id,{secondary:true,extra:`data-status="${m.status==='disabled'?'approved':'disabled'}"`}):''}</div>
   ${form('card',field('uid','Codice tessera NFC','text','required maxlength="40" placeholder="Es. 04A1B2C3"'),m.uidTessera?'Cambia tessera':'Assegna tessera',{id:m.id,cls:'inline-form'})}`,m.status==='disabled'?'muted-card':'');
@@ -597,20 +644,20 @@ async function panFaccende(){
  const active=members.members.filter(m=>m.status==='approved'&&m.id!==S.me.id);
  return section(`Da verificare (${pending.chores.length})`,pending.chores.length?grid(pending.chores.map(c=>card(`<h3>${esc(c.choreName)}</h3><p>${esc(c.memberName)} · ${dateShort(c.requestedAt)}</p>${c.note?`<p class="muted">${esc(c.note)}</p>`:''}<p>${c.xp||''}</p>${c.memberId===S.me.id?'<p class="muted">È una tua missione: la verifica un altro referente.</p>':`<div class="row">${btn('Conferma','verify',c.id)}${btn('Respingi','reject',c.id,{secondary:true})}</div>`}`.replace('<p></p>',''))),'two'):card('<p>Nessuna missione in attesa.</p>'))+
  section('Registra una missione fatta',types.types.some(t=>t.active)?form('logchore',`<label>Socio<select name="memberId" required>${active.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}</option>`).join('')}</select></label><label>Missione<select name="typeId" required>${types.types.filter(t=>t.active).map(t=>`<option value="${esc(t.id)}">${esc(t.name)} (${t.xp} XP, ${t.cheese} F.)</option>`).join('')}</select></label>${field('note','Nota (facoltativa)','text','maxlength="200"').replace(' required','')}<p class="muted">Registrata da un referente, viene convalidata subito. Le tue missioni le richiedi dalla pagina Missioni e le verifica un altro referente.</p>`,'Registra e convalida'):card('<p>Crea prima una missione nel catalogo.</p>'))+
- section('Catalogo missioni',grid(types.types.map(t=>card(`<h3>${esc(t.name)}</h3><p>${esc(t.description)}</p><p>${t.xp} XP · ${t.cheese} Formaggi ${t.active?'':badge('Non attiva')}</p>${form('chorepath',pathSelect(t.path),'Salva',{id:t.id,cls:'inline-form'})}${btn(t.active?'Disattiva':'Riattiva','choreActive',t.id,{secondary:true,extra:`data-active="${t.active?0:1}"`})}`)),'two'))+
- section('Nuova missione nel catalogo',form('choretype','<h3>Aggiungi una missione</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="400"').replace(' required','')+field('xp','XP','number','required min="0" max="500" value="10"')+field('cheese','Formaggi','number','required min="0" max="200" value="2"')+pathSelect('solidarieta'),'Aggiungi'));
+ section('Catalogo missioni',grid(types.types.map(t=>card(`<h3>${esc(t.name)}</h3><p>${esc(t.description)}</p><p>${t.xp} XP · ${tumazzi(t.cheese)} ${t.active?'':badge('Non attiva')}</p>${form('chorepath',pathSelect(t.path),'Salva',{id:t.id,cls:'inline-form'})}${btn(t.active?'Disattiva':'Riattiva','choreActive',t.id,{secondary:true,extra:`data-active="${t.active?0:1}"`})}`)),'two'))+
+ section('Nuova missione nel catalogo',form('choretype','<h3>Aggiungi una missione</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="400"').replace(' required','')+field('xp','XP','number','required min="0" max="500" value="10"')+field('cheese','Tumazzi','number','required min="0" max="200" value="2"')+pathSelect('solidarieta'),'Aggiungi'));
 }
 async function panPutia(){
  const [pend,rw]=await Promise.all([api('/redemptions'),api('/rewards')]);
- return section(`Premi da consegnare (${pend.redemptions.length})`,pend.redemptions.length?grid(pend.redemptions.map(x=>card(`<h3>${esc(x.rewardName)}</h3><p>${esc(x.memberName)} · ${x.cost} Formaggi · ${dateShort(x.createdAt)}</p>${x.memberId===S.me.id?'<p class="muted">È un tuo premio: lo consegna un altro referente.</p>':`<div class="row">${btn('Consegnato','redDeliver',x.id)}${btn('Annulla','redeemCancel',x.id,{secondary:true})}</div>`}`)),'two'):card('<p>Nessun premio da consegnare.</p>'))+
- section('Premi in vetrina',grid(rw.rewards.map(r=>card(`<h3>${esc(r.name)} ${r.active?'':badge('Non attivo')}</h3><p>${r.cost} Formaggi · ${r.stock===null?'scorta illimitata':r.stock+' disponibili'}</p>${form('rewardedit',field('cost','Costo','number',`required min="1" max="5000" value="${r.cost}"`)+field('quantity','Quantità totale (vuoto = illimitata)','number',`min="0" max="10000" value="${r.quantity??''}"`).replace(' required',''),'Salva',{id:r.id,cls:'inline-form'})}${btn(r.active?'Togli dalla vetrina':'Rimetti in vetrina','rewardActive',r.id,{secondary:true,extra:`data-active="${r.active?0:1}"`})}`)),'two'))+
- section('Nuovo premio',form('reward','<h3>Aggiungi un premio</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="300"').replace(' required','')+field('cost','Costo in Formaggi','number','required min="1" max="5000" value="20"')+field('quantity','Quantità (vuoto = illimitata)','number','min="0" max="10000"').replace(' required','')+`<label>Icona<select name="art">${ARTS.map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}</select></label>`,'Aggiungi il premio'));
+ return section(`Premi da consegnare (${pend.redemptions.length})`,pend.redemptions.length?grid(pend.redemptions.map(x=>card(`<h3>${esc(x.rewardName)}</h3><p>${esc(x.memberName)} · ${tumazzi(x.cost)} · ${dateShort(x.createdAt)}</p>${x.memberId===S.me.id?'<p class="muted">È un tuo premio: lo consegna un altro referente.</p>':`<div class="row">${btn('Consegnato','redDeliver',x.id)}${btn('Annulla','redeemCancel',x.id,{secondary:true})}</div>`}`)),'two'):card('<p>Nessun premio da consegnare.</p>'))+
+ section('Premi in vetrina',grid(rw.rewards.map(r=>card(`<h3>${esc(r.name)} ${r.active?'':badge('Non attivo')}</h3><p>${tumazzi(r.cost)} · ${r.stock===null?'scorta illimitata':r.stock+' disponibili'}</p>${form('rewardedit',field('cost','Costo','number',`required min="1" max="5000" value="${r.cost}"`)+field('quantity','Quantità totale (vuoto = illimitata)','number',`min="0" max="10000" value="${r.quantity??''}"`).replace(' required',''),'Salva',{id:r.id,cls:'inline-form'})}${btn(r.active?'Togli dalla vetrina':'Rimetti in vetrina','rewardActive',r.id,{secondary:true,extra:`data-active="${r.active?0:1}"`})}`)),'two'))+
+ section('Nuovo premio',form('reward','<h3>Aggiungi un premio</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="300"').replace(' required','')+field('cost','Costo in Tumazzi','number','required min="1" max="5000" value="20"')+field('quantity','Quantità (vuoto = illimitata)','number','min="0" max="10000"').replace(' required','')+`<label>Icona<select name="art">${ARTS.map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}</select></label>`,'Aggiungi il premio'));
 }
 const textArea=(name,label,max,value='',required=false)=>`<label>${label}<textarea name="${name}" maxlength="${max}"${required?' required':''}>${esc(value)}</textarea></label>`;
 async function panPrimaVisita(){
  const {visit}=await api('/space/visit');
  return section('Prima visita',form('visit', '<p>Queste informazioni sono pubbliche. Inserisci solo dettagli verificati sulla sede.</p>'+
-  field('address','Indirizzo','text',`maxlength="200" value="${esc(visit?.address)}"`)+
+  field('address','Indirizzo','text',`maxlength="200" value="${esc(visit?.address||venueAddress)}"`)+
   textArea('access','Modalità di accesso',600,visit?.access)+
   textArea('accessibility','Accessibilità della sede',600,visit?.accessibility),'Salva informazioni'));
 }
@@ -655,14 +702,14 @@ async function panAttivita(id){
      <label>Partecipante<select name="memberId" required><option value="">Seleziona</option>${eligible.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}</option>`).join('')}</select></label>`,
     'Registra presenza',{id:a.id}));
   }
-  return section(esc(a.name),card(`<p>${dateLong(a.startsAt)} · ${statusText[a.status]} · ${a.capacity} posti</p><p class="muted">${esc(a.verificationRule)}</p><p>${a.xp} XP · ${a.cheese} Formaggi a chi partecipa</p>`)+`<p>${link('Tutte le attività','referenti/attivita')}</p>`)+
-  section('Accesso all’attività',form('activity-access',activityAccessFields(a),'Salva modalità',{id:a.id}))+walkIn+
+  return section(esc(a.name),card(`<p>${dateLong(a.startsAt)} · ${statusText[a.status]} · ${a.capacity} posti</p><p class="muted">${esc(a.verificationRule)}</p><p>${a.xp} XP · ${tumazzi(a.cheese)} a chi partecipa</p>${activityDescription(a)}`)+`<p>${link('Tutte le attività','referenti/attivita')}</p>`)+
+  section('Dettagli dell’attività',form('activity-access',textArea('description','Descrizione visibile nel calendario',1600,a.description)+activityAccessFields(a),'Salva dettagli',{id:a.id}))+walkIn+
   (a.accessMode==='open'?'':section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended&&b.memberId!==S.me.id?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>')));
  }
  const {activities}=await api('/activities/manage');
- const create=form('activity','<h3>Nuova attività</h3>'+field('name','Titolo','text','required maxlength="120"')+field('startsAt','Data e ora','datetime-local','required')+field('capacity','Posti','number','required min="1" max="500" value="25"')+activityAccessFields()+field('verificationRule','Come verifichi la presenza','text','required maxlength="300" value="Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."')+field('xp','XP','number','required min="0" max="500" value="30"')+field('cheese','Formaggi','number','required min="0" max="200" value="5"')+`<label>Percorso (facoltativo, per i consigli)<select name="path"><option value="">Nessuno</option>${PATHS.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('')}</select></label><label>Stato<select name="status"><option value="draft">Bozza (non visibile)</option><option value="published">Pubblicata</option></select></label>`,'Crea attività');
+ const create=form('activity','<h3>Nuova attività</h3>'+field('name','Titolo','text','required maxlength="120"')+field('startsAt','Data e ora','datetime-local','required')+field('capacity','Posti','number','required min="1" max="500" value="25"')+textArea('description','Descrizione visibile nel calendario',1600)+activityAccessFields()+field('verificationRule','Come verifichi la presenza','text','required maxlength="300" value="Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."')+field('xp','XP','number','required min="0" max="500" value="30"')+field('cheese','Tumazzi','number','required min="0" max="200" value="5"')+`<label>Percorso (facoltativo, per i consigli)<select name="path"><option value="">Nessuno</option>${PATHS.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('')}</select></label><label>Stato<select name="status"><option value="draft">Bozza (non visibile)</option><option value="published">Pubblicata</option></select></label>`,'Crea attività');
  const prefill=`<p><button type="button" class="secondary" data-action="prefill">Precompila con la prima attività reale</button></p>`;
- return section('Nuova attività',prefill+create)+section(`Attività (${activities.length})`,activities.length?grid(activities.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.startsAt)} · ${badge(statusText[a.status])}</p><p>${a.pending} in attesa · ${a.confirmed} confermate · ${a.attended} presenze · ${a.capacity} posti</p><div class="row">${a.status!=='published'&&a.status!=='cancelled'?btn('Pubblica','act-status',a.id,{extra:'data-status="published"'}):''}${a.status==='published'?btn('Torna a bozza','act-status',a.id,{secondary:true,extra:'data-status="draft"'}):''}${a.status!=='cancelled'?btn('Annulla','act-status',a.id,{secondary:true,extra:'data-status="cancelled"'}):''}<a class="btn" href="#referenti/attivita/${esc(a.id)}">Gestisci attività →</a></div>`)),'two'):card('<p>Nessuna attività creata.</p>'));
+ return section('Nuova attività',prefill+create)+section(`Attività (${activities.length})`,activities.length?grid(activities.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.startsAt)} · ${badge(statusText[a.status])}</p>${activityDescription(a)}<p>${a.pending} in attesa · ${a.confirmed} confermate · ${a.attended} presenze · ${a.capacity} posti</p><div class="row">${a.status!=='published'&&a.status!=='cancelled'?btn('Pubblica','act-status',a.id,{extra:'data-status="published"'}):''}${a.status==='published'?btn('Torna a bozza','act-status',a.id,{secondary:true,extra:'data-status="draft"'}):''}${a.status!=='cancelled'?btn('Annulla','act-status',a.id,{secondary:true,extra:'data-status="cancelled"'}):''}<a class="btn" href="#referenti/attivita/${esc(a.id)}">Gestisci attività →</a></div>`)),'two'):card('<p>Nessuna attività creata.</p>'));
 }
 async function panStatistiche(){
  const s=await api('/stats/sede?days=90').catch(()=>api('/stats/sede'));
@@ -734,7 +781,7 @@ async function tvPage(){
  const z=Number(pref.get('tvzoom',1))||1;
  return `<div class="tv-frame"><div class="tv-screen" style="--tvz:${z}"><div class="tv-tools no-print">${btn('A−','tvzoom','down',{secondary:true})}${btn('A+','tvzoom','up',{secondary:true})}${btn('Tema','theme','',{secondary:true})}</div><div class="tv-top"><div class="tv-brand">CCA SIEMMU<small>e boni siemmu</small></div><div class="tv-clock"><strong id="tv-time">${tvTime()}</strong><span id="tv-date">${esc(tvDate())}</span></div></div>
  <div class="tv-main"><div class="tv-left"><div class="tv-live ${st?.open?'live-on':'live-off'}"><span class="live-dot" aria-hidden="true"></span>${st?.open?'Aperto ora':'Chiuso al momento'}</div><p class="tv-hours">${esc(st?.days||'Da lunedì a venerdì')} · ${esc(st?.hours||'16:00–20:00')}</p>
- <h2>Prossime attività</h2>${next.length?`<ul class="tv-acts">${next.map(a=>`<li><strong>${esc(a.name)}</strong><span>${dateLong(a.starts_at)}</span><span>${a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</span></li>`).join('')}</ul>`:'<p class="tv-empty">Presto altre attività in calendario.</p>'}</div>
+ <h2>Prossime attività</h2>${next.length?`<ul class="tv-acts">${next.map(a=>`<li><strong>${esc(a.name)}</strong><span>${dateLong(a.starts_at)}</span>${activityDescription(a)}<span>${a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</span></li>`).join('')}</ul>`:'<p class="tv-empty">Presto altre attività in calendario.</p>'}</div>
  <div class="tv-right">${villageScene(metrics)}<p class="tv-village">${reached} ${reached===1?'traguardo':'traguardi'} su ${(metrics||[]).length}: il paese cresce con le presenze, le attività e le missioni.</p></div></div>
  <div class="tv-foot">${cowMascot('curioso',tip,tvTips)}${window.qrcode?`<div class="tv-qr">${qrSvg(location.origin+'/#home','QR code del sito')}<span>Il sito dello spazio</span></div>`:''}</div></div></div>`;
 }
@@ -745,7 +792,7 @@ setInterval(()=>{if(location.hash!=='#tv'||document.hidden)return;const t=docume
 setInterval(()=>{if(location.hash==='#tv'&&!document.hidden)render();},60000);
 
 /* ---- router ---- */
-const redirects={benvenuto:'accedi',formaggi:'putia',vasceddi:'missioni',paisi:'home',condividi:'profilo'};
+const redirects={benvenuto:'accedi',formaggi:'putia',tumazzi:'putia',vasceddi:'missioni',paisi:'home',condividi:'profilo'};
 let renderId=0;
 async function render(focus=false){
  const id=++renderId;
@@ -789,6 +836,7 @@ async function render(focus=false){
  }
  if(id!==renderId)return;
  main.innerHTML=html;
+ if(!['tv','cartello'].includes(page)&&!main.querySelector('#mu-popover'))main.insertAdjacentHTML('beforeend',mu(page));
  main.removeAttribute('aria-busy');
  if(page==='tv')fitTv();
  if(focus){
@@ -846,6 +894,13 @@ function openTrophy(t){
  const b=box.querySelector('button');b.onclick=close;b.focus();
 }
 const actions={
+ 'mu-next'(_id,el){
+  const tips=JSON.parse(el.dataset.tips);
+  const i=Number(el.dataset.i);
+  const panel=el.closest('.mu-popover');
+  panel.querySelector('.mascot p').textContent=tips[i];
+  el.dataset.i=(i+1)%tips.length;
+ },
  async 'assembly-clear'(){await run(()=>api('/assembly/meeting',{method:'PUT',body:{clear:true}}),'Convocazione rimossa.');},
  reload:()=>render(),
  trophy(id){const t=(S.trophies||[]).find(x=>x.id===id);if(t)openTrophy(t);},
@@ -856,13 +911,13 @@ const actions={
  async checkout(){await run(()=>api('/checkout',{method:'POST',body:{}}),'Uscita registrata. A presto!');},
  async rotate(){if(!confirm('Il vecchio QR smetterà di funzionare e dovrai ristampare il cartello. Continuare?'))return;await run(()=>api('/checkin-code/rotate',{method:'POST',body:{}}),'Codice cambiato: ristampa il cartello.');},
  async redeem(id){let r;await run(async()=>{r=await api(`/rewards/${encodeURIComponent(id)}/redeem`,{method:'POST',body:{}});},null,{rerender:false})&&(say(`Premio riscattato! ${r.emailSent?'Ti abbiamo scritto una email con le istruzioni.':'Passa in sede per ritirarlo.'}`),await render());},
- async redeemCancel(id){await run(()=>api(`/redemptions/${encodeURIComponent(id)}/cancel`,{method:'POST',body:{}}),'Riscatto annullato: i Formaggi sono tornati.');},
+ async redeemCancel(id){await run(()=>api(`/redemptions/${encodeURIComponent(id)}/cancel`,{method:'POST',body:{}}),'Riscatto annullato: i Tumazzi sono tornati.');},
  async redDeliver(id){await run(()=>api(`/redemptions/${encodeURIComponent(id)}/deliver`,{method:'POST',body:{}}),'Premio consegnato. Il socio è stato avvisato anche via email.');},
  async rewardActive(id,el){await run(()=>api(`/rewards/${encodeURIComponent(id)}`,{method:'PATCH',body:{active:el.dataset.active==='1'}}),'Vetrina aggiornata.');},
  async xAccept(id){await run(()=>api(`/time-exchanges/${encodeURIComponent(id)}/accept`,{method:'POST',body:{}}),'Richiesta accettata.');},
  async xDecline(id){await run(()=>api(`/time-exchanges/${encodeURIComponent(id)}/decline`,{method:'POST',body:{}}),'Richiesta rifiutata.');},
  async xCancel(id){await run(()=>api(`/time-exchanges/${encodeURIComponent(id)}/cancel`,{method:'POST',body:{}}),'Scambio annullato.');},
- async xDone(id){let r;await run(async()=>{r=await api(`/time-exchanges/${encodeURIComponent(id)}/done`,{method:'POST',body:{}});},null,{rerender:false})&&(say(r.awarded?'Scambio concluso! Hai ricevuto XP e Formaggi.':'Scambio concluso. Hai già raggiunto il limite di premi della settimana.'),await render());},
+ async xDone(id){let r;await run(async()=>{r=await api(`/time-exchanges/${encodeURIComponent(id)}/done`,{method:'POST',body:{}});},null,{rerender:false})&&(say(r.awarded?'Scambio concluso! Hai ricevuto XP e Tumazzi.':'Scambio concluso. Hai già raggiunto il limite di premi della settimana.'),await render());},
  async offerClose(id){await run(()=>api(`/time-offers/${encodeURIComponent(id)}/close`,{method:'POST',body:{}}),'Offerta chiusa.');},
  async vote(id,el){await run(()=>api(`/proposals/${encodeURIComponent(id)}/vote`,{method:'POST',body:{on:el.dataset.on==='1'}}),el.dataset.on==='1'?'Voto registrato.':'Voto tolto.');},
  async pdecline(id){await run(()=>api(`/proposals/${encodeURIComponent(id)}/decline`,{method:'POST',body:{}}),'Proposta segnata come non accolta.');},
@@ -880,13 +935,13 @@ const actions={
  async status(id,el){await run(()=>api(`/members/${encodeURIComponent(id)}`,{method:'PATCH',body:{status:el.dataset.status}}),'Stato aggiornato.');},
  async cardRemove(id){await run(()=>api(`/members/${encodeURIComponent(id)}/card`,{method:'DELETE'}),'Tessera rimossa.');},
  async out(id){await run(()=>api('/access',{method:'POST',body:{memberId:id,direction:'OUT'}}),'Uscita registrata.');},
- async verify(id){let r;await run(async()=>{r=await api(`/chores/${encodeURIComponent(id)}/verify`,{method:'POST',body:{}});},null,{rerender:false})&&(say(r.outcome.cheeseCapped?'Confermata. I Formaggi sono stati ridotti per il limite settimanale.':'Missione confermata.'),await render());},
+ async verify(id){let r;await run(async()=>{r=await api(`/chores/${encodeURIComponent(id)}/verify`,{method:'POST',body:{}});},null,{rerender:false})&&(say(r.outcome.cheeseCapped?'Confermata. I Tumazzi sono stati ridotti per il limite settimanale.':'Missione confermata.'),await render());},
  async reject(id){await run(()=>api(`/chores/${encodeURIComponent(id)}/reject`,{method:'POST',body:{}}),'Missione respinta.');},
  async choreActive(id,el){await run(()=>api(`/chore-types/${encodeURIComponent(id)}`,{method:'PATCH',body:{active:el.dataset.active==='1'}}),'Catalogo aggiornato.');},
  async 'act-status'(id,el){await run(()=>api(`/activities/manage/${encodeURIComponent(id)}`,{method:'PATCH',body:{status:el.dataset.status}}),'Attività aggiornata.');},
  async 'bk-confirm'(id,el){await run(()=>api(`/activities/${encodeURIComponent(id)}/confirm`,{method:'POST',body:{memberId:el.dataset.member}}),'Prenotazione confermata.');},
  async 'bk-decline'(id,el){await run(()=>api(`/activities/${encodeURIComponent(id)}/decline`,{method:'POST',body:{memberId:el.dataset.member}}),'Prenotazione rifiutata.');},
- async 'bk-attend'(id,el){await run(()=>api(`/activities/${encodeURIComponent(id)}/attendance`,{method:'POST',body:{memberId:el.dataset.member}}),'Presenza registrata, XP e Formaggi assegnati.');},
+ async 'bk-attend'(id,el){await run(()=>api(`/activities/${encodeURIComponent(id)}/attendance`,{method:'POST',body:{memberId:el.dataset.member}}),'Presenza registrata, XP e Tumazzi assegnati.');},
  prefill(){
   const f=main.querySelector('form[data-form="activity"]');if(!f)return;
   f.elements.name.value='Giornata internazionale contro la violenza sulle donne';
@@ -916,7 +971,7 @@ const submits={
   await run(()=>api(id?`/assembly/decisions/${encodeURIComponent(id)}`:'/assembly/decisions',{method:id?'PUT':'POST',body}),id?'Decisione aggiornata.':'Decisione pubblicata.');
  },
  async 'activity-access'(f,v,id){
-  await run(()=>api(`/activities/manage/${encodeURIComponent(id)}`,{method:'PATCH',body:{accessMode:v('accessMode'),publicEvent:f.elements.publicEvent.checked}}),'Modalità di accesso aggiornata.');
+  await run(()=>api(`/activities/manage/${encodeURIComponent(id)}`,{method:'PATCH',body:{accessMode:v('accessMode'),publicEvent:f.elements.publicEvent.checked,description:v('description')}}),'Dettagli dell’attività aggiornati.');
  },
  async walkin(_f,v,id){
   await run(()=>api(`/activities/${encodeURIComponent(id)}/attendance`,{method:'POST',body:{memberId:v('memberId')}}),'Presenza registrata.');
@@ -961,7 +1016,7 @@ const submits={
  async choretype(f,v){await run(()=>api('/chore-types',{method:'POST',body:{name:v('name'),description:v('description'),xp:Number(v('xp')),cheese:Number(v('cheese')),path:v('path')}}),'Missione aggiunta al catalogo.');},
  async chorepath(f,v){await run(()=>api(`/chore-types/${encodeURIComponent(f.dataset.id)}`,{method:'PATCH',body:{path:v('path')}}),'Percorso aggiornato.');},
  async activity(f,v){
-  await run(()=>api('/activities/manage',{method:'POST',body:{name:v('name'),startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000),capacity:Number(v('capacity')),verificationRule:v('verificationRule'),xp:Number(v('xp')),cheese:Number(v('cheese')),path:v('path')||null,status:v('status'),accessMode:v('accessMode'),publicEvent:f.elements.publicEvent.checked}}),'Attività creata.');
+  await run(()=>api('/activities/manage',{method:'POST',body:{name:v('name'),startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000),capacity:Number(v('capacity')),verificationRule:v('verificationRule'),xp:Number(v('xp')),cheese:Number(v('cheese')),path:v('path')||null,status:v('status'),accessMode:v('accessMode'),publicEvent:f.elements.publicEvent.checked,description:v('description')}}),'Attività creata.');
  }
 };
 main.addEventListener('submit',async event=>{
@@ -1003,6 +1058,13 @@ document.addEventListener('click',event=>{
  if(control&&!control.matches(':disabled,[aria-disabled="true"]')&&pref.get('sound','off')==='on')playClick();
 },true);
 main.addEventListener('change',event=>{
+ if(event.target.matches('form[data-form="avatar"] input[name="color"]')){
+  const form=event.target.form;
+  form.querySelectorAll('input[name="species"]').forEach(input=>{
+   input.nextElementSibling.outerHTML=avatar(input.value,event.target.value);
+  });
+ }
+
  if(event.target.id!=='sound-toggle')return;
  pref.set('sound',event.target.checked?'on':'off');
  if(event.target.checked)playClick();

@@ -17,6 +17,11 @@ const publicFlag = value => {
  return Number(value);
 };
 
+function description(value = '') {
+ if (typeof value !== 'string' || value.length > 1600) fail(400, 'Descrizione: al massimo 1600 caratteri.');
+ return value.trim();
+}
+
 // Accetta un istante in secondi Unix oppure una data ISO.
 function startsAt(value) {
  const seconds = typeof value === 'number' ? value : Math.floor(Date.parse(String(value)) / 1000);
@@ -24,7 +29,7 @@ function startsAt(value) {
  return seconds;
 }
 
-const manageSql = `SELECT a.id, a.name, a.starts_at AS startsAt, a.capacity, a.status, a.verification_rule AS verificationRule,
+const manageSql = `SELECT a.id, a.name, a.description, a.starts_at AS startsAt, a.capacity, a.status, a.verification_rule AS verificationRule,
   a.xp, a.cheese, a.path, a.access_mode AS accessMode, a.public_event AS publicEvent,
   (SELECT COUNT(*) FROM bookings b WHERE b.activity_id = a.id AND b.status = 'pending') AS pending,
   (SELECT COUNT(*) FROM bookings b WHERE b.activity_id = a.id AND b.status = 'confirmed') AS confirmed,
@@ -41,12 +46,12 @@ export async function create({request, db}) {
  const id = crypto.randomUUID();
  const status = body.status ?? 'draft';
  if (!STATUSES.includes(status)) fail(400, 'Stato non valido.');
- await db.prepare(`INSERT INTO activities (id, name, starts_at, capacity, status, verification_rule, xp, cheese, path, access_mode, public_event)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
+ await db.prepare(`INSERT INTO activities (id, name, starts_at, capacity, status, verification_rule, xp, cheese, path, access_mode, public_event, description)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
   id, text(body.name, 'Nome', {max: 120}), startsAt(body.startsAt), integer(body.capacity, 'Posti', {min: 1, max: 500}), status,
   text(body.verificationRule, 'Criterio di convalida', {max: 300}),
-  integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Formaggi', {max: 200}), activityPath(body.path),
-  accessMode(body.accessMode ?? 'booking'), publicFlag(body.publicEvent ?? false)
+  integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Tumazzi', {max: 200}), activityPath(body.path),
+  accessMode(body.accessMode ?? 'booking'), publicFlag(body.publicEvent ?? false), description(body.description)
  ).run();
  return json({activity: await db.prepare(`${manageSql} WHERE a.id = ?`).bind(id).first()}, 201);
 }
@@ -57,11 +62,12 @@ export async function update({request, db, params}) {
  const values = [];
  const put = (column, value) => { sets.push(`${column} = ?`); values.push(value); };
  if ('name' in body) put('name', text(body.name, 'Nome', {max: 120}));
+ if ('description' in body) put('description', description(body.description));
  if ('startsAt' in body) put('starts_at', startsAt(body.startsAt));
  if ('capacity' in body) put('capacity', integer(body.capacity, 'Posti', {min: 1, max: 500}));
  if ('verificationRule' in body) put('verification_rule', text(body.verificationRule, 'Criterio di convalida', {max: 300}));
  if ('xp' in body) put('xp', integer(body.xp, 'XP', {max: 500}));
- if ('cheese' in body) put('cheese', integer(body.cheese, 'Formaggi', {max: 200}));
+ if ('cheese' in body) put('cheese', integer(body.cheese, 'Tumazzi', {max: 200}));
  if ('path' in body) put('path', activityPath(body.path));
  if ('accessMode' in body) put('access_mode', accessMode(body.accessMode));
  if ('publicEvent' in body) put('public_event', publicFlag(body.publicEvent));

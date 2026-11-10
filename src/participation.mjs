@@ -1,3 +1,4 @@
+import {tumazzi} from './lib/http.mjs';
 import {sessionToken, tokenHash} from './tokens.mjs';
 import {notify} from './lib/notify.mjs';
 import {checkTrophies} from './lib/trophies.mjs';
@@ -23,7 +24,7 @@ export async function handleParticipation(request,db,env={}){
  if(api!=='api'||resource!=='activities'||path.length>5)return json({error:'Percorso non trovato.'},404);
 
  if(request.method==='GET'&&!activity){
-  const {results}=await db.prepare(`SELECT a.id,a.name,a.starts_at,a.capacity,a.verification_rule,a.path,a.access_mode,a.public_event,
+  const {results}=await db.prepare(`SELECT a.id,a.name,a.description,a.starts_at,a.capacity,a.verification_rule,a.path,a.access_mode,a.public_event,
    a.capacity-COUNT(b.member_id) AS available
    FROM activities a LEFT JOIN bookings b ON b.activity_id=a.id AND b.status IN ('pending','confirmed')
    WHERE a.status='published' GROUP BY a.id ORDER BY a.starts_at`).all();
@@ -91,7 +92,7 @@ export async function handleParticipation(request,db,env={}){
  const attendance=await query(db,'SELECT xp,cheese FROM attendance WHERE activity_id=? AND member_id=?',activity,member).first();
  if(!attendance)return json({error:'L’attività è stata modificata. Riprova.'},409);
  if(inserted.meta.changes){
-  await notifyMember(db,member,'ok','Presenza registrata',`${await activityName(db,activity)}: +${attendance.xp} XP e +${attendance.cheese} Formaggi.`);
+  await notifyMember(db,member,'ok','Presenza registrata',`${await activityName(db,activity)}: +${attendance.xp} XP e +${tumazzi(attendance.cheese)}.`);
   await checkTrophies(env,db,member);
  }
  return json({attendance});

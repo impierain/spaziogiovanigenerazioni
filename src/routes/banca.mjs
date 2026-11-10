@@ -1,4 +1,4 @@
-import {fail, json, readJson, text} from '../lib/http.mjs';
+import {tumazzi, fail, json, readJson, text} from '../lib/http.mjs';
 import {romeWeekStart} from '../lib/time.mjs';
 import {notify} from '../lib/notify.mjs';
 import {mailMember, exchangeEmail} from '../lib/emails.mjs';
@@ -80,7 +80,7 @@ export async function decide(verdict, {env, db, member, params}) {
 export const accept = ctx => decide('accept', ctx);
 export const decline = ctx => decide('decline', ctx);
 
-// Chi ha ricevuto l'ora la conferma: entrambi ricevono XP e Formaggi (con il limite settimanale).
+// Chi ha ricevuto l'ora la conferma: entrambi ricevono XP e Tumazzi (con il limite settimanale).
 export async function done({env, db, member, params}) {
  const x = await loadExchange(db, params.id);
  if (x.requesterId !== member.id) fail(403, 'Solo chi ha ricevuto l’ora può confermarla.');
@@ -93,7 +93,7 @@ export async function done({env, db, member, params}) {
   if (used >= WEEKLY_EXCHANGES) { outcome[who] = false; continue; }
   await db.prepare(`INSERT INTO awards (member_id, source, ref, title, xp, cheese) VALUES (?, 'scambio', ?, ?, ?, ?)`).bind(who, String(x.id), `Banca del tempo: ${x.title}`.slice(0, 120), EXCHANGE_XP, EXCHANGE_CHEESE).run();
   outcome[who] = true;
-  await notify(db, who, {kind: 'banca', level: 'ok', title: `Scambio concluso: ${x.title}`, body: `+${EXCHANGE_XP} XP e +${EXCHANGE_CHEESE} Formaggio.`});
+  await notify(db, who, {kind: 'banca', level: 'ok', title: `Scambio concluso: ${x.title}`, body: `+${EXCHANGE_XP} XP e +${tumazzi(EXCHANGE_CHEESE)}.`});
  }
  for (const who of [x.ownerId, x.requesterId]) await checkTrophies(env, db, who);
  return json({status: 'done', awarded: outcome[x.requesterId] ?? false});

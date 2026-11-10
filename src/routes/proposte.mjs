@@ -1,4 +1,4 @@
-import {fail, json, readJson, text, integer} from '../lib/http.mjs';
+import {tumazzi, fail, json, readJson, text, integer} from '../lib/http.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
 import {mailMember, proposalEmail} from '../lib/emails.mjs';
 import {checkTrophies} from '../lib/trophies.mjs';
@@ -51,12 +51,12 @@ export async function schedule({request, env, db, member, params}) {
  const startsAt = integer(body.startsAt, 'Data', {min: now, max: now + 365 * 86400});
  const activityId = crypto.randomUUID();
  await db.batch([
-  db.prepare(`INSERT INTO activities (id, name, starts_at, capacity, status, verification_rule, xp, cheese) VALUES (?, ?, ?, 20, 'draft', ?, 30, 3)`).bind(
-   activityId, p.title.slice(0, 120), startsAt, 'Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata.'),
+  db.prepare(`INSERT INTO activities (id, name, starts_at, capacity, status, verification_rule, xp, cheese, description) VALUES (?, ?, ?, 20, 'draft', ?, 30, 3, ?)`).bind(
+   activityId, p.title.slice(0, 120), startsAt, 'Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata.', p.description),
   db.prepare(`UPDATE proposals SET status = 'scheduled', activity_id = ? WHERE id = ? AND status = 'open'`).bind(activityId, p.id),
   db.prepare(`INSERT INTO awards (member_id, source, ref, title, xp, cheese) VALUES (?, 'proposta', ?, ?, ?, ?)`).bind(p.member_id, String(p.id), `Proposta accolta: ${p.title}`.slice(0, 120), PROPOSAL_XP, PROPOSAL_CHEESE)
  ]);
- await notify(db, p.member_id, {kind: 'proposta', level: 'ok', title: `La tua proposta va in calendario: ${p.title}`, body: `+${PROPOSAL_XP} XP e +${PROPOSAL_CHEESE} Formaggi.`});
+ await notify(db, p.member_id, {kind: 'proposta', level: 'ok', title: `La tua proposta va in calendario: ${p.title}`, body: `+${PROPOSAL_XP} XP e +${tumazzi(PROPOSAL_CHEESE)}.`});
  const when = new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(startsAt * 1000));
  await mailMember(env, db, p.member_id, name => proposalEmail(name, {proposal: p.title, when}));
  await checkTrophies(env, db, p.member_id);

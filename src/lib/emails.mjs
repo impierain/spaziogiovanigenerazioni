@@ -1,3 +1,4 @@
+import {tumazzi} from './http.mjs';
 // Email dell'app con lo stesso design dell'invito: titolo, testo, riquadro con elenco, pulsante.
 import {sendEmail} from './email.mjs';
 
@@ -48,8 +49,8 @@ export const trophyEmail = (name, trophies) => layout({
 });
 
 export const redemptionEmail = (name, {reward, cost, balance, status}) => status === 'delivered'
- ? layout({subject: `Premio consegnato: ${reward} · CCA SIEMMU`, title: 'Premio consegnato!', intro: `Ciao ${name}, ti abbiamo consegnato il premio che avevi riscattato. Goditelo!`, items: [{title: reward, text: `${cost} Formaggi`}], button: 'Apri la Putìa', url: `${SITE}/#putia`})
- : layout({subject: `Hai riscattato: ${reward} · CCA SIEMMU`, title: 'Premio riscattato!', intro: `Ciao ${name}, hai riscattato un premio nella Putìa. Passa in sede negli orari di apertura (da lunedì a venerdì, 16:00–20:00): un referente te lo consegna.`, items: [{title: reward, text: `${cost} Formaggi spesi · te ne restano ${balance}`}], button: 'Apri la Putìa', url: `${SITE}/#putia`, note: 'Cambiato idea? Puoi annullare il riscatto finché non è consegnato: i Formaggi tornano subito tuoi.'});
+ ? layout({subject: `Premio consegnato: ${reward} · CCA SIEMMU`, title: 'Premio consegnato!', intro: `Ciao ${name}, ti abbiamo consegnato il premio che avevi riscattato. Goditelo!`, items: [{title: reward, text: `${tumazzi(cost)}`}], button: 'Apri la Putìa', url: `${SITE}/#putia`})
+ : layout({subject: `Hai riscattato: ${reward} · CCA SIEMMU`, title: 'Premio riscattato!', intro: `Ciao ${name}, hai riscattato un premio nella Putìa. Passa in sede negli orari di apertura (da lunedì a venerdì, 16:00–20:00): un referente te lo consegna.`, items: [{title: reward, text: `${tumazzi(cost)} spesi · te ne restano ${balance}`}], button: 'Apri la Putìa', url: `${SITE}/#putia`, note: 'Cambiato idea? Puoi annullare il riscatto finché non è consegnato: i Tumazzi tornano subito tuoi.'});
 
 export const reminderEmail = (name, {activity, when}) => layout({
  subject: `Promemoria: ${activity} · CCA SIEMMU`, title: 'Ti aspettiamo!',

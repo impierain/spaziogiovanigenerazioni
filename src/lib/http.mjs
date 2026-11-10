@@ -59,3 +59,5 @@ export function uid(value) {
  if (!/^[0-9A-F]{8,20}$/.test(clean) || clean.length % 2) fail(400, 'Codice tessera non valido.');
  return clean;
 }
+
+export const tumazzi = n => `${n} ${Number(n) === 1 ? 'Tumuzzu' : 'Tumazzi'}`;

@@ -1,13 +1,14 @@
 import {fail, json, readJson, email, text, uid} from '../lib/http.mjs';
 import {inviteEmail, sendEmail} from '../lib/email.mjs';
 import {newToken} from '../tokens.mjs';
+import {notify} from '../lib/notify.mjs';
 
 const INVITE_SECONDS = 7 * 24 * 3600;
 const ROLES = ['participant', 'organizer'];
 const STATUSES = ['pending', 'approved', 'disabled'];
 
 // Crea un link monouso per impostare la password e prova a spedirlo per email.
-async function issueInvite(env, db, request, member) {
+async function issueInvite(env, db, request, member, actorId) {
  const {token, hash} = await newToken();
  const purpose = member.has_password ? 'reset' : 'invito';
  await db.batch([
@@ -18,6 +19,12 @@ async function issueInvite(env, db, request, member) {
  const inviteUrl = `${new URL(request.url).origin}/#imposta-password/${token}`;
  const mail = inviteEmail({name: member.full_name || member.pseudonym, url: inviteUrl, purpose});
  const result = await sendEmail(env, {to: member.email, ...mail});
+ const who = member.full_name || member.pseudonym;
+ if (actorId) {
+  await notify(db, actorId, result.sent
+   ? {kind: 'email', level: 'ok', title: `Email inviata a ${who}`, body: `${purpose === 'reset' ? 'Link per la nuova password' : 'Invito al profilo'} spedito a ${member.email}.`}
+   : {kind: 'email', level: 'error', title: `Email non inviata a ${who}`, body: `Motivo: ${result.reason}. Copia il link dal pannello Soci e mandalo tu, anche su WhatsApp.`});
+ }
  return {inviteUrl, emailSent: result.sent, emailNote: result.sent ? null : result.reason, purpose};
 }
 
@@ -33,7 +40,7 @@ export async function list({db}) {
  return json({members: results.map(shape)});
 }
 
-export async function create({request, db, env}) {
+export async function create({request, db, env, member: actor}) {
  const body = await readJson(request);
  const address = email(body.email);
  const fullName = text(body.fullName, 'Nome e cognome', {max: 80});
@@ -50,16 +57,16 @@ export async function create({request, db, env}) {
   throw error;
  }
  const member = await db.prepare(`${listSql} WHERE m.id = ?`).bind(id).first();
- const invite = await issueInvite(env, db, request, {id, email: address, full_name: fullName, pseudonym, has_password: false});
+ const invite = await issueInvite(env, db, request, {id, email: address, full_name: fullName, pseudonym, has_password: false}, actor.id);
  return json({member: shape(member), invite}, 201);
 }
 
-export async function reinvite({request, db, env, params}) {
+export async function reinvite({request, db, env, params, member: actor}) {
  const member = await db.prepare(`SELECT id, email, pseudonym, full_name, status, password_hash IS NOT NULL AS has_password
   FROM members WHERE id = ?`).bind(params.id).first();
  if (!member) fail(404, 'Socio non trovato.');
  if (member.status === 'disabled') fail(409, 'Il socio è disattivato.');
- return json({invite: await issueInvite(env, db, request, member)});
+ return json({invite: await issueInvite(env, db, request, member, actor.id)});
 }
 
 export async function update({request, db, member, params}) {

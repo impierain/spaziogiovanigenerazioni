@@ -50,7 +50,8 @@ const LEVELS=[['Noviziu',0],['Esploratore',60],['Cumpagnu',150],['Custode',300],
 const WEEKLY_CHEESE=12;
 const main=document.querySelector('main');
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const S={me:null,totals:{xp:0,cheese:0},invite:null,loaded:false};
+const S={me:null,totals:{xp:0,cheese:0},invite:null,loaded:false,unread:0};
+const bellIcon=()=>pixelIcon('<path fill="currentColor" d="M7 1h2v2h3v2h1v6h2v2H1v-2h2V5h1V3h3zM6 14h4v2H6z"/>','bell-icon');
 const pref={get(k,d){try{return localStorage.getItem('cca-'+k)??d;}catch{return d;}},set(k,v){try{localStorage.setItem('cca-'+k,v);}catch{}}};
 
 /* ---- rete ---- */
@@ -63,7 +64,7 @@ async function api(path,{method='GET',body}={}){
  return data;
 }
 async function loadSession(){
- try{const d=await api('/auth/me');S.me=d.member;S.totals=d.totals??{xp:0,cheese:0};}
+ try{const d=await api('/auth/me');S.me=d.member;S.totals=d.totals??{xp:0,cheese:0};S.unread=d.unread??0;}
  catch{S.me=null;}
  S.loaded=true;
 }
@@ -114,6 +115,9 @@ function renderChrome(active){
  const nav=document.querySelector('#nav');
  nav.style.setProperty('--cols',ids.length);
  nav.innerHTML=ids.map(id=>`<a href="#${id}" ${active===id?'aria-current="page"':''}><span class="nav-icon-tile" aria-hidden="true">${pixelIcon(navIcons[navDefs[id][1]],'nav-icon')}</span>${navDefs[id][0]}</a>`).join('');
+ const bell=document.querySelector('#notifications');
+ bell.hidden=!S.me;
+ if(S.me){bell.setAttribute('aria-label',S.unread?`Notifiche, ${S.unread} da leggere`:'Notifiche');bell.innerHTML=bellIcon()+(S.unread?`<span class="unread" aria-hidden="true">${S.unread}</span>`:'');}
  const wallet=document.querySelector('#wallet-link');
  wallet.hidden=!S.me;
  if(S.me){wallet.innerHTML=pixelIcon(cheese)+`<span>${S.totals.cheese}</span>`;wallet.setAttribute('aria-label',`${S.totals.cheese} Formaggi guadagnati · apri le missioni`);}
@@ -347,8 +351,21 @@ async function panStatistiche(){
  section('Classifica dei più presenti',s.ranking.length?card(`<ol class="list">${s.ranking.map(r=>`<li>${esc(r.name)} · ${r.hours} h · ${r.visits} visite</li>`).join('')}</ol>`):card('<p>Ancora nessun dato.</p>'));
 }
 
+
+/* ---- bacheca notifiche ---- */
+const levelIcon={ok:'✓',error:'✕',info:'ℹ'};
+async function notifiche(){
+ if(!S.me)return needLogin();
+ const d=await api('/notifications');
+ const items=d.notifications;
+ const html=title('Notifiche','Esiti delle operazioni e avvisi che ti riguardano.')+
+  section('Bacheca',items.length?`<div class="notice-list">${items.map(n=>`<article class="card notice-item notice-${n.level} ${n.read?'':'notice-unread'}"><span class="notice-icon" aria-hidden="true">${levelIcon[n.level]||'ℹ'}</span><div><h3>${esc(n.title)}${n.read?'':' '+badge('Nuova')}</h3>${n.body?`<p>${esc(n.body)}</p>`:''}<p class="muted">${dateShort(n.createdAt)}</p></div></article>`).join('')}</div>`:card('<p>Nessuna notifica per ora. Qui compariranno gli esiti degli invii email e gli avvisi su prenotazioni e faccende.</p>'));
+ if(d.unread){api('/notifications/read',{method:'POST',body:{all:true}}).then(r=>{S.unread=r.unread??0;renderChrome('');}).catch(()=>{});}
+ return html;
+}
+
 /* ---- router ---- */
-const redirects={benvenuto:'accedi',comunita:'home',formaggi:'missioni',vasceddi:'missioni',notifiche:'home',paisi:'home',condividi:'profilo'};
+const redirects={benvenuto:'accedi',comunita:'home',formaggi:'missioni',vasceddi:'missioni',paisi:'home',condividi:'profilo'};
 let renderId=0;
 async function render(focus=false){
  const id=++renderId;
@@ -356,7 +373,8 @@ async function render(focus=false){
  let page=raw||'home';
  if(redirects[page]){location.replace('#'+redirects[page]);return;}
  if(!S.loaded)await loadSession();
- const known=['home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','imposta-password'];
+ else if(S.me)await refreshTotals();
+ const known=['notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','imposta-password'];
  const active=known.includes(page)?page:'';
  renderChrome(active);
  main.setAttribute('aria-busy','true');
@@ -364,6 +382,7 @@ async function render(focus=false){
  try{
   if(page==='home')html=S.me?await homeMember():home();
   else if(page==='calendario')html=await calendario();
+  else if(page==='notifiche')html=await notifiche();
   else if(page==='spazio')html=spazio();
   else if(page==='privacy')html=privacy();
   else if(page==='accedi')html=accedi();
@@ -382,10 +401,23 @@ async function render(focus=false){
  main.removeAttribute('aria-busy');
  if(focus){window.scrollTo(0,0);main.focus({preventScroll:true});}
 }
-function say(message,error=false){
- const status=document.querySelector('#status');
- status.textContent=message;status.classList.toggle('error',error);
- clearTimeout(say.t);say.t=setTimeout(()=>{status.textContent='';},5000);
+function banner(level,message,{sticky=false}={}){
+ let box=document.querySelector('#banner');
+ if(!box){box=document.createElement('div');box.id='banner';document.body.append(box);}
+ const bad=level==='error';
+ box.className='banner '+(bad?'banner-error':'banner-ok');
+ box.setAttribute('role',bad?'alert':'status');
+ box.innerHTML=`<span class="banner-icon" aria-hidden="true">${bad?'✕':'✓'}</span><span class="banner-text">${esc(message)}</span><button type="button" class="banner-close" aria-label="Chiudi avviso">×</button>`;
+ box.hidden=false;
+ box.querySelector('button').onclick=()=>{box.hidden=true;};
+ clearTimeout(banner.t);
+ if(!bad&&!sticky)banner.t=setTimeout(()=>{box.hidden=true;},6000);
+}
+function say(message,error=false){banner(error?'error':'ok',message);}
+// Esito di un invio email, mostrato come banner e salvato anche nella bacheca.
+function emailBanner(invite,who){
+ if(invite.emailSent)banner('ok',`Email inviata a ${who}.`);
+ else banner('error',`Email non inviata a ${who}${invite.emailNote?` (${invite.emailNote})`:''}. Copia il link qui sotto o mandalo su WhatsApp.`);
 }
 async function run(task,okMessage,{rerender=true}={}){
  try{await task();if(okMessage)say(okMessage);}
@@ -396,7 +428,7 @@ async function run(task,okMessage,{rerender=true}={}){
  if(rerender){const y=window.scrollY;await render();window.scrollTo(0,y);}
  return true;
 }
-async function refreshTotals(){try{const d=await api('/auth/me');if(d.member){S.me=d.member;S.totals=d.totals;}}catch{}}
+async function refreshTotals(){try{const d=await api('/auth/me');if(d.member){S.me=d.member;S.totals=d.totals;S.unread=d.unread??0;}}catch{}}
 
 /* ---- azioni ---- */
 const actions={
@@ -409,7 +441,7 @@ const actions={
  async invite(id,el){
   let out;
   const ok=await run(async()=>{out=await api(`/members/${encodeURIComponent(id)}/invite`,{method:'POST',body:{}});},null,{rerender:false});
-  if(ok){S.invite={...out.invite,phone:el.dataset.phone,who:el.closest('article')?.querySelector('h3')?.textContent||''};await render();window.scrollTo(0,0);}
+  if(ok){const who=el.closest('article')?.querySelector('h3')?.textContent||'';S.invite={...out.invite,phone:el.dataset.phone,who};await render();window.scrollTo(0,0);emailBanner(out.invite,who);}
  },
  async role(id,el){await run(()=>api(`/members/${encodeURIComponent(id)}`,{method:'PATCH',body:{role:el.dataset.role}}),'Ruolo aggiornato.');},
  async status(id,el){await run(()=>api(`/members/${encodeURIComponent(id)}`,{method:'PATCH',body:{status:el.dataset.status}}),'Stato aggiornato.');},
@@ -454,7 +486,7 @@ const submits={
  async member(f,v){
   let out;
   const ok=await run(async()=>{out=await api('/members',{method:'POST',body:{fullName:v('fullName'),email:v('email'),pseudonym:v('pseudonym')||undefined,phone:v('phone')||undefined,role:v('role')}});},null,{rerender:false});
-  if(ok){S.invite={...out.invite,phone:out.member.phone,who:out.member.fullName||out.member.pseudonym};say('Socio registrato.');await render();window.scrollTo(0,0);}
+  if(ok){const who=out.member.fullName||out.member.pseudonym;S.invite={...out.invite,phone:out.member.phone,who};await render();window.scrollTo(0,0);emailBanner(out.invite,who);}
  },
  async card(f,v,id){await run(()=>api(`/members/${encodeURIComponent(id)}/card`,{method:'PUT',body:{uidTessera:v('uid')}}),'Tessera assegnata.');},
  async access(f,v){

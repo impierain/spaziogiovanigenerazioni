@@ -1,8 +1,12 @@
 import {sessionToken, tokenHash} from './tokens.mjs';
+import {notify} from './lib/notify.mjs';
 
 const romeDate = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Rome', year:'numeric', month:'2-digit', day:'2-digit'});
 const json = (body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
 const query = (db,sql,...bindings)=>db.prepare(sql).bind(...bindings);
+
+const notifyMember=(db,memberId,level,title,body='')=>notify(db,memberId,{kind:'attivita',level,title,body});
+const activityName=async(db,id)=>(await query(db,'SELECT name FROM activities WHERE id=?',id).first())?.name??'';
 
 async function sessionMember(request,db){
  const hash=await tokenHash(sessionToken(request));
@@ -63,7 +67,9 @@ export async function handleParticipation(request,db){
    AND EXISTS (SELECT 1 FROM members WHERE id=? AND role='organizer' AND status='approved')
    AND EXISTS (SELECT 1 FROM activities WHERE id=? AND status='published' AND starts_at>unixepoch())`,
    status,activity,member,actor.id,activity).run();
-  return result.meta.changes?json({status}):json({error:'La richiesta non è più in attesa o l’attività non è prenotabile.'},409);
+  if(!result.meta.changes)return json({error:'La richiesta non è più in attesa o l’attività non è prenotabile.'},409);
+  await notifyMember(db,member,status==='confirmed'?'ok':'info',status==='confirmed'?'Prenotazione confermata':'Prenotazione non accettata',await activityName(db,activity));
+  return json({status});
  }
 
  const event=await query(db,`SELECT starts_at FROM activities WHERE id=? AND status='published'`,activity).first();
@@ -80,5 +86,7 @@ export async function handleParticipation(request,db){
   throw error;
  }
  const attendance=await query(db,'SELECT xp,cheese FROM attendance WHERE activity_id=? AND member_id=?',activity,member).first();
- return attendance?json({attendance}):json({error:'L’attività è stata modificata. Riprova.'},409);
+ if(!attendance)return json({error:'L’attività è stata modificata. Riprova.'},409);
+ await notifyMember(db,member,'ok','Presenza registrata',`${await activityName(db,activity)}: +${attendance.xp} XP e +${attendance.cheese} Formaggi.`);
+ return json({attendance});
 }

@@ -1,5 +1,6 @@
 import {fail, json, readJson, integer, text} from '../lib/http.mjs';
 import {romeWeekStart} from '../lib/time.mjs';
+import {notify, notifyOrganizers} from '../lib/notify.mjs';
 
 // Come per le missioni ripetibili: al massimo 12 Formaggi a settimana dalle faccende.
 export const WEEKLY_CHEESE_CAP = 12;
@@ -67,7 +68,7 @@ export async function listLogs({url, db, member}) {
 
 // Applica la decisione del referente. Il tetto settimanale taglia i Formaggi, non gli XP.
 async function decide(db, logId, organizerId, verdict) {
- const log = await db.prepare(`SELECT l.id, l.member_id, l.status, c.xp, c.cheese
+ const log = await db.prepare(`SELECT l.id, l.member_id, l.status, c.xp, c.cheese, c.name
   FROM chore_logs l JOIN chore_types c ON c.id = l.chore_type_id WHERE l.id = ?`).bind(logId).first();
  if (!log) fail(404, 'Faccenda non trovata.');
  if (log.status !== 'pending') fail(409, 'Questa faccenda è già stata decisa.');
@@ -87,7 +88,11 @@ async function decide(db, logId, organizerId, verdict) {
   if (String(error).includes('chore_not_authorized')) fail(403, 'Non puoi decidere su una tua faccenda.');
   throw error;
  }
- return {id: logId, status: verdict, xp, cheese, cheeseCapped: verdict === 'verified' && cheese < log.cheese};
+ const cheeseCapped = verdict === 'verified' && cheese < log.cheese;
+ await notify(db, log.member_id, verdict === 'verified'
+  ? {kind: 'faccenda', level: 'ok', title: `Faccenda confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${cheese} Formaggi.${cheeseCapped ? ' I Formaggi sono ridotti per il limite settimanale.' : ''}`}
+  : {kind: 'faccenda', level: 'info', title: `Faccenda non confermata: ${log.name}`, body: 'Un referente non l’ha convalidata. Chiedi a lui il motivo.'});
+ return {id: logId, status: verdict, xp, cheese, cheeseCapped};
 }
 
 export async function createLog({request, db, member}) {
@@ -101,6 +106,11 @@ export async function createLog({request, db, member}) {
  const note = text(body.note, 'Nota', {max: 500, optional: true}) ?? '';
  const inserted = await db.prepare('INSERT INTO chore_logs (chore_type_id, member_id, note) VALUES (?, ?, ?)').bind(choreType.id, memberId, note).run();
  const id = inserted.meta.last_row_id;
+ if (!onBehalf) {
+  const name = await db.prepare('SELECT pseudonym FROM members WHERE id = ?').bind(memberId).first();
+  const type = await db.prepare('SELECT name FROM chore_types WHERE id = ?').bind(choreType.id).first();
+  await notifyOrganizers(db, memberId, {kind: 'faccenda', level: 'info', title: `Nuova faccenda da verificare: ${type?.name ?? ''}`, body: `Richiesta di ${name?.pseudonym ?? 'un socio'}. Vai in Referenti → Faccende.`});
+ }
  // Un referente che registra la faccenda di un altro socio la convalida subito.
  const outcome = onBehalf ? await decide(db, id, member.id, 'verified') : null;
  const row = await db.prepare(`${logSql} WHERE l.id = ?`).bind(id).first();

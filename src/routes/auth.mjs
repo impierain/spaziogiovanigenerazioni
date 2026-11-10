@@ -2,6 +2,7 @@ import {fail, json, readJson, email, text} from '../lib/http.mjs';
 import {hashPassword, passwordProblem, verifyPassword} from '../lib/password.mjs';
 import {EXPIRED_COOKIE, endSession, startSession} from '../lib/session.mjs';
 import {tokenHash} from '../tokens.mjs';
+import {unreadCount} from './notifications.mjs';
 
 const MAX_FAILED = 8;
 const WINDOW_SECONDS = 15 * 60;
@@ -46,7 +47,7 @@ export async function logout({request, db}) {
 
 export async function me({member, db}) {
  if (!member) return json({member: null});
- return json({member: publicMember(member), totals: await memberTotals(db, member.id)});
+ return json({member: publicMember(member), totals: await memberTotals(db, member.id), unread: await unreadCount(db, member.id)});
 }
 
 async function tokenRow(db, token) {

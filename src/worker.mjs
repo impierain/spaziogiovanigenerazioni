@@ -14,6 +14,8 @@ const routes = [
  ['POST', '/api/auth/login', 'public', auth.login],
  ['POST', '/api/auth/logout', 'public', auth.logout],
  ['GET', '/api/auth/me', 'public', auth.me],
+ ['GET', '/api/status', 'public', accessi.status],
+ ['GET', '/api/community', 'public', stats.community],
  ['GET', '/api/auth/token', 'public', auth.checkToken],
  ['POST', '/api/auth/set-password', 'public', auth.setPassword],
  ['POST', '/api/auth/change-password', 'member', auth.changePassword],
@@ -45,6 +47,7 @@ const routes = [
  ['PATCH', '/api/activities/manage/:id', 'organizer', activities.update],
  ['GET', '/api/activities/manage/:id/bookings', 'organizer', activities.bookings],
  ['GET', '/api/my/bookings', 'member', activities.mine],
+ ['GET', '/api/my/progress', 'member', stats.progress],
  ['GET', '/api/notifications', 'member', notifications.list],
  ['POST', '/api/notifications/read', 'member', notifications.markRead]
 ].map(([method, pattern, access, handler]) => ({method, access, handler, parts: pattern.split('/')}));

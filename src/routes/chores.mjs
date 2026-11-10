@@ -4,6 +4,8 @@ import {notify, notifyOrganizers} from '../lib/notify.mjs';
 
 // Come per le missioni ripetibili: al massimo 12 Formaggi a settimana dalle faccende.
 export const WEEKLY_CHEESE_CAP = 12;
+export const PATHS = ['studio', 'creativita', 'socialita', 'cittadinanza', 'solidarieta'];
+const pathOf = value => PATHS.includes(value) ? value : fail(400, 'Percorso non valido.');
 
 const slug = name => name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'faccenda';
@@ -12,7 +14,7 @@ const typeShape = row => ({...row, active: !!row.active});
 
 export async function listTypes({db, member}) {
  const where = member.role === 'organizer' ? '' : 'WHERE active = 1';
- const {results} = await db.prepare(`SELECT id, name, description, xp, cheese, active FROM chore_types ${where} ORDER BY active DESC, name COLLATE NOCASE`).all();
+ const {results} = await db.prepare(`SELECT id, name, description, xp, cheese, active, path FROM chore_types ${where} ORDER BY active DESC, name COLLATE NOCASE`).all();
  return json({types: results.map(typeShape)});
 }
 
@@ -20,11 +22,11 @@ export async function createType({request, db}) {
  const body = await readJson(request);
  const name = text(body.name, 'Nome', {max: 80});
  const id = `${slug(name)}-${crypto.randomUUID().slice(0, 6)}`;
- await db.prepare('INSERT INTO chore_types (id, name, description, xp, cheese) VALUES (?, ?, ?, ?, ?)').bind(
+ await db.prepare('INSERT INTO chore_types (id, name, description, xp, cheese, path) VALUES (?, ?, ?, ?, ?, ?)').bind(
   id, name, text(body.description, 'Descrizione', {max: 400, optional: true}) ?? '',
-  integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Formaggi', {max: 200})
+  integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Formaggi', {max: 200}), pathOf(body.path ?? 'solidarieta')
  ).run();
- const row = await db.prepare('SELECT id, name, description, xp, cheese, active FROM chore_types WHERE id = ?').bind(id).first();
+ const row = await db.prepare('SELECT id, name, description, xp, cheese, active, path FROM chore_types WHERE id = ?').bind(id).first();
  return json({type: typeShape(row)}, 201);
 }
 
@@ -37,11 +39,12 @@ export async function updateType({request, db, params}) {
  if ('description' in body) put('description', text(body.description, 'Descrizione', {max: 400, optional: true}) ?? '');
  if ('xp' in body) put('xp', integer(body.xp, 'XP', {max: 500}));
  if ('cheese' in body) put('cheese', integer(body.cheese, 'Formaggi', {max: 200}));
+ if ('path' in body) put('path', pathOf(body.path));
  if ('active' in body) put('active', body.active ? 1 : 0);
  if (!sets.length) fail(400, 'Nessuna modifica indicata.');
  const result = await db.prepare(`UPDATE chore_types SET ${sets.join(', ')} WHERE id = ?`).bind(...values, params.id).run();
  if (!result.meta.changes) fail(404, 'Faccenda non trovata.');
- const row = await db.prepare('SELECT id, name, description, xp, cheese, active FROM chore_types WHERE id = ?').bind(params.id).first();
+ const row = await db.prepare('SELECT id, name, description, xp, cheese, active, path FROM chore_types WHERE id = ?').bind(params.id).first();
  return json({type: typeShape(row)});
 }
 

@@ -1,5 +1,5 @@
 import {fail, json, integer} from '../lib/http.mjs';
-import {romeDay, romeDayStart, romeHour, romeMonth, romeWeekday} from '../lib/time.mjs';
+import {romeDay, romeDayStart, romeHour, romeMonth, romeWeekday, romeWeekStart} from '../lib/time.mjs';
 
 const STALE_SECONDS = 16 * 3600;
 const DAY_NAMES = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
@@ -180,4 +180,37 @@ export async function socio({db, member, params}) {
   activitiesAttended: attendance.n,
   choresVerified: chores.n
  });
+}
+
+// Numeri pubblici del paese: nessun dato personale.
+export async function community({db}) {
+ const now = Math.floor(Date.now() / 1000);
+ const weekStart = romeWeekStart(now * 1000);
+ const rows = await loadRows(db, weekStart);
+ const {sessions} = buildSessions(rows, now);
+ const merged = mergeIntervals(sessions);
+ const hoursWeek = merged.reduce((sum, [a, b]) => sum + (b - a), 0) / 3600;
+ const one = async sql => (await db.prepare(sql).first())?.n ?? 0;
+ const [youngs, activities, chores] = await Promise.all([
+  one("SELECT COUNT(*) AS n FROM members WHERE status = 'approved'"),
+  one('SELECT COUNT(DISTINCT activity_id) AS n FROM attendance'),
+  one("SELECT COUNT(*) AS n FROM chore_logs WHERE status = 'verified'")
+ ]);
+ return json({metrics: [
+  {key: 'giovani', label: 'Giovani coinvolti', value: youngs, target: 120, note: 'Obiettivo del primo anno', icon: 'heart'},
+  {key: 'apertura', label: 'Ore di apertura questa settimana', value: round(hoursWeek), target: 20, note: 'Obiettivo settimanale', icon: 'book'},
+  {key: 'attivita', label: 'Attività svolte', value: activities, target: 18, note: 'Obiettivo del primo anno', icon: 'star'},
+  {key: 'faccende', label: 'Faccende verificate', value: chores, target: 50, note: 'Cura dello spazio, fatta insieme', icon: 'plant'}
+ ]});
+}
+
+// Albero delle competenze: esperienze verificate per percorso. Le attività
+// a cui hai partecipato contano per «Socialità e comunità».
+export async function progress({db, member}) {
+ const {results} = await db.prepare(`SELECT c.path AS path, COUNT(*) AS n FROM chore_logs l
+  JOIN chore_types c ON c.id = l.chore_type_id WHERE l.member_id = ? AND l.status = 'verified' GROUP BY c.path`).bind(member.id).all();
+ const counts = Object.fromEntries(results.map(r => [r.path, r.n]));
+ const attended = (await db.prepare('SELECT COUNT(*) AS n FROM attendance WHERE member_id = ?').bind(member.id).first())?.n ?? 0;
+ counts.socialita = (counts.socialita ?? 0) + attended;
+ return json({counts, attended});
 }

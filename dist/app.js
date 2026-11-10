@@ -1,50 +1,50 @@
 /* CCA SIEMMU · sito collegato alle API del Worker */
 const navIcons = {
- home:'<path d="M1 7h2V5h2V3h2V1h2v2h2v2h2v2h2v3h-2v5H3v-5H1z"/><path fill="#fe4400" d="M3 8h2V6h2V4h2v2h2v2h2v1H3z"/><path fill="#fff3d5" d="M5 10h6v3H9v-2H7v2H5z"/>',
- calendario:'<path d="M4 1h2v2h4V1h2v2h3v12H1V3h3z"/><path fill="#fe4400" d="M3 5h10v2H3z"/><path fill="#fff3d5" d="M3 8h10v5H3z"/><path fill="#6f440f" d="M4 9h2v1H4z M7 9h2v1H7z M10 9h2v1h-2z M4 11h2v1H4z M7 11h2v1H7z"/>',
- missioni:'<path d="M4 1h8v2h3v5h-2v2h-3v2h3v3H3v-3h3v-2H3V8H1V3h3z"/><path fill="#b9954b" d="M5 3h6v5h-1v1H6V8H5z M7 10h2v2H7z M5 13h6v1H5z"/><path fill="#fff3d5" d="M7 4h2v2H7z M3 5h1v2H3z M12 5h1v2h-1z"/>',
- comunita:'<path d="M2 2h4v1h1v4H6v1h4V7H9V3h1V2h4v1h1v4h-1v2h1v1h1v4H0v-4h1V9h1V7H1V3h1z"/><path fill="#8feafc" d="M3 4h2v2H3z M2 10h4v2H2z"/><path fill="#caff4d" d="M11 4h2v2h-2z M10 10h4v2h-4z"/>',
- referenti:'<path d="M5 1h6v2h3v9h-2v2H4v-2H2V3h3z"/><path fill="#8feafc" d="M4 5h8v6h-2v2H6v-2H4z"/><path fill="#caff4d" d="M6 3h4v2H6z"/><path d="M6 7h2v2h2v1H6z M9 6h2v2H9z"/>',
- profilo:'<path d="M2 1h12v1h1v12h-1v1H2v-1H1V2h1z"/><path fill="#fff3d5" d="M3 3h10v10H3z"/><path d="M6 4h4v4H6z M5 9h6v1h1v2H4v-2h1z"/><path fill="#b9954b" d="M7 5h2v2H7z"/><path fill="#fe4400" d="M6 10h4v1H6z"/>'
+ home:'<path d="M1 7h2V5h2V3h2V1h2v2h2v2h2v2h2v3h-2v5H3v-5H1z"/><path fill="#4e9f3d" d="M3 8h2V6h2V4h2v2h2v2h2v1H3z"/><path fill="#f4f1ea" d="M5 10h6v3H9v-2H7v2H5z"/>',
+ calendario:'<path d="M4 1h2v2h4V1h2v2h3v12H1V3h3z"/><path fill="#4e9f3d" d="M3 5h10v2H3z"/><path fill="#f4f1ea" d="M3 8h10v5H3z"/><path fill="#6f440f" d="M4 9h2v1H4z M7 9h2v1H7z M10 9h2v1h-2z M4 11h2v1H4z M7 11h2v1H7z"/>',
+ missioni:'<path d="M4 1h8v2h3v5h-2v2h-3v2h3v3H3v-3h3v-2H3V8H1V3h3z"/><path fill="#b9954b" d="M5 3h6v5h-1v1H6V8H5z M7 10h2v2H7z M5 13h6v1H5z"/><path fill="#f4f1ea" d="M7 4h2v2H7z M3 5h1v2H3z M12 5h1v2h-1z"/>',
+ comunita:'<path d="M2 2h4v1h1v4H6v1h4V7H9V3h1V2h4v1h1v4h-1v2h1v1h1v4H0v-4h1V9h1V7H1V3h1z"/><path fill="#bdd9da" d="M3 4h2v2H3z M2 10h4v2H2z"/><path fill="#4e9f3d" d="M11 4h2v2h-2z M10 10h4v2h-4z"/>',
+ referenti:'<path d="M5 1h6v2h3v9h-2v2H4v-2H2V3h3z"/><path fill="#bdd9da" d="M4 5h8v6h-2v2H6v-2H4z"/><path fill="#4e9f3d" d="M6 3h4v2H6z"/><path d="M6 7h2v2h2v1H6z M9 6h2v2H9z"/>',
+ profilo:'<path d="M2 1h12v1h1v12h-1v1H2v-1H1V2h1z"/><path fill="#f4f1ea" d="M3 3h10v10H3z"/><path d="M6 4h4v4H6z M5 9h6v1h1v2H4v-2h1z"/><path fill="#b9954b" d="M7 5h2v2H7z"/><path fill="#4e9f3d" d="M6 10h4v1H6z"/>'
 };
 const shapes = {
- book:'<path fill="#161525" d="M1 3h6v1h2V3h6v10H9v1H7v-1H1z"/><path fill="#fff0bd" d="M2 4h4v1h1v7H6v-1H2z M9 5h1V4h4v7h-4v1H9z"/><path fill="#5876df" d="M3 6h3v1H3z M3 8h3v1H3z M10 6h3v1h-3z M10 8h3v1h-3z"/>',
- camera:'<path fill="#161525" d="M1 5h3V3h7v2h4v9H1z"/><path fill="#fff0bd" d="M2 6h12v6H2z"/><path fill="#2048ef" d="M6 6h5v1h1v4h-1v1H6v-1H5V7h1z"/><path fill="#9de2ff" d="M7 7h3v3H7z"/>',
- plant:'<path fill="#161525" d="M1 2h5v2h2v2h1V4h2V2h4v6h-2v2h-3v2h3v3H3v-3h4v-2H4V8H1z"/><path fill="#a8ef69" d="M2 3h3v2h2v4H5V7H2z M11 5h1V3h2v4h-2v2h-2V6h1z"/><path fill="#d37c4a" d="M4 13h8v1H4z"/>',
- heart:'<path fill="#161525" d="M1 3h5v1h4V3h5v6h-2v2h-2v2H9v2H7v-2H5v-2H3V9H1z"/><path fill="#ff55a1" d="M2 4h3v1h2v1h2V5h2V4h3v4h-2v2h-2v2H8v1H7v-1H6v-2H4V8H2z"/>',
- pin:'<path fill="#171523" d="M3 2h9v2h2v9h-2v2H3v-2H1V4h2z"/><path fill="#fe4400" d="M4 4h7v1h1v7h-1v1H4v-1H3V5h1z"/><path fill="#fff3d5" d="M7 5h2v2h2v2H9v2H7V9H5V7h2z"/>',
- bag:'<path fill="#171523" d="M5 1h6v2h1v3h2v9H2V6h2V3h1z"/><path fill="#b9954b" d="M6 3h4v3H9V4H7v2H6z M4 8h8v5H4z"/><path fill="#fff3d5" d="M7 9h2v2H7z"/>',
- shirt:'<path fill="#171523" d="M5 1h6v1h2v2h2v5h-3v6H4V9H1V4h2V2h2z"/><path fill="#8feafc" d="M3 5h2V3h1v2h4V3h1v2h2v2h-3v6H6V7H3z"/><path fill="#6f440f" d="M7 7h2v2H7z"/>',
- star:'<path fill="#161525" d="M7 1h2v3h2v2h4v3h-3v3h1v3h-3v-2H6v2H3v-3h1V9H1V6h4V4h2z"/><path fill="#ffe043" d="M7 3h2v3h2v1h3v1h-3v4H9v-1H7v1H5V8H2V7h3V6h2z"/>'
+ book:'<path fill="#2c3531" d="M1 3h6v1h2V3h6v10H9v1H7v-1H1z"/><path fill="#eee7d9" d="M2 4h4v1h1v7H6v-1H2z M9 5h1V4h4v7h-4v1H9z"/><path fill="#5876df" d="M3 6h3v1H3z M3 8h3v1H3z M10 6h3v1h-3z M10 8h3v1h-3z"/>',
+ camera:'<path fill="#2c3531" d="M1 5h3V3h7v2h4v9H1z"/><path fill="#eee7d9" d="M2 6h12v6H2z"/><path fill="#73528f" d="M6 6h5v1h1v4h-1v1H6v-1H5V7h1z"/><path fill="#9de2ff" d="M7 7h3v3H7z"/>',
+ plant:'<path fill="#2c3531" d="M1 2h5v2h2v2h1V4h2V2h4v6h-2v2h-3v2h3v3H3v-3h4v-2H4V8H1z"/><path fill="#a8ef69" d="M2 3h3v2h2v4H5V7H2z M11 5h1V3h2v4h-2v2h-2V6h1z"/><path fill="#d37c4a" d="M4 13h8v1H4z"/>',
+ heart:'<path fill="#2c3531" d="M1 3h5v1h4V3h5v6h-2v2h-2v2H9v2H7v-2H5v-2H3V9H1z"/><path fill="#d8b4f8" d="M2 4h3v1h2v1h2V5h2V4h3v4h-2v2h-2v2H8v1H7v-1H6v-2H4V8H2z"/>',
+ pin:'<path fill="#2c3531" d="M3 2h9v2h2v9h-2v2H3v-2H1V4h2z"/><path fill="#4e9f3d" d="M4 4h7v1h1v7h-1v1H4v-1H3V5h1z"/><path fill="#f4f1ea" d="M7 5h2v2h2v2H9v2H7V9H5V7h2z"/>',
+ bag:'<path fill="#2c3531" d="M5 1h6v2h1v3h2v9H2V6h2V3h1z"/><path fill="#b9954b" d="M6 3h4v3H9V4H7v2H6z M4 8h8v5H4z"/><path fill="#f4f1ea" d="M7 9h2v2H7z"/>',
+ shirt:'<path fill="#2c3531" d="M5 1h6v1h2v2h2v5h-3v6H4V9H1V4h2V2h2z"/><path fill="#bdd9da" d="M3 5h2V3h1v2h4V3h1v2h2v2h-3v6H6V7H3z"/><path fill="#6f440f" d="M7 7h2v2H7z"/>',
+ star:'<path fill="#2c3531" d="M7 1h2v3h2v2h4v3h-3v3h1v3h-3v-2H6v2H3v-3h1V9H1V6h4V4h2z"/><path fill="#d8b4f8" d="M7 3h2v3h2v1h3v1h-3v4H9v-1H7v1H5V8H2V7h3V6h2z"/>'
 };
-const art = name=>`<div class="sprite-box"><svg class="sprite" viewBox="-2 -2 20 20" shape-rendering="crispEdges" aria-hidden="true"><path fill="#b9a88d" d="M2 15h12v1H2z"/>${shapes[name]}<path fill="#fff3d5" opacity=".6" d="M-1 0h1v1h-1z M16 3h1v1h-1z"/></svg></div>`;
+const art = name=>`<div class="sprite-box"><svg class="sprite" viewBox="-2 -2 20 20" shape-rendering="crispEdges" aria-hidden="true"><path fill="#b9a88d" d="M2 15h12v1H2z"/>${shapes[name]}<path fill="#f4f1ea" opacity=".6" d="M-1 0h1v1h-1z M16 3h1v1h-1z"/></svg></div>`;
 const avatarColors = {
- rosa:['Rosa fichidindia','#ff55a1'],verde:['Verde salvia','#bce98d'],blu:['Blu cielo','#699cff'],
+ rosa:['Rosa fichidindia','#d8b4f8'],verde:['Verde salvia','#9abe7f'],blu:['Blu cielo','#699cff'],
  sole:['Giallo ginestra','#ffce39'],terracotta:['Terracotta','#dc7046'],viola:['Viola tramonto','#ad82ed'],
- ottanio:['Verde ottanio','#138f91'],crema:['Crema pietra','#fff3d5'],rosso:['Rosso melograno','#e9435d'],
+ ottanio:['Verde ottanio','#138f91'],crema:['Crema pietra','#f4f1ea'],rosso:['Rosso melograno','#e9435d'],
  bosco:['Verde bosco','#428357'],cobalto:['Blu cobalto','#3456c7'],prugna:['Prugna','#953c83'],
  arcobaleno:['Arcobaleno','linear-gradient(90deg,#ff697b 0 17%,#ffaf55 17% 34%,#f6df6c 34% 51%,#8bd294 51% 68%,#77bde9 68% 85%,#be9af0 85%)']
 };
 const animals = {
- mucca:{name:'Mucca',art:'<path fill="#b9954b" d="M4 2h2v3H4z M10 2h2v3h-2z"/><path fill="#171523" d="M2 4h4V3h4v1h4v4h-2v4H4V8H2z"/><path fill="#fffdf4" d="M4 5h8v5H4z"/><path fill="#73584e" d="M4 5h3v3H4z"/><path fill="#171523" d="M6 6h1v2H6z M10 6h1v2h-1z"/><path fill="#ee99aa" d="M5 9h6v2H5z"/><path fill="#171523" d="M6 9h1v1H6z M9 9h1v1H9z"/>'},
- pecora:{name:'Pecora',art:'<path fill="#171523" d="M4 3h2V2h4v1h2v2h2v5h-2v2H4v-2H2V5h2z"/><path fill="#fffdf4" d="M5 4h2V3h2v1h2v2h2v3h-2v2H5V9H3V6h2z"/><path fill="#7e6e80" d="M5 6h6v4H5z"/><path fill="#171523" d="M6 7h1v1H6z M9 7h1v1H9z M7 9h2v1H7z"/>'},
- gallina:{name:'Gallina',art:'<path fill="#171523" d="M7 2h4v2h1v2h3v3h-3v3H3v-2H2V6h3v1h1V4h1z"/><path fill="#fe4400" d="M8 3h2v2H8z M10 9h1v2h-1z"/><path fill="#fffdf4" d="M3 7h2v2h2V5h4v6H4V9H3z"/><path fill="#ffbd37" d="M11 7h3v1h-3z"/><path fill="#171523" d="M9 6h1v1H9z"/>'},
- asino:{name:'Asino',art:'<path fill="#171523" d="M3 1h3v3h4V1h3v5h-1v6H4V6H3z"/><path fill="#a8a0ad" d="M4 2h1v4h6V2h1v3h-1v6H5V5H4z"/><path fill="#fff3d5" d="M5 9h6v2H5z"/><path fill="#171523" d="M6 6h1v2H6z M9 6h1v2H9z M7 9h2v1H7z"/>'},
- maiale:{name:'Maiale',art:'<path fill="#171523" d="M2 3h4v2h4V3h4v5h-1v3h-2v1H5v-1H3V8H2z"/><path fill="#ee99aa" d="M3 4h2v2h6V4h2v3h-1v3h-2v1H6v-1H4V7H3z"/><path fill="#cf6789" d="M6 8h4v2H6z"/><path fill="#171523" d="M5 6h1v1H5z M10 6h1v1h-1z M6 9h1v1H6z M9 9h1v1H9z"/>'},
- capra:{name:'Capra',art:'<path fill="#171523" d="M4 1h2v3h4V1h2v4h3v3h-3v2h-2v2H6v-2H4V8H1V5h3z"/><path fill="#b9954b" d="M5 2h1v3H5z M10 2h1v3h-1z"/><path fill="#fffdf4" d="M2 6h3V5h6v1h3v1h-3v2H9v2H7V9H5V7H2z"/><path fill="#171523" d="M6 6h1v1H6z M9 6h1v1H9z M7 8h2v1H7z"/>'},
- ricotta:{name:'Vascello di ricotta',art:'<path fill="#171523" d="M6 2h4v1h2v2h2v4h-1v2h-2v1H5v-1H3V9H2V5h2V3h2z"/><path fill="#fffdf4" d="M6 3h4v1h2v2h1v1H3V6h2V4h1z"/><path fill="#b9954b" d="M3 8h10v1h-1v2H4V9H3z"/><path fill="#6f440f" d="M5 8h1v3H5z M8 8h1v3H8z M11 8h1v2h-1z"/>'},
- ficodindia:{name:'Pala di fico d’India',art:'<path fill="#171523" d="M6 2h4v1h2v3h1v3h-2v2H9v1H6v-1H4V9H3V6h1V3h2z"/><path fill="#69a650" d="M6 3h4v1h1v3h1v1h-2v2H8v1H6v-1H5V8H4V6h1V4h1z"/><path fill="#fff3d5" d="M6 5h1v1H6z M9 6h1v1H9z M6 8h1v1H6z"/><path fill="#fe4400" d="M9 1h2v2H9z"/>'},
- torre:{name:'Torre in rovina',art:'<path fill="#171523" d="M3 2h3v2h2v1h2V3h3v9H3z"/><path fill="#b9954b" d="M4 3h1v2h3v1h3V4h1v7H4z"/><path fill="#fff3d5" d="M4 6h3v1H4z M9 7h3v1H9z"/><path fill="#171523" d="M7 7h2v4H7z M5 9h1v1H5z M10 9h1v1h-1z"/>'},
- serpente:{name:'Serpente',art:'<path fill="#171523" d="M9 2h4v1h2v5h-3v4H2V9h2V7h5z"/><path fill="#69a650" d="M10 3h3v1h1v3h-3v4H3v-1h2V8h5z"/><path fill="#caff4d" d="M4 10h6v1H4z"/><path fill="#171523" d="M12 4h1v1h-1z"/><path fill="#fe4400" d="M13 7h3v1h-3z"/>'},
- cane:{name:'Cane',art:'<path fill="#171523" d="M2 3h4v1h4V3h4v7h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 4h2v5H3z M11 4h2v5h-2z"/><path fill="#fff3d5" d="M5 5h6v6H5z"/><path fill="#171523" d="M6 6h1v1H6z M9 6h1v1H9z M7 8h2v1H7z"/><path fill="#ee99aa" d="M7 10h2v1H7z"/>'},
- civetta:{name:'Civetta',art:'<path fill="#171523" d="M2 2h3v2h6V2h3v8h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 3h1v2h8V3h1v6h-2v2H5V9H3z"/><path fill="#fff3d5" d="M4 6h3v3H4z M9 6h3v3H9z"/><path fill="#171523" d="M5 7h1v1H5z M10 7h1v1h-1z"/><path fill="#fe4400" d="M7 9h2v1H7z"/>'},
- leone:{name:'Leone rampante',art:'<path fill="#171523" d="M3 3h3V1h1v1h2V1h1v2h3v2h2v5h-2v2h-2v1H5v-1H3v-2H1V5h2z"/><path fill="#b96535" d="M4 4h8v1h2v4h-2v2h-2v1H6v-1H4V9H2V6h2z"/><path fill="#f1b951" d="M6 5h4v1h2v3h-1v2H5V9H4V6h2z M6 3h4v1H6z"/><path fill="#171523" d="M5 7h2v1H5z M9 7h2v1H9z M7 9h2v1H7z"/><path fill="#ffe5aa" d="M6 10h4v1H6z"/>'}
+ mucca:{name:'Mucca',art:'<path fill="#b9954b" d="M4 2h2v3H4z M10 2h2v3h-2z"/><path fill="#2c3531" d="M2 4h4V3h4v1h4v4h-2v4H4V8H2z"/><path fill="#f4f1ea" d="M4 5h8v5H4z"/><path fill="#73584e" d="M4 5h3v3H4z"/><path fill="#2c3531" d="M6 6h1v2H6z M10 6h1v2h-1z"/><path fill="#ee99aa" d="M5 9h6v2H5z"/><path fill="#2c3531" d="M6 9h1v1H6z M9 9h1v1H9z"/>'},
+ pecora:{name:'Pecora',art:'<path fill="#2c3531" d="M4 3h2V2h4v1h2v2h2v5h-2v2H4v-2H2V5h2z"/><path fill="#f4f1ea" d="M5 4h2V3h2v1h2v2h2v3h-2v2H5V9H3V6h2z"/><path fill="#7e6e80" d="M5 6h6v4H5z"/><path fill="#2c3531" d="M6 7h1v1H6z M9 7h1v1H9z M7 9h2v1H7z"/>'},
+ gallina:{name:'Gallina',art:'<path fill="#2c3531" d="M7 2h4v2h1v2h3v3h-3v3H3v-2H2V6h3v1h1V4h1z"/><path fill="#4e9f3d" d="M8 3h2v2H8z M10 9h1v2h-1z"/><path fill="#f4f1ea" d="M3 7h2v2h2V5h4v6H4V9H3z"/><path fill="#ffbd37" d="M11 7h3v1h-3z"/><path fill="#2c3531" d="M9 6h1v1H9z"/>'},
+ asino:{name:'Asino',art:'<path fill="#2c3531" d="M3 1h3v3h4V1h3v5h-1v6H4V6H3z"/><path fill="#a8a0ad" d="M4 2h1v4h6V2h1v3h-1v6H5V5H4z"/><path fill="#f4f1ea" d="M5 9h6v2H5z"/><path fill="#2c3531" d="M6 6h1v2H6z M9 6h1v2H9z M7 9h2v1H7z"/>'},
+ maiale:{name:'Maiale',art:'<path fill="#2c3531" d="M2 3h4v2h4V3h4v5h-1v3h-2v1H5v-1H3V8H2z"/><path fill="#ee99aa" d="M3 4h2v2h6V4h2v3h-1v3h-2v1H6v-1H4V7H3z"/><path fill="#cf6789" d="M6 8h4v2H6z"/><path fill="#2c3531" d="M5 6h1v1H5z M10 6h1v1h-1z M6 9h1v1H6z M9 9h1v1H9z"/>'},
+ capra:{name:'Capra',art:'<path fill="#2c3531" d="M4 1h2v3h4V1h2v4h3v3h-3v2h-2v2H6v-2H4V8H1V5h3z"/><path fill="#b9954b" d="M5 2h1v3H5z M10 2h1v3h-1z"/><path fill="#f4f1ea" d="M2 6h3V5h6v1h3v1h-3v2H9v2H7V9H5V7H2z"/><path fill="#2c3531" d="M6 6h1v1H6z M9 6h1v1H9z M7 8h2v1H7z"/>'},
+ ricotta:{name:'Vascello di ricotta',art:'<path fill="#2c3531" d="M6 2h4v1h2v2h2v4h-1v2h-2v1H5v-1H3V9H2V5h2V3h2z"/><path fill="#f4f1ea" d="M6 3h4v1h2v2h1v1H3V6h2V4h1z"/><path fill="#b9954b" d="M3 8h10v1h-1v2H4V9H3z"/><path fill="#6f440f" d="M5 8h1v3H5z M8 8h1v3H8z M11 8h1v2h-1z"/>'},
+ ficodindia:{name:'Pala di fico d’India',art:'<path fill="#2c3531" d="M6 2h4v1h2v3h1v3h-2v2H9v1H6v-1H4V9H3V6h1V3h2z"/><path fill="#69a650" d="M6 3h4v1h1v3h1v1h-2v2H8v1H6v-1H5V8H4V6h1V4h1z"/><path fill="#f4f1ea" d="M6 5h1v1H6z M9 6h1v1H9z M6 8h1v1H6z"/><path fill="#4e9f3d" d="M9 1h2v2H9z"/>'},
+ torre:{name:'Torre in rovina',art:'<path fill="#2c3531" d="M3 2h3v2h2v1h2V3h3v9H3z"/><path fill="#b9954b" d="M4 3h1v2h3v1h3V4h1v7H4z"/><path fill="#f4f1ea" d="M4 6h3v1H4z M9 7h3v1H9z"/><path fill="#2c3531" d="M7 7h2v4H7z M5 9h1v1H5z M10 9h1v1h-1z"/>'},
+ serpente:{name:'Serpente',art:'<path fill="#2c3531" d="M9 2h4v1h2v5h-3v4H2V9h2V7h5z"/><path fill="#69a650" d="M10 3h3v1h1v3h-3v4H3v-1h2V8h5z"/><path fill="#4e9f3d" d="M4 10h6v1H4z"/><path fill="#2c3531" d="M12 4h1v1h-1z"/><path fill="#4e9f3d" d="M13 7h3v1h-3z"/>'},
+ cane:{name:'Cane',art:'<path fill="#2c3531" d="M2 3h4v1h4V3h4v7h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 4h2v5H3z M11 4h2v5h-2z"/><path fill="#f4f1ea" d="M5 5h6v6H5z"/><path fill="#2c3531" d="M6 6h1v1H6z M9 6h1v1H9z M7 8h2v1H7z"/><path fill="#ee99aa" d="M7 10h2v1H7z"/>'},
+ civetta:{name:'Civetta',art:'<path fill="#2c3531" d="M2 2h3v2h6V2h3v8h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 3h1v2h8V3h1v6h-2v2H5V9H3z"/><path fill="#f4f1ea" d="M4 6h3v3H4z M9 6h3v3H9z"/><path fill="#2c3531" d="M5 7h1v1H5z M10 7h1v1h-1z"/><path fill="#4e9f3d" d="M7 9h2v1H7z"/>'},
+ leone:{name:'Leone rampante',art:'<path fill="#2c3531" d="M3 3h3V1h1v1h2V1h1v2h3v2h2v5h-2v2h-2v1H5v-1H3v-2H1V5h2z"/><path fill="#b96535" d="M4 4h8v1h2v4h-2v2h-2v1H6v-1H4V9H2V6h2z"/><path fill="#c6a55b" d="M6 5h4v1h2v3h-1v2H5V9H4V6h2z M6 3h4v1H6z"/><path fill="#2c3531" d="M5 7h2v1H5z M9 7h2v1H9z M7 9h2v1H7z"/><path fill="#ffe5aa" d="M6 10h4v1H6z"/>'}
 };
-const cheese='<path fill="#171523" d="M10 1h2v1h2v2h1v10H1V7h2V6h2V5h2V4h2V2h1z"/><path fill="#f4bf57" d="M10 3h2v1h1v2H5V5h2V4h3z"/><path fill="#ffd782" d="M3 8h10v4H3z"/><path fill="#a96a32" d="M5 9h2v2H5z M10 10h2v1h-2z"/>';
+const cheese='<path fill="#2c3531" d="M10 1h2v1h2v2h1v10H1V7h2V6h2V5h2V4h2V2h1z"/><path fill="#f4bf57" d="M10 3h2v1h1v2H5V5h2V4h3z"/><path fill="#ffd782" d="M3 8h10v4H3z"/><path fill="#a96a32" d="M5 9h2v2H5z M10 10h2v1h-2z"/>';
 function cowMascot(mood,text,tips=[]){
  const eyes={normale:'M6 6h1v2H6z M10 6h1v2h-1z',felice:'M5 7h1V6h2v1H5z M9 7h1V6h2v1H9z',curioso:'M6 6h1v2H6z M10 7h1v1h-1z',festoso:'M5 6h2v1H5z M10 6h2v1h-2z'};
  const all=[text,...tips.filter(t=>t&&t!==text)];
- return `<div class="mascot ${all.length>1?'talk':''}" ${all.length>1?`data-tips="${esc(JSON.stringify(all))}" data-i="0" tabindex="0" role="button" aria-label="Mù: tocca per un altro consiglio"`:''}>${pixelIcon(animals.mucca.art+(mood==='normale'||mood==='curioso'?chibiFace('mucca'):`<path fill="#171523" d="${eyes[mood]}"/>`),'mu-sprite')}<div><strong>Mù</strong><p aria-live="polite">${esc(text)}</p></div></div>`;
+ return `<div class="mascot ${all.length>1?'talk':''}" ${all.length>1?`data-tips="${esc(JSON.stringify(all))}" data-i="0" tabindex="0" role="button" aria-label="Mù: tocca per un altro consiglio"`:''}>${pixelIcon(animals.mucca.art+(mood==='normale'||mood==='curioso'?chibiFace('mucca'):`<path fill="#2c3531" d="${eyes[mood]}"/>`),'mu-sprite')}<div><strong>Mù</strong><p aria-live="polite">${esc(text)}</p></div></div>`;
 }
 const pixelIcon = (path,kind='')=>`<svg class="pixel-icon ${kind}" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${path}</svg>`;
 
@@ -100,8 +100,8 @@ function chibiFace(species){
  const eyes=faces[species];
  if(!eyes)return '';
  const [x,y,a,b]=eyes;
- return `<path fill="#171523" d="M${x-.5} ${y}h2v2h-2z M${a-.5} ${b}h2v2h-2z"/>
-  <path fill="#fffdf4" d="M${x} ${y}h.5v.5h-.5z M${a} ${b}h.5v.5h-.5z"/>
+ return `<path fill="#2c3531" d="M${x-.5} ${y}h2v2h-2z M${a-.5} ${b}h2v2h-2z"/>
+  <path fill="#f4f1ea" d="M${x} ${y}h.5v.5h-.5z M${a} ${b}h.5v.5h-.5z"/>
   <path fill="#e996a1" d="M${x-1} ${y+2}h1v.5h-1z M${a+1} ${b+2}h1v.5h-1z"/>`;
 }
 const avatarDetails={
@@ -129,11 +129,11 @@ const avatar=(species=pref.get('species','mucca'),color=pref.get('color','rosa')
   ?colors.map((fill,i)=>`<path fill="${fill}" d="M${1+i*5} 1h5v30h-5z"/>`).join('')
   :`<path fill="${accent}" d="M1 1h30v30H1z"/>`;
  return `<svg class="avatar" viewBox="0 0 32 32" shape-rendering="crispEdges" role="img" aria-label="Avatar pixel · ${animal.name}">
-  ${backdrop}<path fill="#fff3d5" opacity=".68" d="M9 3h14v2h4v4h2v12h-2v4H5v-4H3V9h2V5h4z"/>
-  <path fill="#fffdf4" d="M3 4h2v2H3z M27 5h2v2h-2z M3 21h1v1H3z M28 19h1v1h-1z"/>
+  ${backdrop}<path fill="#f4f1ea" opacity=".68" d="M9 3h14v2h4v4h2v12h-2v4H5v-4H3V9h2V5h4z"/>
+  <path fill="#f4f1ea" d="M3 4h2v2H3z M27 5h2v2h-2z M3 21h1v1H3z M28 19h1v1h-1z"/>
   <g transform="translate(0 1) scale(2)">${animal.art}${chibiFace(key)}</g><path fill="${highlight}" d="${detail}"/>
-  <path fill="#171523" d="M7 24h18v1h1v6H6v-6h1z"/><path fill="#fff3d5" d="M8 25h16v5H8z"/>
-  <path fill="#171523" d="M10 26h3v1h-2v1h2v2h-3v-1h2v-1h-2z M15 26h3v1h-2v2h1v-1h1v2h-3z M20 26h3v1h-2v2h1v-1h1v2h-3z"/>
+  <path fill="#2c3531" d="M7 24h18v1h1v6H6v-6h1z"/><path fill="#f4f1ea" d="M8 25h16v5H8z"/>
+  <path fill="#2c3531" d="M10 26h3v1h-2v1h2v2h-3v-1h2v-1h-2z M15 26h3v1h-2v2h1v-1h1v2h-3z M20 26h3v1h-2v2h1v-1h1v2h-3z"/>
  </svg>`;
 };
 function level(xp){
@@ -169,7 +169,7 @@ function renderChrome(active){
 }
 
 /* ---- orari, stato live, Mù, paese, albero, festa ---- */
-const clockIcon=()=>pixelIcon('<path fill="#171523" d="M5 1h6v1h2v1h1v2h1v6h-1v2h-1v1h-2v1H5v-1H3v-1H2v-2H1V5h1V3h1V2h2z"/><path fill="#fff3d5" d="M5 2h6v1h2v2h1v6h-1v2h-2v1H5v-1H3v-2H2V5h1V3h2z"/><path fill="#171523" d="M7 4h2v4h3v2H7z"/>');
+const clockIcon=()=>pixelIcon('<path fill="#2c3531" d="M5 1h6v1h2v1h1v2h1v6h-1v2h-1v1h-2v1H5v-1H3v-1H2v-2H1V5h1V3h1V2h2z"/><path fill="#f4f1ea" d="M5 2h6v1h2v2h1v6h-1v2h-2v1H5v-1H3v-2H2V5h1V3h2z"/><path fill="#2c3531" d="M7 4h2v4h3v2H7z"/>');
 const getStatus=async()=>{try{return await api('/status');}catch{return null;}};
 const getCommunity=async()=>{try{return (await api('/community')).metrics;}catch{return null;}};
 function liveLine(st){
@@ -248,8 +248,8 @@ async function paese(){
 const PATHS=[['studio','Studio e conoscenza','book'],['creativita','Creatività e cultura','camera'],['socialita','Socialità e comunità','heart'],['cittadinanza','Cittadinanza e partecipazione','star'],['solidarieta','Solidarietà e cura','plant']];
 const pathInfo=id=>PATHS.find(p=>p[0]===id)||PATHS[4];
 function treeGraphic(counts){
- const xs=[15,37,60,83,105],cols=['#8feafc','#ff9fc8','#ffb56b','#c8a8ff','#caff4d'];
- let svg=`<path class="tree-sky" d="M0 0h120v78H0z"/><path fill="#fff3d5" opacity=".65" d="M7 13h9v2H7z M97 7h15v2H97z"/>
+ const xs=[15,37,60,83,105],cols=['#bdd9da','#d8b4f8','#ffb56b','#c8a8ff','#4e9f3d'];
+ let svg=`<path class="tree-sky" d="M0 0h120v78H0z"/><path fill="#f4f1ea" opacity=".65" d="M7 13h9v2H7z M97 7h15v2H97z"/>
  <path class="tree-leaves" d="M3 27h5V16h9v-5h13V7h14v5h8V4h16v8h11V8h13v5h11v7h10v9h4v24h-9v7H12v-6H3z"/>
  <path fill="#1d473c" d="M0 72h120v6H0z"/><path fill="#8ab66b" d="M4 72h8v2H4z M25 72h6v2h-6z M94 72h8v2h-8z M108 72h8v2h-8z"/>
  <path fill="#231b25" d="M55 49h10v20h8v3H45v-3h10z"/><path fill="#a16639" d="M57 49h6v22H52v-2h5z"/><path fill="#e1ad6d" d="M60 55h2v12h-2z"/>`;
@@ -259,8 +259,8 @@ function treeGraphic(counts){
    <g transform="translate(${x-6} ${y-7}) scale(.75)">${shapes[icon]}</g>`;
   [5,3,1].forEach((need,step)=>{
    const node=y+8+step*10,on=n>=need;
-   svg+=`<rect x="${x-4}" y="${node-4}" width="8" height="8" fill="#171523"/><rect x="${x-3}" y="${node-3}" width="6" height="6" fill="${on?cols[i]:'#344653'}"/>
-   <text x="${x}" y="${node+1.65}" text-anchor="middle" font-size="4.5" font-weight="800" fill="${on?'#171523':'#fff3d5'}">${need}</text>`;
+   svg+=`<rect x="${x-4}" y="${node-4}" width="8" height="8" fill="#2c3531"/><rect x="${x-3}" y="${node-3}" width="6" height="6" fill="${on?cols[i]:'#344653'}"/>
+   <text x="${x}" y="${node+1.65}" text-anchor="middle" font-size="4.5" font-weight="800" fill="${on?'#2c3531':'#f4f1ea'}">${need}</text>`;
   });
  });
  return `<div class="tree-box"><svg viewBox="0 0 120 78" role="img" aria-label="Albero delle competenze: cinque rami, tre tappe ciascuno">${svg}</svg></div>`;
@@ -284,7 +284,7 @@ function celebrate(n){
  let box=document.querySelector('#celebration');
  if(!box){box=document.createElement('div');box.id='celebration';document.body.append(box);}
  const l=LEVELS[n-1];
- const colors=['#caff4d','#fe4400','#8feafc','#ffe043','#ff55a1'];
+ const colors=['#4e9f3d','#4e9f3d','#bdd9da','#d8b4f8','#d8b4f8'];
  const bits=Array.from({length:18},(_,i)=>`<i style="left:${(i*37)%100}%;background:${colors[i%5]};animation-delay:${(i%6)*90}ms"></i>`).join('');
  box.className='celebration';box.setAttribute('role','dialog');box.setAttribute('aria-label','Hai raggiunto un nuovo livello');
  box.innerHTML=`<div class="celebration-card"><div class="confetti" aria-hidden="true">${bits}</div><span class="eyebrow">NUOVO LIVELLO</span><h2>Livello ${n}: ${esc(l[0])}</h2>${cowMascot(n===LEVELS.length?'festoso':'felice',n===LEVELS.length?'Sei una Leggenda di cca! Che orgoglio!':'Complimenti! Un altro passo per far crescere lo spazio.')}<button type="button" class="btn">Evviva!</button></div>`;
@@ -899,7 +899,7 @@ function openTrophy(t){
  if(!box){box=document.createElement('div');box.id='trophy-box';document.body.append(box);}
  const left=Math.max(0,t.target-t.count),pct=Math.round(t.count/t.target*100);
  box.className='celebration';box.setAttribute('role','dialog');box.setAttribute('aria-label',`Trofeo: ${t.name}`);
- box.innerHTML=`<div class="celebration-card trophy-card ${t.earned?'trophy-on':'trophy-off'}">${t.earned?'<div class="confetti" aria-hidden="true">'+Array.from({length:14},(_,i)=>`<i style="left:${(i*41)%100}%;background:${['#caff4d','#fe4400','#8feafc','#ffe043','#ff55a1'][i%5]};animation-delay:${(i%6)*90}ms"></i>`).join('')+'</div>':''}
+ box.innerHTML=`<div class="celebration-card trophy-card ${t.earned?'trophy-on':'trophy-off'}">${t.earned?'<div class="confetti" aria-hidden="true">'+Array.from({length:14},(_,i)=>`<i style="left:${(i*41)%100}%;background:${['#4e9f3d','#4e9f3d','#bdd9da','#d8b4f8','#d8b4f8'][i%5]};animation-delay:${(i%6)*90}ms"></i>`).join('')+'</div>':''}
   <span class="eyebrow">${esc(t.group.toUpperCase())}</span><div class="trophy-art ${t.earned?'':'locked'}">${art(t.icon)}</div><h2>${esc(t.name)}</h2>
   <p>${badge(t.earned?'Ottenuto':'Bloccato')}</p><p>${esc(t.desc)}</p>
   ${t.earned?`<p class="muted">Conquistato il ${dayLong(t.awardedAt)}. Bravə!</p>`:`<progress value="${t.count}" max="${t.target}" aria-label="Progresso"></progress><p><strong>${t.count} / ${t.target}</strong> · ${pct}%</p><p class="muted">${left===1?'Ti manca 1 passo':`Ti mancano ${left} passi`} per sbloccarlo.</p>`}
@@ -918,7 +918,7 @@ function shareCardImage({kicker,headline,subtitle,trophy}){
  const ctx=canvas.getContext('2d');
  if(!ctx)throw new Error('La card non è disponibile in questo browser.');
  ctx.imageSmoothingEnabled=false;
- const ink='#231d33',cream='#fff3d5',gold='#f1b951',sky='#8feafc';
+ const ink='#2c3531',cream='#f4f1ea',gold='#c6a55b',sky='#bdd9da';
  const block=(color,x,y,w,h)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
  const text=(value,x,y,size,color=ink,max=880)=>{
   ctx.fillStyle=color;
@@ -938,8 +938,8 @@ function shareCardImage({kicker,headline,subtitle,trophy}){
  block(sky,0,0,1080,1080);
  // Each graphic unit is aligned to an 8px tile.
  for(const [x,y] of [[72,104],[856,72],[936,336]]){
-  block('#fffaf0',x,y,64,16);
-  block('#fffaf0',x+16,y-16,32,16);
+  block('#f4f1ea',x,y,64,16);
+  block('#f4f1ea',x+16,y-16,32,16);
  }
  block(ink,56,40,984,1008);
  block(cream,40,24,984,1008);
@@ -949,12 +949,12 @@ function shareCardImage({kicker,headline,subtitle,trophy}){
  block(ink,40,1024,984,8);
  ctx.textAlign='center';
  text('CCA SIEMMU',532,113,58);
- text('E BONI SIEMMU',532,151,23,'#6e5a66');
+ text('E BONI SIEMMU',532,151,23,'#506052');
  block(ink,104,198,856,62);
- block(trophy?gold:'#d9ed9d',96,190,856,62);
+ block(trophy?gold:'#4e9f3d',96,190,856,62);
  text(kicker,524,232,24);
  // A pixel stage frames the character like an RPG portrait.
- block('#d5eeea',112,282,840,320);
+ block('#e2dcce',112,282,840,320);
  block('#96c3b0',112,530,840,72);
  block('#66937a',112,562,840,40);
  for(const [x,y,w] of [[112,506,128],[240,482,112],[352,522,104],[648,514,120],[768,490,184]]){
@@ -962,16 +962,16 @@ function shareCardImage({kicker,headline,subtitle,trophy}){
   block('#85ac87',x+16,y+16,w-32,32);
  }
  block(ink,400,298,264,264);
- block(trophy?gold:'#f1dfb7',392,290,264,264);
+ block(trophy?gold:'#e2dcce',392,290,264,264);
  block(cream,408,306,232,232);
  const saved=pref.get('species','mucca');
  const species=Object.hasOwn(animals,saved)?saved:'mucca';
  sprite(trophy?navIcons.missioni:animals[species].art,428,318,12);
  if(!trophy)sprite(chibiFace(species),428,318,12);
  for(const [x,y] of [[288,344],[744,392],[680,300]]){
-  block('#f1b951',x-8,y-24,16,48);
-  block('#f1b951',x-24,y-8,48,16);
-  block('#fff3d5',x-4,y-12,8,24);
+  block('#c6a55b',x-8,y-24,16,48);
+  block('#c6a55b',x-24,y-8,48,16);
+  block('#f4f1ea',x-4,y-12,8,24);
  }
  ctx.font='900 62px system-ui,sans-serif';
  const lines=[];
@@ -988,9 +988,9 @@ function shareCardImage({kicker,headline,subtitle,trophy}){
  const l=level(S.totals.xp);
  for(let i=0;i<16;i++){
   block(ink,148+i*48,866,40,24);
-  block(trophy||l.top||i<Math.floor(l.progress/l.range*16)?'#f1b951':'#c9c4ba',152+i*48,870,32,16);
+  block(trophy||l.top||i<Math.floor(l.progress/l.range*16)?'#c6a55b':'#c9c4ba',152+i*48,870,32,16);
  }
- text('CAMMARATA + SAN GIOVANNI GEMINI',532,960,21,'#6e5a66');
+ text('CAMMARATA + SAN GIOVANNI GEMINI',532,960,21,'#506052');
  return canvas.toDataURL('image/png');
 }
 

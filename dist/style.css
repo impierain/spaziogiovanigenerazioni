@@ -64,3 +64,17 @@ main{line-height:1.55}h1,h2,h3{letter-spacing:-.025em}h1{font-size:clamp(2rem,5.
 #share-preview{display:block;width:min(100%,480px);height:auto;border:2px solid var(--ink)}
 #share-native[hidden],#share-download[hidden],#share-preview[hidden]{display:none}
 .hero .entry-hint{margin-top:10px;max-width:42ch}
+
+/* ---- integrazione API ---- */
+@media(max-width:999px){nav{grid-template-columns:repeat(var(--cols,5),1fr)}}
+.bar-row{display:grid;grid-template-columns:3.2rem 1fr 4rem;align-items:center;gap:8px;margin:5px 0;font-size:.9rem}
+.bar-track{display:block;height:14px;border:2px solid var(--ink);background:var(--paper)}
+.bar-fill{display:block;height:100%;background:var(--orange,#fe4400)}
+.bar-value{text-align:right;font-variant-numeric:tabular-nums}
+.invite-link{display:flex;gap:8px;flex-wrap:wrap}.invite-link input{flex:1 1 220px;min-width:0;font:inherit;padding:8px}
+.inline-form{display:grid;gap:8px;margin-top:10px;padding:0;border:0;box-shadow:none;background:transparent}
+form.plain{border:0;box-shadow:none;background:transparent;padding:0}
+.muted-card{opacity:.65}
+.sr{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#status.error{background:#e9435d;color:#fff}
+.tabs a[aria-current]{font-weight:800;text-decoration:underline}

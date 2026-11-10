@@ -6,7 +6,7 @@ export const EXPIRED_COOKIE = '__Host-cca_session=; Path=/; Secure; HttpOnly; Sa
 export async function currentMember(request, db) {
  const hash = await tokenHash(sessionToken(request));
  if (!hash) return null;
- return db.prepare(`SELECT m.id, m.email, m.pseudonym, m.full_name, m.role, m.status
+ return db.prepare(`SELECT m.id, m.email, m.pseudonym, m.full_name, m.role, m.status, m.interests
   FROM sessions s JOIN members m ON m.id = s.member_id
   WHERE s.token_hash = ? AND s.expires_at > unixepoch() AND m.status = 'approved'`).bind(hash).first();
 }

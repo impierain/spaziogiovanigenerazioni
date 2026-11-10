@@ -23,7 +23,7 @@ export async function handleParticipation(request,db,env={}){
  if(api!=='api'||resource!=='activities'||path.length>5)return json({error:'Percorso non trovato.'},404);
 
  if(request.method==='GET'&&!activity){
-  const {results}=await db.prepare(`SELECT a.id,a.name,a.starts_at,a.capacity,a.verification_rule,
+  const {results}=await db.prepare(`SELECT a.id,a.name,a.starts_at,a.capacity,a.verification_rule,a.path,
    a.capacity-COUNT(b.member_id) AS available
    FROM activities a LEFT JOIN bookings b ON b.activity_id=a.id AND b.status IN ('pending','confirmed')
    WHERE a.status='published' GROUP BY a.id ORDER BY a.starts_at`).all();

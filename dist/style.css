@@ -132,7 +132,6 @@ body.tv{overflow:hidden}body.tv header.top,body.tv nav,body.tv #banner,body.tv #
 .tv-right{min-height:0}.tv-right .village{border:3px solid var(--ink);box-shadow:.12em .12em var(--ink);max-height:560px}.tv-right .village img{max-height:560px}.tv-village{margin-top:.7em;font-size:1.25em;font-weight:700;max-width:none}
 .tv-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:2em}.tv-foot .mascot{font-size:1.5em;flex:1;min-width:0}.tv-qr{display:grid;gap:.4em;justify-items:center;text-align:center;font-weight:800;font-size:1em}.tv-qr .qr-box{width:8em}
 [data-theme="night"] .tv-screen{background:#210C27;color:#f4f1ea}[data-theme="night"] .tv-acts li{background:#33153B;color:#f4f1ea}[data-theme="night"] .tv-live{color:#480052}
-@media(max-width:900px){.tv-main{grid-template-columns:1fr}}
 
 /* Mù, albero e trofei */
 .mascot.talk{cursor:pointer}.mascot p{transition:opacity .22s}.mascot p.tip-out{opacity:0}

@@ -187,3 +187,8 @@ body.tv{overflow:hidden}body.tv header.top,body.tv nav,body.tv #banner,body.tv #
  .home-hero .home-scenery { align-self: end; }
  .home-hero img { height: auto; }
 }
+
+/* Prima visita e registro dell'assemblea */
+.meeting-notes { white-space: pre-wrap; }
+.visit-card h3 + p { margin-top: .3rem; }
+.visit-card .grid { gap: 1rem 1.4rem; }

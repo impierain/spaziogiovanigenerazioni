@@ -9,6 +9,7 @@ import * as chores from './routes/chores.mjs';
 import * as learning from './routes/learning.mjs';
 import * as members from './routes/members.mjs';
 import * as notifications from './routes/notifications.mjs';
+import * as space from './routes/space.mjs';
 import * as stats from './routes/stats.mjs';
 import * as trophies from './routes/trophies.mjs';
 import * as putia from './routes/putia.mjs';
@@ -23,6 +24,12 @@ const routes = [
  ['GET', '/api/auth/me', 'public', auth.me],
  ['GET', '/api/status', 'public', accessi.status],
  ['GET', '/api/community', 'public', stats.community],
+ ['GET', '/api/space/visit', 'public', space.visit],
+ ['PUT', '/api/space/visit', 'organizer', space.saveVisit],
+ ['GET', '/api/assembly', 'member', space.assembly],
+ ['PUT', '/api/assembly/meeting', 'organizer', space.saveAssembly],
+ ['POST', '/api/assembly/decisions', 'organizer', space.saveDecision],
+ ['PUT', '/api/assembly/decisions/:id', 'organizer', space.saveDecision],
  ['GET', '/api/auth/token', 'public', auth.checkToken],
  ['POST', '/api/auth/set-password', 'public', auth.setPassword],
  ['POST', '/api/auth/change-password', 'member', auth.changePassword],

@@ -61,3 +61,17 @@ export async function presenti({db}) {
   WHERE a.direction = 'IN' AND a.at > ? AND m.status = 'approved' ORDER BY a.at`).bind(since).all();
  return json({presenti: results});
 }
+
+// Stato pubblico della sede: aperta quando c'è almeno una persona dentro.
+// Il numero di persone lo vedono solo i soci con l'accesso.
+export const OPENING = {days: 'Da lunedì a venerdì', hours: '16:00–20:00'};
+export async function status({db, member}) {
+ const since = Math.floor(Date.now() / 1000) - STALE_SECONDS;
+ const row = await db.prepare(`SELECT COUNT(*) AS n FROM members m
+  JOIN accessi a ON a.id = (SELECT id FROM accessi WHERE member_id = m.id ORDER BY at DESC, id DESC LIMIT 1)
+  WHERE a.direction = 'IN' AND a.at > ? AND m.status = 'approved'`).bind(since).first();
+ const count = row?.n ?? 0;
+ const body = {open: count > 0, ...OPENING};
+ if (member) body.count = count;
+ return new Response(JSON.stringify(body), {status: 200, headers: {'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store'}});
+}

@@ -3,6 +3,8 @@ on:
   pull_request:
   push:
     branches: [main]
+permissions:
+  contents: read
 jobs:
   controllo:
     runs-on: ubuntu-latest
@@ -19,3 +21,17 @@ jobs:
         run: |
           npm install --no-save wrangler@4
           npx wrangler d1 migrations apply DB --local
+
+  # Se il controllo passa, unisce da solo le PR aperte da Piero su rami di questo repository.
+  unione-automatica:
+    needs: controllo
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'impierain'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Unisci la PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --merge

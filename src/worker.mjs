@@ -26,6 +26,7 @@ const routes = [
  ['GET', '/api/auth/token', 'public', auth.checkToken],
  ['POST', '/api/auth/set-password', 'public', auth.setPassword],
  ['POST', '/api/auth/change-password', 'member', auth.changePassword],
+ ['PATCH', '/api/auth/profile', 'member', auth.updateProfile],
 
  ['GET', '/api/members', 'organizer', members.list],
  ['POST', '/api/members', 'organizer', members.create],

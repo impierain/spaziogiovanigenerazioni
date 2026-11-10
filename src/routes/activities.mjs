@@ -1,6 +1,12 @@
 import {fail, json, readJson, integer, text} from '../lib/http.mjs';
 
 const STATUSES = ['draft', 'published', 'cancelled'];
+const PATH_IDS = ['studio', 'creativita', 'socialita', 'cittadinanza', 'solidarieta'];
+const activityPath = value => {
+ if (value === undefined || value === null || value === '') return null;
+ if (!PATH_IDS.includes(value)) fail(400, 'Percorso non valido.');
+ return value;
+};
 
 // Accetta un istante in secondi Unix oppure una data ISO.
 function startsAt(value) {
@@ -10,7 +16,7 @@ function startsAt(value) {
 }
 
 const manageSql = `SELECT a.id, a.name, a.starts_at AS startsAt, a.capacity, a.status, a.verification_rule AS verificationRule,
-  a.xp, a.cheese,
+  a.xp, a.cheese, a.path,
   (SELECT COUNT(*) FROM bookings b WHERE b.activity_id = a.id AND b.status = 'pending') AS pending,
   (SELECT COUNT(*) FROM bookings b WHERE b.activity_id = a.id AND b.status = 'confirmed') AS confirmed,
   (SELECT COUNT(*) FROM attendance t WHERE t.activity_id = a.id) AS attended
@@ -26,11 +32,11 @@ export async function create({request, db}) {
  const id = crypto.randomUUID();
  const status = body.status ?? 'draft';
  if (!STATUSES.includes(status)) fail(400, 'Stato non valido.');
- await db.prepare(`INSERT INTO activities (id, name, starts_at, capacity, status, verification_rule, xp, cheese)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).bind(
+ await db.prepare(`INSERT INTO activities (id, name, starts_at, capacity, status, verification_rule, xp, cheese, path)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(
   id, text(body.name, 'Nome', {max: 120}), startsAt(body.startsAt), integer(body.capacity, 'Posti', {min: 1, max: 500}), status,
   text(body.verificationRule, 'Criterio di convalida', {max: 300}),
-  integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Formaggi', {max: 200})
+  integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Formaggi', {max: 200}), activityPath(body.path)
  ).run();
  return json({activity: await db.prepare(`${manageSql} WHERE a.id = ?`).bind(id).first()}, 201);
 }
@@ -46,6 +52,7 @@ export async function update({request, db, params}) {
  if ('verificationRule' in body) put('verification_rule', text(body.verificationRule, 'Criterio di convalida', {max: 300}));
  if ('xp' in body) put('xp', integer(body.xp, 'XP', {max: 500}));
  if ('cheese' in body) put('cheese', integer(body.cheese, 'Formaggi', {max: 200}));
+ if ('path' in body) put('path', activityPath(body.path));
  if ('status' in body) {
   if (!STATUSES.includes(body.status)) fail(400, 'Stato non valido.');
   put('status', body.status);

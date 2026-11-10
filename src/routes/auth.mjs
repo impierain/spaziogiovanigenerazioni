@@ -9,7 +9,8 @@ const WINDOW_SECONDS = 15 * 60;
 
 export const publicMember = member => ({
  id: member.id, email: member.email, pseudonym: member.pseudonym,
- fullName: member.full_name, role: member.role
+ fullName: member.full_name, role: member.role,
+ interests: String(member.interests || '').split(',').filter(Boolean)
 });
 
 export async function memberTotals(db, memberId) {
@@ -25,7 +26,7 @@ export async function login({request, db}) {
  const failed = await db.prepare('SELECT COUNT(*) AS n FROM auth_attempts WHERE email = ? AND at > ?').bind(address, since).first();
  if (failed.n >= MAX_FAILED) fail(429, 'Troppi tentativi. Riprova tra qualche minuto.');
 
- const member = await db.prepare(`SELECT id, email, pseudonym, full_name, role, status, password_hash
+ const member = await db.prepare(`SELECT id, email, pseudonym, full_name, role, status, interests, password_hash
   FROM members WHERE email = ?`).bind(address).first();
  const valid = await verifyPassword(password, member?.password_hash);
  if (!member || !valid || member.status !== 'approved') {
@@ -84,7 +85,7 @@ export async function setPassword({request, db}) {
  ]);
  if (!updated.meta.changes) fail(404, 'Il link non è valido o è scaduto.');
  const cookie = await startSession(db, row.member_id);
- const member = await db.prepare('SELECT id, email, pseudonym, full_name, role FROM members WHERE id = ?').bind(row.member_id).first();
+ const member = await db.prepare('SELECT id, email, pseudonym, full_name, role, interests FROM members WHERE id = ?').bind(row.member_id).first();
  return json({member: publicMember(member)}, 200, {'Set-Cookie': cookie});
 }
 
@@ -98,4 +99,21 @@ export async function changePassword({request, db, member}) {
  }
  await db.prepare('UPDATE members SET password_hash = ? WHERE id = ?').bind(await hashPassword(body.next), member.id).run();
  return json({ok: true});
+}
+
+// Il socio cambia da solo il proprio nome utente e i propri interessi.
+const INTEREST_PATHS = ['studio', 'creativita', 'socialita', 'cittadinanza', 'solidarieta'];
+export async function updateProfile({request, db, member}) {
+ const body = await readJson(request);
+ const sets = [];
+ const values = [];
+ if ('pseudonym' in body) { sets.push('pseudonym = ?'); values.push(text(body.pseudonym, 'Nome utente', {max: 28})); }
+ if ('interests' in body) {
+  if (!Array.isArray(body.interests) || body.interests.some(i => !INTEREST_PATHS.includes(i))) fail(400, 'Interessi non validi.');
+  sets.push('interests = ?'); values.push([...new Set(body.interests)].join(','));
+ }
+ if (!sets.length) fail(400, 'Nessuna modifica indicata.');
+ await db.prepare(`UPDATE members SET ${sets.join(', ')} WHERE id = ?`).bind(...values, member.id).run();
+ const row = await db.prepare('SELECT id, email, pseudonym, full_name, role, interests FROM members WHERE id = ?').bind(member.id).first();
+ return json({member: publicMember(row)});
 }

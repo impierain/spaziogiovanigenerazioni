@@ -38,10 +38,11 @@ const animals = {
  civetta:{name:'Civetta',art:'<path fill="#171523" d="M2 2h3v2h6V2h3v8h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 3h1v2h8V3h1v6h-2v2H5V9H3z"/><path fill="#fff3d5" d="M4 6h3v3H4z M9 6h3v3H9z"/><path fill="#171523" d="M5 7h1v1H5z M10 7h1v1h-1z"/><path fill="#fe4400" d="M7 9h2v1H7z"/>'}
 };
 const cheese='<path fill="#171523" d="M10 1h2v1h2v2h1v10H1V7h2V6h2V5h2V4h2V2h1z"/><path fill="#f4bf57" d="M10 3h2v1h1v2H5V5h2V4h3z"/><path fill="#ffd782" d="M3 8h10v4H3z"/><path fill="#a96a32" d="M5 9h2v2H5z M10 10h2v1h-2z"/>';
-function cowMascot(mood,text){
+function cowMascot(mood,text,tips=[]){
  const eyes={normale:'M6 6h1v2H6z M10 6h1v2h-1z',felice:'M5 7h1V6h2v1H5z M9 7h1V6h2v1H9z',curioso:'M6 6h1v2H6z M10 7h1v1h-1z',festoso:'M5 6h2v1H5z M10 6h2v1h-2z'};
  const sprite='<path fill="#171523" d="M2 4h2V2h3v2h2V2h3v2h2v1h2v4h-3v3h-2v2H5v-2H3V9H0V5h2z"/><path fill="#b9954b" d="M5 3h1v2H5z M10 3h1v2h-1z"/><path fill="#fff3d5" d="M2 6h3V5h6v1h3v2h-2v3h-2v2H6v-2H4V8H2z"/><path fill="#73584e" d="M4 6h3v2H4z"/><path fill="#ee99aa" d="M5 9h6v3H5z"/><path fill="#171523" d="M6 9h1v1H6z M9 9h1v1H9z M7 11h2v1H7z"/>';
- return `<div class="mascot">${pixelIcon(sprite+`<path fill="#171523" d="${eyes[mood]}"/>`)}<div><strong>Mù</strong><p>${esc(text)}</p></div></div>`;
+ const all=[text,...tips.filter(t=>t&&t!==text)];
+ return `<div class="mascot ${all.length>1?'talk':''}" ${all.length>1?`data-tips="${esc(JSON.stringify(all))}" data-i="0" tabindex="0" role="button" aria-label="Mù: tocca per un altro consiglio"`:''}>${pixelIcon(sprite+`<path fill="#171523" d="${eyes[mood]}"/>`,'mu-sprite')}<div><strong>Mù</strong><p aria-live="polite">${esc(text)}</p></div></div>`;
 }
 const pixelIcon = (path,kind='')=>`<svg class="pixel-icon ${kind}" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${path}</svg>`;
 
@@ -154,12 +155,31 @@ function muSays(page,extra={}){
  if(page==='paese')return ['felice',extra.reached?`Il paese cresce: ${extra.reached} ${extra.reached===1?"traguardo":"traguardi"} su ${extra.total}!`:'Il paese è appena nato. Ogni presenza lo fa crescere.'];
  return ['normale','E boni siemmu!'];
 }
-const mu=(page,extra)=>{const [m,t]=muSays(page,extra);return cowMascot(m,t);};
+const MU_TIPS={
+ home:['Hai già visto le missioni di oggi?','Hai un’idea per lo spazio? Scrivila nelle Proposte.','Controlla la Putìa: forse hai abbastanza Formaggi!','Hai un’ora libera? La Banca del tempo ti aspetta.','Quando arrivi, inquadra il QR all’ingresso.'],
+ missioni:['Ogni missione verificata ti avvicina al prossimo livello.','Le missioni ripetibili danno al massimo 12 Formaggi a settimana.','Chiedi la verifica a un referente: non puoi verificare le tue.'],
+ calendario:['Prenota presto: i posti volano!','Le attività consigliate per te hanno il bollino verde.','Non puoi più venire? Annulla, così il posto va a un altro.'],
+ profilo:['Scegli i tuoi interessi: ti consiglio le attività giuste.','Puoi cambiare il tuo nome utente quando vuoi.','Guarda l’albero: ogni ramo cresce con le tue esperienze.'],
+ paese:['Ogni presenza fa crescere il paese.','Il paese è di tutte e tutti: grazie di esserci!'],
+ generic:['E boni siemmu!','Un passo alla volta si arriva lontano.','Cca si sta bene insieme.']
+};
+const mu=(page,extra)=>{const [m,t]=muSays(page,extra);return cowMascot(m,t,[...(MU_TIPS[page]||[]),...MU_TIPS.generic]);};
+function nextTip(el){
+ if(!el||!el.dataset.tips)return;
+ let tips;try{tips=JSON.parse(el.dataset.tips);}catch{return;}
+ const i=(Number(el.dataset.i)+1)%tips.length,p=el.querySelector('p');
+ el.dataset.i=i;p.classList.add('tip-out');
+ setTimeout(()=>{p.textContent=tips[i];p.classList.remove('tip-out');},220);
+}
+setInterval(()=>{if(document.hidden)return;document.querySelectorAll('.mascot.talk').forEach(nextTip);},12000);
+document.addEventListener('click',e=>{const m=e.target.closest('.mascot.talk');if(m)nextTip(m);});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.mascot.talk')){e.preventDefault();nextTip(e.target);}});
 
 const halfway=m=>m.value>=Math.ceil(m.target/2);
+const fx=()=>`<div class="fx" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="bird"></i><i class="smoke s1"></i><i class="smoke s2"></i><i class="star t1"></i><i class="star t2"></i><i class="star t3"></i></div>`;
 function villageScene(metrics){
  const reached=(metrics||[]).filter(halfway);
- return `<div class="village"><img class="scenery-day" src="sicani.svg" alt="Paese pixel ispirato a Cammarata e San Giovanni Gemini"><img class="scenery-night" src="sicani-notte.svg" alt="" aria-hidden="true"><div aria-hidden="true">${reached.map(m=>pixelIcon(shapes[m.icon])).join('')}</div></div>`;
+ return `<div class="village">${fx()}<img class="scenery-day" src="sicani.svg" alt="Paese pixel ispirato a Cammarata e San Giovanni Gemini"><img class="scenery-night" src="sicani-notte.svg" alt="" aria-hidden="true"><div aria-hidden="true">${reached.map(m=>pixelIcon(shapes[m.icon])).join('')}</div></div>`;
 }
 function villageCard(metrics){
  if(!metrics)return '';
@@ -178,8 +198,18 @@ async function paese(){
 
 const PATHS=[['studio','Studio e conoscenza','book'],['creativita','Creatività e cultura','camera'],['socialita','Socialità e comunità','heart'],['cittadinanza','Cittadinanza e partecipazione','star'],['solidarieta','Solidarietà e cura','plant']];
 const pathInfo=id=>PATHS.find(p=>p[0]===id)||PATHS[4];
+function treeGraphic(counts){
+ const xs=[9,25,41,57,73],cols=['#8feafc','#ff9fc8','#ff8a4d','#c8a8ff','#caff4d'];
+ let svg='<rect x="0" y="52" width="82" height="4" fill="#6f440f"/><rect x="38" y="34" width="6" height="19" fill="#6f440f"/>';
+ PATHS.forEach(([id],i)=>{
+  const x=xs[i],n=counts[id]||0;
+  svg+=`<rect x="${Math.min(x,41)}" y="34" width="${Math.abs(x-41)+1}" height="2" fill="#6f440f"/><rect x="${x}" y="8" width="2" height="28" fill="#6f440f"/>`;
+  [[1,28],[3,19],[5,10]].forEach(([need,y])=>{const on=n>=need;svg+=`<rect x="${x-3}" y="${y}" width="8" height="8" fill="#171523"/><rect x="${x-2}" y="${y+1}" width="6" height="6" fill="${on?cols[i]:'#e6e0cf'}" class="${on?'tree-on':''}"/>`;});
+ });
+ return `<div class="tree-box"><svg viewBox="0 0 82 56" shape-rendering="crispEdges" role="img" aria-label="Albero delle competenze: cinque rami, tre tappe ciascuno">${svg}</svg></div>`;
+}
 function skillTree(counts,types){
- return section('Albero delle competenze',`<p class="section-intro">Le tappe raccontano le esperienze verificate in sede. Prima tappa a 1 esperienza, poi 3 e 5.</p>`+grid(PATHS.map(([id,name,icon])=>{
+ return section('Albero delle competenze',`<p class="section-intro">Le tappe raccontano le esperienze verificate in sede. Prima tappa a 1 esperienza, poi 3 e 5.</p>`+card(treeGraphic(counts))+grid(PATHS.map(([id,name,icon])=>{
   const n=counts[id]||0,next=[1,3,5].find(x=>x>n);
   const dots=[1,3,5].map(x=>`<span class="stage ${n>=x?'done':''}" title="Tappa ${x}">${x}</span>`).join('');
   const linked=types.filter(t=>t.path===id);
@@ -236,7 +266,7 @@ async function trofei(){
  const groups=[...new Set(trophies.map(t=>t.group))];
  const got=trophies.filter(t=>t.earned).length;
  return title('Trofei',`${got} su ${trophies.length} conquistati. Arrivano da soli quando i dati verificati raggiungono la soglia, e ti avvisiamo anche per email.`)+
- groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`${art(t.icon)}<h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}`,t.earned?'green':'')),'three'))).join('');
+ (S.trophies=trophies,groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`<div class="${t.earned?'':'locked'}">${art(t.icon)}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<p>${badge('Bloccato')}</p><progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}${btn(t.earned?'Apri il trofeo':'Come si sblocca','trophy',t.id,{secondary:true})}`,t.earned?'green':'')),'three'))).join(''));
 }
 async function putia(){
  if(!S.me)return needLogin();
@@ -288,7 +318,7 @@ function homeIntro(){
  <p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio gratuito per incontrarsi, studiare e far nascere idee insieme.</p>
  <div class="row">${link('Apri il calendario','calendario')} ${link(S.me?'Vai alle missioni':'Accedi o chiedi un invito',S.me?'missioni':'accedi')}</div>
  ${S.me?'':'<p class="entry-hint">Il calendario si apre senza account.</p>'}</div>
- <picture><img class="scenery-day" src="sicani.svg" alt="${artLabel}"><img class="scenery-night" src="sicani-notte.svg" alt="${artLabel} di notte"></picture></header>
+ <div class="home-scenery">${fx()}<img class="scenery-day" src="sicani.svg" alt="${artLabel}"><img class="scenery-night" src="sicani-notte.svg" alt="${artLabel} di notte"></div></header>
  <section class="space-signpost"><div><span class="eyebrow">LO SPAZIO GIOVANI</span><h2>Un posto da usare, uno spazio da fare insieme</h2>
  <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Scopri lo spazio','spazio')}</section>`;
 }
@@ -305,7 +335,7 @@ async function home(){
 }
 async function homeMember(){
  const [acts,mine,chores,st,metrics,pres]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending&memberId='+encodeURIComponent(S.me.id)),getStatus(),getCommunity(),api('/checkin').catch(()=>null)]);
- const presenceCard=pres?card('<span class="eyebrow">LA MIA PRESENZA</span>'+(pres.inside?`<h3>Sei in sede dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</h3><p>Quando esci inquadra il QR all’ingresso, oppure registra l’uscita da qui.</p>${btn('Registra la mia uscita','checkout')}`:'<h3>Non risulti in sede</h3><p>Quando arrivi inquadra il QR all’ingresso con la fotocamera: il sito segna il tuo ingresso.</p>')):'';
+ const presenceCard=pres?card('<span class="eyebrow">LA MIA PRESENZA</span>'+(pres.inside?`<h3>Sei in sede dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</h3><p>Quando esci registra l’uscita da qui, oppure inquadra il QR all’ingresso.</p>${btn('Registra la mia uscita','checkout')}`:`<h3>Non hai ancora registrato l’ingresso</h3><p>Se sei in sede, segna la tua presenza: basta un tocco, senza approvazione. Puoi anche inquadrare il QR all’ingresso.</p>${btn('Registra il mio ingresso','checkin')}`)):'';
  const booked=new Map(mine.bookings.map(b=>[b.activityId,b.status]));
  const upcoming=acts.activities.filter(a=>a.starts_at>Date.now()/1000-3600).slice(0,3);
  let extra='';
@@ -314,9 +344,8 @@ async function homeMember(){
   const mineAll=pending.chores.filter(c=>c.memberId!==S.me.id).length;
   extra=section('Da gestire',grid([
    card(`<span class="metric">${inside.presenti.length}</span><h3>In sede adesso</h3><p>${inside.presenti.length?esc(inside.presenti.map(p=>p.name).join(', ')):'Nessuno è registrato dentro.'}</p>${link('Registra ingressi','referenti/presenze')}`,'green'),
-   card(`<span class="metric">${mineAll}</span><h3>Missioni da verificare</h3><p>Le richieste in attesa aspettano una decisione.</p>${link('Verifica','referenti/missioni')}`),
-   card(`<h3>Pannello referenti</h3><p>Soci, presenze, missioni, attività e statistiche.</p>${link('Apri il pannello','referenti')}`)
-  ]));
+   card(`<span class="metric">${mineAll}</span><h3>Missioni da verificare</h3><p>Le richieste in attesa aspettano una decisione.</p>${link('Verifica','referenti/missioni')}`)
+  ],'two'));
  }
  return homeIntro()+
   `<div class="grid stats home-stats" aria-label="Il mio personaggio, Formaggi e orari">${card(profileChip(),'profile-stat')}
@@ -340,7 +369,8 @@ async function calendario(){
   else if(active)action=`${badge(statusText[b.status])}<div class="row">${btn('Annulla prenotazione','cancel',a.id,{secondary:true})}</div>`;
   else if(a.available<=0)action=badge('Posti esauriti');
   else action=btn('Prenota un posto','reserve',a.id)+(b&&b.status==='declined'?`<p class="muted">La richiesta precedente è stata rifiutata.</p>`:'');
-  return card(`<h3>${esc(a.name)}</h3><p><strong>${dateLong(a.starts_at)}</strong></p><p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p><p class="muted">${esc(a.verification_rule)}</p>${action}`);
+  const rec=S.me&&a.path&&(S.me.interests||[]).includes(a.path);
+  return card(`${rec?`<p>${badge('Consigliata per te')}</p>`:''}<h3>${esc(a.name)}</h3><p><strong>${dateLong(a.starts_at)}</strong></p><p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p><p class="muted">${esc(a.verification_rule)}</p>${action}`);
  }),'two'):card('<h3>Ancora nulla in calendario</h3><p>I referenti pubblicheranno qui le prossime attività.</p>');
  return title('Calendario','Le attività dello spazio. La prenotazione è una richiesta: un referente la conferma.')+section('Prossime attività',body)+
   (S.me?section('Come funziona',card('<p>Quando prenoti, il posto resta riservato finché un referente decide. Alla fine il referente verifica di persona la tua presenza e ti assegna XP e Formaggi.</p>')):'')+mu('calendario');
@@ -397,7 +427,7 @@ async function missioni(){
  const active=types.types.filter(t=>t.active);
  const pending=logs.chores.filter(c=>c.status==='pending').length;
  return title('Missioni','Le missioni che tengono vivo lo spazio. Falla, chiedi la verifica a un referente e ricevi XP e Formaggi.')+
- section('Missioni disponibili',active.length?grid(active.map(t=>card(`${art(pathInfo(t.path)[2])}<h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}</p><p>${esc(t.description)}</p><p><strong>${t.xp} XP</strong> · <strong>${t.cheese} Formaggi</strong></p>${form('chore',field('note','Nota (facoltativa)','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"').replace(' required',''),'Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
+ section('Missioni disponibili',active.length?grid(active.map(t=>card(`${art(pathInfo(t.path)[2])}<h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}${(S.me.interests||[]).includes(t.path)?' '+badge('Consigliata per te'):''}</p><p>${esc(t.description)}</p><p><strong>${t.xp} XP</strong> · <strong>${t.cheese} Formaggi</strong></p>${form('chore',field('note','Nota (facoltativa)','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"').replace(' required',''),'Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
  `<p class="muted">Le missioni ripetibili danno al massimo ${WEEKLY_CHEESE} Formaggi a settimana (da lunedì a domenica). Gli XP si contano sempre.</p>`+
  section(`Le mie richieste${pending?` · ${pending} in attesa`:''}`,logs.chores.length?card(`<ul class="list">${logs.chores.map(c=>`<li><strong>${esc(c.choreName)}</strong> · ${dateShort(c.requestedAt)} · ${badge(statusText[c.status])}${c.status==='verified'?` · ${c.xp} XP, ${c.cheese} Formaggi`:''}${c.note?`<br><span class="muted">${esc(c.note)}</span>`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora richiesto nessuna missione.</p>'))+mu('missioni',{pending});
 }
@@ -406,7 +436,7 @@ async function missioni(){
 const weekdayBars=(rows,key)=>{const max=Math.max(1,...rows.map(r=>r[key]));return rows.map(r=>bar(r[key],max,r.name.slice(0,3))).join('');};
 async function presenze(){
  if(!S.me)return needLogin();
- const [stats,acc,prog]=await Promise.all([api('/stats/members/'+S.me.id),api('/access?limit=40&memberId='+encodeURIComponent(S.me.id)),api('/my/progress').catch(()=>({counts:{}}))]);
+ const [stats,acc,prog,ctypes]=await Promise.all([api('/stats/members/'+S.me.id),api('/access?limit=40&memberId='+encodeURIComponent(S.me.id)),api('/my/progress').catch(()=>({counts:{}})),api('/chore-types').catch(()=>({types:[]}))]);
  const t=stats.totals,l=level(t.xp);
  const monthMax=Math.max(0.1,...stats.months.map(m=>m.hours));
  const pathRows=PATHS.map(([id,name])=>bar(prog.counts[id]||0,Math.max(1,...PATHS.map(([k])=>prog.counts[k]||0)),name.split(' ')[0]));
@@ -423,7 +453,7 @@ async function presenze(){
  ],'two'))+
  section('Ore in sede per mese',stats.months.length?card(stats.months.map(m=>bar(m.hours,monthMax,m.month.slice(2),' h')).join('')):card('<p>Ancora nessun dato.</p>'))+
  section('Quando vieni',card(weekdayBars(stats.weekdays,'visits')))+
- section('Missioni per percorso',card(pathRows.join('')+`<p>${link('Vedi l’albero delle competenze','profilo')}</p>`))+
+ skillTree(prog.counts,ctypes.types.filter(t=>t.active))+
  section('Ultime visite',stats.recent.length?card(`<ul class="list">${stats.recent.map(r=>`<li>${dateLong(r.start)} · ${duration(r.minutes)}</li>`).join('')}</ul>`):card('<p>Nessuna visita registrata.</p>'))+
  section('Registro ingressi e uscite',acc.accessi.length?card(`<ul class="list">${acc.accessi.map(a=>`<li>${a.direction==='IN'?'Ingresso':'Uscita'} · ${dateShort(a.at)}</li>`).join('')}</ul>`):card('<p>Ancora nessun movimento negli ultimi 30 giorni.</p>'));
 }
@@ -451,16 +481,26 @@ async function journalCard(){
 }
 async function profilo(){
  if(!S.me)return needLogin();
- const [prog,types,journal]=await Promise.all([api('/my/progress').catch(()=>({counts:{}})),api('/chore-types').catch(()=>({types:[]})),journalCard()]);
+ const [prog,types,acts,journal]=await Promise.all([api('/my/progress').catch(()=>({counts:{}})),api('/chore-types').catch(()=>({types:[]})),api('/activities').catch(()=>({activities:[]})),journalCard()]);
+ const mine=S.me.interests||[];
+ const recMissions=types.types.filter(t=>t.active&&mine.includes(t.path)).slice(0,4);
+ const recActs=acts.activities.filter(a=>a.path&&mine.includes(a.path)&&a.starts_at>Date.now()/1000-3600).slice(0,3);
+ const interestsForm=`<h3>I miei interessi</h3><p class="muted">Scegli cosa ti piace: ti consigliamo missioni e attività.</p><fieldset><legend>Percorsi</legend>${PATHS.map(([id,name])=>`<label><input type="checkbox" name="interest" value="${id}" ${mine.includes(id)?'checked':''}> ${esc(name)}</label>`).join('')}</fieldset>`;
+ const recommend=section('Consigliato per te',mine.length?(recMissions.length||recActs.length?grid([
+   ...recActs.map(a=>card(`<span class="eyebrow">ATTIVITÀ</span><h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p>${link('Apri il calendario','calendario')}`)),
+   ...recMissions.map(t=>card(`<span class="eyebrow">MISSIONE</span><h3>${esc(t.name)}</h3><p>${esc(t.description)}</p>${link('Vai alle missioni','missioni')}`))
+  ],'two'):card('<p>Per ora non ci sono attività o missioni nei tuoi percorsi. Controlla più avanti!</p>')):card('<p>Scegli i tuoi interessi qui sotto e ti consigliamo missioni e attività su misura.</p>'));
  const species=pref.get('species','mucca'),color=pref.get('color','rosa');
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="sr">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
  section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}`),
   card(`<details class="disclosure"><summary>Cambia avatar</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`)],'two'))+
  section('Diario di apprendimento Youthpass',journal)+
- skillTree(prog.counts,types.types.filter(t=>t.active))+
+ recommend+skillTree(prog.counts,types.types.filter(t=>t.active))+
  section('Preferenze',card(`<label class="sound-setting"><input type="checkbox" id="sound-toggle" ${pref.get('sound','off')==='on'?'checked':''}> Suoni dei pulsanti</label><p class="muted">Breve suono pixel quando usi un pulsante o un link. La scelta vale su questo browser.</p>`))+
- section('Account',grid([
+ section('Il mio account',grid([
+  form('nick','<h3>Nome utente</h3><p class="muted">È il nome che vedono gli altri soci.</p>'+field('pseudonym','Il tuo nome utente','text',`required maxlength="28" value="${esc(S.me.pseudonym)}"`),'Salva nome utente'),
+  form('interests',interestsForm,'Salva interessi'),
   card(`<h3>${esc(S.me.fullName||S.me.pseudonym)}</h3><p>${esc(S.me.email)}</p><p>${badge(isOrganizer()?'Referente':'Socio')}</p>${btn('Esci','logout','',{secondary:true})}`),
   form('changepw','<h3>Cambia password</h3>'+field('current','Password attuale','password','required autocomplete="current-password"')+field('next','Nuova password (almeno 10 caratteri)','password','required minlength="10" autocomplete="new-password"'),'Cambia password')
  ],'two'))+
@@ -494,9 +534,8 @@ async function panPanoramica(){
  ],'two'))+
  section(`Ultimi ${sede.periodDays} giorni`,grid([
   card(`<span class="metric">${t.hoursOpen}</span><h3>Ore di apertura</h3><p>Ore con almeno una persona dentro</p>`),
-  card(`<span class="metric">${t.visits}</span><h3>Visite</h3><p>${t.uniqueMembers} persone diverse</p>`),
-  card(`<span class="metric">${t.personHours}</span><h3>Ore-persona</h3><p>Media ${duration(t.avgVisitMinutes)} a visita</p>`)
- ])+`<p>${link('Tutte le statistiche','referenti/statistiche')}</p>`);
+  card(`<span class="metric">${t.visits}</span><h3>Visite</h3><p>${t.uniqueMembers} persone diverse</p>`)
+ ],'two')+`<p>${link('Tutte le statistiche','referenti/statistiche')}</p>`);
 }
 async function panSoci(){
  const {members}=await api('/members');
@@ -543,7 +582,7 @@ async function panAttivita(id){
   section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended&&b.memberId!==S.me.id?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>'));
  }
  const {activities}=await api('/activities/manage');
- const create=form('activity','<h3>Nuova attività</h3>'+field('name','Titolo','text','required maxlength="120"')+field('startsAt','Data e ora','datetime-local','required')+field('capacity','Posti','number','required min="1" max="500" value="25"')+field('verificationRule','Come verifichi la presenza','text','required maxlength="300" value="Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."')+field('xp','XP','number','required min="0" max="500" value="30"')+field('cheese','Formaggi','number','required min="0" max="200" value="5"')+`<label>Stato<select name="status"><option value="draft">Bozza (non visibile)</option><option value="published">Pubblicata</option></select></label>`,'Crea attività');
+ const create=form('activity','<h3>Nuova attività</h3>'+field('name','Titolo','text','required maxlength="120"')+field('startsAt','Data e ora','datetime-local','required')+field('capacity','Posti','number','required min="1" max="500" value="25"')+field('verificationRule','Come verifichi la presenza','text','required maxlength="300" value="Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."')+field('xp','XP','number','required min="0" max="500" value="30"')+field('cheese','Formaggi','number','required min="0" max="200" value="5"')+`<label>Percorso (facoltativo, per i consigli)<select name="path"><option value="">Nessuno</option>${PATHS.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('')}</select></label><label>Stato<select name="status"><option value="draft">Bozza (non visibile)</option><option value="published">Pubblicata</option></select></label>`,'Crea attività');
  const prefill=`<p><button type="button" class="secondary" data-action="prefill">Precompila con la prima attività reale</button></p>`;
  return section('Nuova attività',prefill+create)+section(`Attività (${activities.length})`,activities.length?grid(activities.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.startsAt)} · ${badge(statusText[a.status])}</p><p>${a.pending} in attesa · ${a.confirmed} confermate · ${a.attended} presenze · ${a.capacity} posti</p><div class="row">${a.status!=='published'&&a.status!=='cancelled'?btn('Pubblica','act-status',a.id,{extra:'data-status="published"'}):''}${a.status==='published'?btn('Torna a bozza','act-status',a.id,{secondary:true,extra:'data-status="draft"'}):''}${a.status!=='cancelled'?btn('Annulla','act-status',a.id,{secondary:true,extra:'data-status="cancelled"'}):''}<a class="btn" href="#referenti/attivita/${esc(a.id)}">Prenotazioni →</a></div>`)),'two'):card('<p>Nessuna attività creata.</p>'));
 }
@@ -559,7 +598,6 @@ async function panStatistiche(){
  return section(`Ultimi ${s.periodDays} giorni`,grid([
   card(`<span class="metric">${t.hoursOpen}</span><h3>Ore di apertura</h3><p>Con almeno una persona dentro</p>`),
   card(`<span class="metric">${t.visits}</span><h3>Visite</h3><p>${t.uniqueMembers} persone diverse</p>`),
-  card(`<span class="metric">${t.personHours}</span><h3>Ore-persona</h3><p>Media ${duration(t.avgVisitMinutes)}</p>`),
   card(`<span class="metric">${s.streak.current}</span><h3>Serie</h3><p>Giorni di apertura consecutivi · record ${s.streak.best}</p>`)
  ],'two'))+section('Confronto mensile',card(cmp+s.trend.map(m=>bar(m.hours,trendMax,m.month.slice(2),' h')).join('')))+
  section('Ore di apertura per giorno',card(s.weekdays.map(d=>bar(d.hoursOpen,dayMax,d.name.slice(0,3),' h')).join('')))+
@@ -594,11 +632,12 @@ async function ingressoPage(code){
  if(!scan||scan.code!==code){scan={code,p:api('/checkin',{method:'POST',body:{code}}).then(r=>({r}),e=>({e}))};setTimeout(()=>{scan=null;},8000);}
  const {r,e}=await scan.p;
  if(e){scan=null;return title('Ingresso in sede','')+failCard(e);}
+ history.replaceState(null,'','#home');
  const a=r.access,mins=a.sinceMinutes;
  const dur=mins?` dopo ${mins>=60?`${Math.floor(mins/60)} h ${mins%60} min`:`${mins} min`}`:'';
  const msg=a.direction==='IN'?`Ingresso registrato. Benvenutə, ${S.me.pseudonym}!`:`Uscita registrata${dur}. A presto, ${S.me.pseudonym}!`;
- setTimeout(()=>{location.replace('#home');say(msg);},0);
- return title(a.direction==='IN'?'Benvenutə!':'A presto!',esc(msg));
+ await refreshTotals();renderChrome('home');say(msg);
+ return await homeMember();
 }
 async function cartello(){
  if(!isOrganizer())return needLogin();
@@ -614,12 +653,16 @@ async function tvPage(){
  const reached=(metrics||[]).filter(halfway).length;
  const tip=st?.open&&Math.floor(Date.now()/60000)%3===0?'Siamo aperti: entra, ti aspettiamo!':tvTips[Math.floor(Date.now()/60000)%tvTips.length];
  try{navigator.wakeLock?.request('screen').catch(()=>{});}catch{}
- return `<div class="tv-screen"><div class="tv-top"><div class="tv-brand">CCA SIEMMU<small>e boni siemmu</small></div><div class="tv-clock"><strong id="tv-time">${tvTime()}</strong><span id="tv-date">${esc(tvDate())}</span></div></div>
+ const z=Number(pref.get('tvzoom',1))||1;
+ return `<div class="tv-frame"><div class="tv-screen" style="--tvz:${z}"><div class="tv-tools no-print">${btn('A−','tvzoom','down',{secondary:true})}${btn('A+','tvzoom','up',{secondary:true})}${btn('Tema','theme','',{secondary:true})}</div><div class="tv-top"><div class="tv-brand">CCA SIEMMU<small>e boni siemmu</small></div><div class="tv-clock"><strong id="tv-time">${tvTime()}</strong><span id="tv-date">${esc(tvDate())}</span></div></div>
  <div class="tv-main"><div class="tv-left"><div class="tv-live ${st?.open?'live-on':'live-off'}"><span class="live-dot" aria-hidden="true"></span>${st?.open?'Aperto ora':'Chiuso al momento'}</div><p class="tv-hours">${esc(st?.days||'Da lunedì a venerdì')} · ${esc(st?.hours||'16:00–20:00')}</p>
  <h2>Prossime attività</h2>${next.length?`<ul class="tv-acts">${next.map(a=>`<li><strong>${esc(a.name)}</strong><span>${dateLong(a.starts_at)}</span><span>${a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</span></li>`).join('')}</ul>`:'<p class="tv-empty">Presto altre attività in calendario.</p>'}</div>
  <div class="tv-right">${villageScene(metrics)}<p class="tv-village">${reached} ${reached===1?'traguardo':'traguardi'} su ${(metrics||[]).length}: il paese cresce con le presenze, le attività e le missioni.</p></div></div>
- <div class="tv-foot">${cowMascot('curioso',tip)}${window.qrcode?`<div class="tv-qr">${qrSvg(location.origin+'/#home','QR code del sito')}<span>Il sito dello spazio</span></div>`:''}</div></div>`;
+ <div class="tv-foot">${cowMascot('curioso',tip,tvTips)}${window.qrcode?`<div class="tv-qr">${qrSvg(location.origin+'/#home','QR code del sito')}<span>Il sito dello spazio</span></div>`:''}</div></div></div>`;
 }
+// La TV è 16:9: la scena è un riquadro fisso 1920×1080 che si adatta allo schermo senza deformarsi.
+function fitTv(){const st=document.querySelector('.tv-screen');if(!st)return;st.style.transform=`translate(-50%,-50%) scale(${Math.min(innerWidth/1920,innerHeight/1080)})`;}
+window.addEventListener('resize',fitTv);
 setInterval(()=>{if(location.hash!=='#tv'||document.hidden)return;const t=document.querySelector('#tv-time');if(t)t.textContent=tvTime();},15000);
 setInterval(()=>{if(location.hash==='#tv'&&!document.hidden)render();},60000);
 
@@ -668,6 +711,7 @@ async function render(focus=false){
  if(id!==renderId)return;
  main.innerHTML=html;
  main.removeAttribute('aria-busy');
+ if(page==='tv')fitTv();
  if(focus){
   const target=page==='banca'&&(detail==='offri'?'time-offer':detail==='scambi'?'time-exchanges':null);
   const node=target&&document.getElementById(target);
@@ -705,8 +749,29 @@ async function run(task,okMessage,{rerender=true}={}){
 async function refreshTotals(){try{const d=await api('/auth/me');if(d.member){S.me=d.member;S.totals=d.totals;S.unread=d.unread??0;}}catch{}}
 
 /* ---- azioni ---- */
+function openTrophy(t){
+ let box=document.querySelector('#trophy-box');
+ if(!box){box=document.createElement('div');box.id='trophy-box';document.body.append(box);}
+ const left=Math.max(0,t.target-t.count),pct=Math.round(t.count/t.target*100);
+ box.className='celebration';box.setAttribute('role','dialog');box.setAttribute('aria-label',`Trofeo: ${t.name}`);
+ box.innerHTML=`<div class="celebration-card trophy-card ${t.earned?'trophy-on':'trophy-off'}">${t.earned?'<div class="confetti" aria-hidden="true">'+Array.from({length:14},(_,i)=>`<i style="left:${(i*41)%100}%;background:${['#caff4d','#fe4400','#8feafc','#ffe043','#ff55a1'][i%5]};animation-delay:${(i%6)*90}ms"></i>`).join('')+'</div>':''}
+  <span class="eyebrow">${esc(t.group.toUpperCase())}</span><div class="trophy-art ${t.earned?'':'locked'}">${art(t.icon)}</div><h2>${esc(t.name)}</h2>
+  <p>${badge(t.earned?'Ottenuto':'Bloccato')}</p><p>${esc(t.desc)}</p>
+  ${t.earned?`<p class="muted">Conquistato il ${dayLong(t.awardedAt)}. Bravə!</p>`:`<progress value="${t.count}" max="${t.target}" aria-label="Progresso"></progress><p><strong>${t.count} / ${t.target}</strong> · ${pct}%</p><p class="muted">${left===1?'Ti manca 1 passo':`Ti mancano ${left} passi`} per sbloccarlo.</p>`}
+  <button type="button" class="btn">Chiudi</button></div>`;
+ box.hidden=false;
+ const close=()=>{box.hidden=true;document.removeEventListener('keydown',k);};
+ const k=e=>{if(e.key==='Escape')close();};
+ document.addEventListener('keydown',k);
+ box.onclick=e=>{if(e.target===box)close();};
+ const b=box.querySelector('button');b.onclick=close;b.focus();
+}
 const actions={
  reload:()=>render(),
+ trophy(id){const t=(S.trophies||[]).find(x=>x.id===id);if(t)openTrophy(t);},
+ theme(){document.querySelector('#theme-toggle').click();render();},
+ tvzoom(id){const z=Math.min(1.6,Math.max(.6,Number(pref.get('tvzoom',1))+(id==='up'?.1:-.1)));pref.set('tvzoom',z.toFixed(2));const el=document.querySelector('.tv-screen');if(el)el.style.setProperty('--tvz',z);},
+ async checkin(){await run(async()=>{const r=await api('/checkin',{method:'POST',body:{}});say(`Ingresso registrato. Benvenutə, ${S.me.pseudonym}!`);return r;},null);},
  print:()=>window.print(),
  async checkout(){await run(()=>api('/checkout',{method:'POST',body:{}}),'Uscita registrata. A presto!');},
  async rotate(){if(!confirm('Il vecchio QR smetterà di funzionare e dovrai ristampare il cartello. Continuare?'))return;await run(()=>api('/checkin-code/rotate',{method:'POST',body:{}}),'Codice cambiato: ristampa il cartello.');},
@@ -777,6 +842,8 @@ const submits={
   const ok=await run(async()=>{const d=await api('/auth/set-password',{method:'POST',body:{token:v('token'),password:v('password')}});S.me=d.member;},null,{rerender:false});
   if(ok){await refreshTotals();location.hash='#home';await render(true);say('Profilo completo. Benvenutə!');}
  },
+ async nick(f,v){await run(async()=>{const d=await api('/auth/profile',{method:'PATCH',body:{pseudonym:v('pseudonym')}});S.me=d.member;},'Nome utente aggiornato.');},
+ async interests(f,v){const list=[...f.querySelectorAll('input[name=interest]:checked')].map(i=>i.value);await run(async()=>{const d=await api('/auth/profile',{method:'PATCH',body:{interests:list}});S.me=d.member;},'Interessi salvati.');},
  async changepw(f,v){if(await run(()=>api('/auth/change-password',{method:'POST',body:{current:v('current'),next:v('next')}}),'Password cambiata.',{rerender:false}))f.reset();},
  avatar(f,v){pref.set('species',v('species')||'mucca');pref.set('color',v('color')||'rosa');say('Avatar salvato.');return render();},
  async chore(f,v,id){if(await run(()=>api('/chores',{method:'POST',body:{typeId:id,note:v('note')}}),'Richiesta inviata: un referente la verificherà.'))return;},
@@ -797,7 +864,7 @@ const submits={
  async choretype(f,v){await run(()=>api('/chore-types',{method:'POST',body:{name:v('name'),description:v('description'),xp:Number(v('xp')),cheese:Number(v('cheese')),path:v('path')}}),'Missione aggiunta al catalogo.');},
  async chorepath(f,v){await run(()=>api(`/chore-types/${encodeURIComponent(f.dataset.id)}`,{method:'PATCH',body:{path:v('path')}}),'Percorso aggiornato.');},
  async activity(f,v){
-  await run(()=>api('/activities/manage',{method:'POST',body:{name:v('name'),startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000),capacity:Number(v('capacity')),verificationRule:v('verificationRule'),xp:Number(v('xp')),cheese:Number(v('cheese')),status:v('status')}}),'Attività creata.');
+  await run(()=>api('/activities/manage',{method:'POST',body:{name:v('name'),startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000),capacity:Number(v('capacity')),verificationRule:v('verificationRule'),xp:Number(v('xp')),cheese:Number(v('cheese')),path:v('path')||null,status:v('status')}}),'Attività creata.');
  }
 };
 main.addEventListener('submit',async event=>{

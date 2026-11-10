@@ -6,6 +6,7 @@ import * as accessi from './routes/accessi.mjs';
 import * as auth from './routes/auth.mjs';
 import * as chores from './routes/chores.mjs';
 import * as members from './routes/members.mjs';
+import * as notifications from './routes/notifications.mjs';
 import * as stats from './routes/stats.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
@@ -43,7 +44,9 @@ const routes = [
  ['POST', '/api/activities/manage', 'organizer', activities.create],
  ['PATCH', '/api/activities/manage/:id', 'organizer', activities.update],
  ['GET', '/api/activities/manage/:id/bookings', 'organizer', activities.bookings],
- ['GET', '/api/my/bookings', 'member', activities.mine]
+ ['GET', '/api/my/bookings', 'member', activities.mine],
+ ['GET', '/api/notifications', 'member', notifications.list],
+ ['POST', '/api/notifications/read', 'member', notifications.markRead]
 ].map(([method, pattern, access, handler]) => ({method, access, handler, parts: pattern.split('/')}));
 
 function match(route, method, parts) {

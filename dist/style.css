@@ -78,3 +78,17 @@ form.plain{border:0;box-shadow:none;background:transparent;padding:0}
 .sr{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #status.error{background:#e9435d;color:#fff}
 .tabs a.btn{margin-top:0;font-size:.9rem}.tabs a.btn:not([aria-current]){background:var(--paper)}.tabs a[aria-current]{background:#284959;color:#fff3d5;border-color:#284959;box-shadow:none}[data-theme="night"] .tabs a.btn:not([aria-current]){background:#29384c;color:#fff3d5;border-color:#8095ad}[data-theme="night"] .tabs a[aria-current]{background:#8feafc;color:#171523;border-color:#8feafc}
+.banner{position:fixed;z-index:50;top:76px;left:50%;transform:translateX(-50%);display:flex;align-items:flex-start;gap:10px;inline-size:min(92vw,560px);padding:12px 14px;border:3px solid var(--ink);box-shadow:4px 4px var(--ink);font-weight:700;line-height:1.4;animation:banner-in .25s ease-out}
+.banner[hidden]{display:none}
+.banner-ok{background:var(--lime)}.banner-error{background:#ffd9cf}
+.banner-icon{flex:none;display:grid;place-items:center;inline-size:26px;block-size:26px;border:2px solid var(--ink);background:#fff;font-weight:900}
+.banner-error .banner-icon{background:var(--orange);color:#fff}
+.banner-text{flex:1}.banner-close{flex:none;min-height:0;inline-size:30px;block-size:30px;padding:0;font-size:1.2rem;box-shadow:none}
+@keyframes banner-in{from{transform:translate(-50%,-14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+@media(prefers-reduced-motion:reduce){.banner{animation:none}}
+.notice-list{display:grid;gap:10px}
+.notice-item{display:flex;gap:12px;align-items:flex-start}.notice-item h3{margin:0 0 4px}.notice-item p{margin:0}
+.notice-icon{flex:none;display:grid;place-items:center;inline-size:30px;block-size:30px;border:2px solid var(--ink);background:var(--sky);font-weight:900}
+.notice-ok .notice-icon{background:var(--lime)}.notice-error .notice-icon{background:var(--orange);color:#fff}
+.notice-unread{border-inline-start-width:8px}
+[data-theme="night"] .banner{color:var(--ink)}

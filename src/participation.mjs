@@ -23,7 +23,7 @@ export async function handleParticipation(request,db,env={}){
  if(api!=='api'||resource!=='activities'||path.length>5)return json({error:'Percorso non trovato.'},404);
 
  if(request.method==='GET'&&!activity){
-  const {results}=await db.prepare(`SELECT a.id,a.name,a.starts_at,a.capacity,a.verification_rule,a.path,
+  const {results}=await db.prepare(`SELECT a.id,a.name,a.starts_at,a.capacity,a.verification_rule,a.path,a.access_mode,a.public_event,
    a.capacity-COUNT(b.member_id) AS available
    FROM activities a LEFT JOIN bookings b ON b.activity_id=a.id AND b.status IN ('pending','confirmed')
    WHERE a.status='published' GROUP BY a.id ORDER BY a.starts_at`).all();
@@ -38,15 +38,16 @@ export async function handleParticipation(request,db,env={}){
  if(action==='reserve'){
   try {
    await query(db,`INSERT INTO bookings (activity_id,member_id,status)
-    SELECT ?,?,'pending' WHERE NOT EXISTS (SELECT 1 FROM bookings WHERE activity_id=? AND member_id=? AND status IN ('pending','confirmed'))
+    SELECT ?,?,'pending' WHERE EXISTS (SELECT 1 FROM activities WHERE id=? AND access_mode='booking')
+    AND NOT EXISTS (SELECT 1 FROM bookings WHERE activity_id=? AND member_id=? AND status IN ('pending','confirmed'))
     ON CONFLICT(activity_id,member_id) DO UPDATE SET status='pending',updated_at=unixepoch()
-    WHERE bookings.status IN ('declined','cancelled')`,activity,actor.id,activity,actor.id).run();
+    WHERE bookings.status IN ('declined','cancelled')`,activity,actor.id,activity,activity,actor.id).run();
   } catch(error){
    if(String(error).includes('booking_unavailable'))return json({error:'La prenotazione non è disponibile.'},409);
    throw error;
   }
   const booking=await query(db,'SELECT status FROM bookings WHERE activity_id=? AND member_id=?',activity,actor.id).first();
-  return booking?json({status:booking.status}):json({error:'La prenotazione non è disponibile.'},409);
+  return ['pending','confirmed'].includes(booking?.status)?json({status:booking.status}):json({error:'La prenotazione non è disponibile.'},409);
  }
 
  if(action==='cancel'){
@@ -78,8 +79,9 @@ export async function handleParticipation(request,db,env={}){
  if(!event||event.starts_at*1000>now||romeDate.format(event.starts_at*1000)!==romeDate.format(now)){
   return json({error:'La presenza si registra dopo l’inizio e nella stessa giornata.'},409);
  }
+ let inserted;
  try {
-  await query(db,`INSERT INTO attendance(activity_id,member_id,verified_by,xp,cheese)
+  inserted=await query(db,`INSERT INTO attendance(activity_id,member_id,verified_by,xp,cheese)
    SELECT id,?,?,xp,cheese FROM activities WHERE id=? AND starts_at=?
    ON CONFLICT(activity_id,member_id) DO NOTHING`,member,actor.id,activity,event.starts_at).run();
  } catch(error){
@@ -88,7 +90,9 @@ export async function handleParticipation(request,db,env={}){
  }
  const attendance=await query(db,'SELECT xp,cheese FROM attendance WHERE activity_id=? AND member_id=?',activity,member).first();
  if(!attendance)return json({error:'L’attività è stata modificata. Riprova.'},409);
- await notifyMember(db,member,'ok','Presenza registrata',`${await activityName(db,activity)}: +${attendance.xp} XP e +${attendance.cheese} Formaggi.`);
- await checkTrophies(env,db,member);
+ if(inserted.meta.changes){
+  await notifyMember(db,member,'ok','Presenza registrata',`${await activityName(db,activity)}: +${attendance.xp} XP e +${attendance.cheese} Formaggi.`);
+  await checkTrophies(env,db,member);
+ }
  return json({attendance});
 }

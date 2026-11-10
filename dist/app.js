@@ -115,7 +115,7 @@ const navDefs={
 function renderChrome(active){
  const ids=!S.me?['home','calendario','spazio','accedi']:isOrganizer()?['home','calendario','missioni','comunita','referenti','profilo']:['home','calendario','missioni','comunita','profilo'];
  const nav=document.querySelector('#nav');
- if(active==='banca')active='comunita';
+ if(['banca','assemblea','proposte'].includes(active))active='comunita';
  nav.style.setProperty('--cols',ids.length);
  nav.innerHTML=ids.map(id=>`<a href="#${id}" ${active===id?'aria-current="page"':''}><span class="nav-icon-tile" aria-hidden="true">${pixelIcon(navIcons[navDefs[id][1]],'nav-icon')}</span>${navDefs[id][0]}</a>`).join('');
  const bell=document.querySelector('#notifications');
@@ -250,11 +250,12 @@ async function comunita(){
  const got=tr.trophies.filter(t=>t.earned).length;
  const open=prop.proposals.filter(p=>p.status==='open').length;
  return title('Comunità','Qui si spendono i Formaggi, si scambia tempo, si propone e si vota.')+
+ section('Assemblea e decisioni',card('<p>Consulta il prossimo incontro, l’ordine del giorno e le decisioni prese insieme.</p>'+link('Vai all’assemblea','assemblea')))+
  section('Scambia tempo e competenze',timeBankCard())+
  section('Cosa vuoi fare?',grid([
   card(`<span class="metric">${S.totals.cheese}</span><h3>A Putìa</h3><p>Spendi i tuoi Formaggi in premi dello spazio.</p>${link('Apri la Putìa','putia')}`,'green'),
   card(`<span class="metric">${got}/${tr.trophies.length}</span><h3>Trofei</h3><p>Si conquistano da soli: basta esserci.</p>${link('I miei trofei','trofei')}`),
-  card(`<span class="metric">${open}</span><h3>Proposte</h3><p>Proponi un’attività e vota quelle degli altri: le più votate vanno in calendario.</p>${link('Proponi e vota','proposte')}`),
+  card(`<span class="metric">${open}</span><h3>Proposte e consultazioni</h3><p>Proponi un’attività e indica quali idee ti interessano. I voti orientano la discussione.</p>${link('Proponi e vota','proposte')}`),
   card(`<h3>U paisi crisci</h3><p>Come cresce il borgo con quello che facciamo insieme.</p>${link('Guarda il paese','paese')}`),
   card(`<h3>Le mie statistiche</h3><p>Ore in sede, serie, XP e percorsi.</p>${link('Le mie statistiche','presenze')}`)
  ]))+mu('home');
@@ -303,14 +304,46 @@ async function proposte(){
  const d=await api('/proposals');
  const open=d.proposals.filter(p=>p.status==='open'),closed=d.proposals.filter(p=>p.status!=='open');
  const org=isOrganizer();
- const item=p=>card(`<h3>${esc(p.title)}</h3><p>${esc(p.description)}</p><p class="muted">di ${esc(p.memberName)} · ${dateShort(p.createdAt)}</p><p><strong>${p.votes}</strong> ${p.votes===1?'voto':'voti'}</p>${p.status==='open'?`${p.mine?badge('La tua proposta'):btn(p.voted?'Togli il voto':'Vota','vote',p.id,{secondary:p.voted,extra:`data-on="${p.voted?0:1}"`})}${org?form('schedule',field('startsAt','Quando','datetime-local','required'),'Porta in calendario',{id:p.id,cls:'inline-form'})+btn('Non accolta','pdecline',p.id,{secondary:true}):''}`:badge(p.status==='scheduled'?'In calendario':'Non accolta')}`);
- return title('Proposte e votazioni',`Proponi un’attività e vota quelle degli altri. Le più votate i referenti le portano in calendario, e chi ha avuto l’idea riceve ${d.reward.xp} XP e ${d.reward.cheese} Formaggi.`)+
- section('In votazione',open.length?grid(open.map(item),'two'):card('<p>Nessuna proposta aperta. Fatti avanti!</p>'))+
+ const item=p=>card(`<h3>${esc(p.title)}</h3><p>${esc(p.description)}</p><p class="muted">di ${esc(p.memberName)} · ${dateShort(p.createdAt)}</p><p><strong>${p.votes}</strong> ${p.votes===1?'voto':'voti'}</p>${p.status==='open'?`${p.mine?badge('La tua proposta'):btn(p.voted?'Togli il voto':'Vota','vote',p.id,{secondary:p.voted,extra:`data-on="${p.voted?0:1}"`})}${org?form('schedule',field('startsAt','Quando','datetime-local','required'),'Crea bozza nel calendario',{id:p.id,cls:'inline-form'})+btn('Non accolta','pdecline',p.id,{secondary:true}):''}`:badge(p.status==='scheduled'?'In programmazione':'Non accolta')}`);
+ return title('Proposte e consultazioni','I voti online raccolgono orientamenti. L’assemblea decide su regole e priorità. Il gruppo operativo organizza turni e calendario.')+
+ card(link('Assemblea e decisioni','assemblea'))+
+ section('Consultazioni aperte',open.length?grid(open.map(item),'two'):card('<p>Nessuna proposta aperta. Fatti avanti!</p>'))+
  section('Fai una proposta',form('proposal','<h3>Un’idea per lo spazio</h3>'+field('title','Titolo','text','required maxlength="100"')+field('description','Descrivila in due righe','text','maxlength="600"').replace(' required',''),'Pubblica la proposta'))+
  (closed.length?section('Già decise',grid(closed.map(item),'two')):'');
 }
 
+const decisionStates={planned:'Da avviare',in_progress:'In corso',done:'Completata'};
+async function assemblea(){
+ if(!S.me)return needLogin();
+ const {meeting,decisions}=await api('/assembly');
+ const upcoming=meeting?.startsAt>Date.now()/1000;
+ return title('Assemblea e decisioni','L’assemblea dei giovani decide sulle regole e sulle priorità. Il gruppo operativo coordina turni e calendario.')+
+ section('Prossima assemblea',card(upcoming
+  ? `<h3>${dateLong(meeting.startsAt)}</h3><p>${esc(meeting.location)}</p><p><strong>Ordine del giorno</strong></p><p class="meeting-notes">${esc(meeting.agenda)}</p>`
+  : '<p>La prossima data sarà pubblicata qui.</p>'))+
+ section('Decisioni dell’assemblea',decisions.length?grid(decisions.map(d=>card(
+  `<p>${dayLong(Date.parse(d.decidedOn+'T12:00:00Z')/1000)} · ${badge(decisionStates[d.status])}</p><h3>${esc(d.title)}</h3>
+   <p class="meeting-notes"><strong>Decisione</strong><br>${esc(d.decision)}</p>
+   <p class="meeting-notes"><strong>Perché</strong><br>${esc(d.reason)}</p><p><strong>Chi se ne occupa</strong><br>${esc(d.responsible)}</p>`
+ )),'two'):card('<p>Le sintesi delle decisioni saranno raccolte qui.</p>'))+
+ card('<p>Usa le consultazioni per proporre idee o indicare le tue preferenze.</p>'+link('Proposte e consultazioni','proposte'))+
+ (isOrganizer()? `<p>${link('Gestisci l’assemblea','referenti/assemblea')}</p>`:'');
+}
+
 /* ---- viste pubbliche ---- */
+const activityBadges=a=>badge(a.access_mode==='open'?'Accesso libero':'Su prenotazione')+(a.public_event?' '+badge('Evento pubblico'):'');
+const nextActivity=activities=>activities.find(a=>a.starts_at>Date.now()/1000);
+const visitInfo=async()=>{try{return (await api('/space/visit')).visit;}catch{return null;}};
+function firstVisit(st,details,upcoming){
+ return section('Vieni per la prima volta',card(`
+  <div class="grid two">
+   <div><h3>Dove e quando</h3><p>${details?.address?esc(details.address):'Indirizzo da confermare. Scrivici prima di venire.'}</p>${openingDetails(st)}</div>
+   <div><h3>Prossima attività</h3>${upcoming?`<p><strong>${esc(upcoming.name)}</strong><br>${dateLong(upcoming.starts_at)}</p><p>${activityBadges(upcoming)}</p>`:'<p>Consulta il calendario per i prossimi appuntamenti.</p>'}</div>
+   <div><h3>Come si entra</h3><p class="meeting-notes">${esc(details?.access||'Lo spazio è gratuito. Il calendario indica se puoi presentarti direttamente o se serve prenotare.')}</p></div>
+   <div><h3>Accessibilità</h3><p class="meeting-notes">${esc(details?.accessibility||'Per informazioni sull’accesso alla sede, scrivici prima di venire.')}</p></div>
+  </div>
+  <div class="row">${link('Apri il calendario','calendario')} <a href="mailto:spaziogiovanigenerazioni@gmail.com">Scrivici</a></div>`,'visit-card'));
+}
 function homeIntro(){
  const artLabel='Borgo dei Monti Sicani in pixel art';
  return `<header class="hero home-hero"><div class="hero-copy"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1>
@@ -319,11 +352,11 @@ function homeIntro(){
  ${S.me?'':'<p class="entry-hint">Il calendario si apre senza account.</p>'}</div>
  <div class="home-scenery"><img class="scenery-day" src="sicani.svg" alt="${artLabel}"><img class="scenery-night" src="sicani-notte.svg" alt="${artLabel} di notte"></div></header>
  <section class="space-signpost"><div><span class="eyebrow">LO SPAZIO GIOVANI</span><h2>Un posto da usare, uno spazio da fare insieme</h2>
- <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Scopri lo spazio','spazio')}</section>`;
+ <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Vieni per la prima volta','spazio')}</section>`;
 }
 async function home(){
- const [st,metrics]=await Promise.all([getStatus(),getCommunity()]);
- return homeIntro()+
+ const [st,metrics,details,acts]=await Promise.all([getStatus(),getCommunity(),visitInfo(),api('/activities').catch(()=>({activities:[]}))]);
+ return homeIntro()+firstVisit(st,details,nextActivity(acts.activities))+
   section('Quando siamo aperti',openingCard(st))+
   section('Scambia tempo e competenze',timeBankCard())+
   section('Come funziona',grid([
@@ -333,7 +366,7 @@ async function home(){
   ]))+villageCard(metrics)+mu('home');
 }
 async function homeMember(){
- const [acts,mine,chores,st,metrics,pres]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending&memberId='+encodeURIComponent(S.me.id)),getStatus(),getCommunity(),api('/checkin').catch(()=>null)]);
+ const [acts,mine,chores,st,metrics,pres,details]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending&memberId='+encodeURIComponent(S.me.id)),getStatus(),getCommunity(),api('/checkin').catch(()=>null),visitInfo()]);
  const presenceCard=pres?card('<span class="eyebrow">LA MIA PRESENZA</span>'+(pres.inside?`<h3>Sei in sede dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</h3><p>Quando esci registra l’uscita da qui, oppure inquadra il QR all’ingresso.</p>${btn('Registra la mia uscita','checkout')}`:`<h3>Non hai ancora registrato l’ingresso</h3><p>Se sei in sede, segna la tua presenza: basta un tocco, senza approvazione. Puoi anche inquadrare il QR all’ingresso.</p>${btn('Registra il mio ingresso','checkin')}`)):'';
  const booked=new Map(mine.bookings.map(b=>[b.activityId,b.status]));
  const upcoming=acts.activities.filter(a=>a.starts_at>Date.now()/1000-3600).slice(0,3);
@@ -346,7 +379,7 @@ async function homeMember(){
    card(`<span class="metric">${mineAll}</span><h3>Missioni da verificare</h3><p>Le richieste in attesa aspettano una decisione.</p>${link('Verifica','referenti/missioni')}`)
   ],'two'));
  }
- return homeIntro()+
+ return homeIntro()+firstVisit(st,details,nextActivity(acts.activities))+
   `<div class="grid stats home-stats" aria-label="Il mio personaggio, Formaggi e orari">${card(profileChip(),'profile-stat')}
    ${card(`<span class="eyebrow">FORMAGGI</span><div class="stat-figure">${pixelIcon(cheese)}<div><strong class="metric">${S.totals.cheese}</strong><span class="stat-label">Formaggi disponibili</span></div></div>${link('A Putìa','putia')}`,'wallet')}
    ${openingCard(st)}</div>`+
@@ -354,7 +387,7 @@ async function homeMember(){
   section('Le mie richieste',card(`<p>${chores.chores.length} missioni in attesa di verifica.</p><div class="row">${link('Vai alle missioni','missioni')}${link('Le mie statistiche','presenze')}</div>`))+
   (presenceCard?section('Presenza',presenceCard):'')+
   extra+
-  section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p><p>${a.available>0?`${a.available} posti liberi su ${a.capacity}`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}`)),'three')+`<p>${link('Tutto il calendario','calendario')}</p>`:card('<p>Non ci sono ancora attività in calendario.</p>'))+villageCard(metrics)+mu('home');
+  section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p><p>${a.access_mode==='open'?'Puoi venire direttamente.':a.available>0?`${a.available} posti liberi su ${a.capacity}`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}`)),'three')+`<p>${link('Tutto il calendario','calendario')}</p>`:card('<p>Non ci sono ancora attività in calendario.</p>'))+villageCard(metrics)+mu('home');
 }
 
 async function calendario(){
@@ -364,23 +397,24 @@ async function calendario(){
  const body=list.length?grid(list.map(a=>{
   const b=booked.get(a.id),active=b&&['pending','confirmed'].includes(b.status);
   let action='';
-  if(!S.me)action=link('Accedi per prenotare','accedi');
+  if(a.access_mode==='open')action='<p>Puoi presentarti direttamente.</p>';
+  else if(!S.me)action=link('Accedi per prenotare','accedi')+(a.public_event?' <a href="mailto:spaziogiovanigenerazioni@gmail.com">Chiedi come partecipare</a>':'');
   else if(active)action=`${badge(statusText[b.status])}<div class="row">${btn('Annulla prenotazione','cancel',a.id,{secondary:true})}</div>`;
   else if(a.available<=0)action=badge('Posti esauriti');
   else action=btn('Prenota un posto','reserve',a.id)+(b&&b.status==='declined'?`<p class="muted">La richiesta precedente è stata rifiutata.</p>`:'');
   const rec=S.me&&a.path&&(S.me.interests||[]).includes(a.path);
-  return card(`${rec?`<p>${badge('Consigliata per te')}</p>`:''}<h3>${esc(a.name)}</h3><p><strong>${dateLong(a.starts_at)}</strong></p><p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p><p class="muted">${esc(a.verification_rule)}</p>${action}`);
+  return card(`${rec?`<p>${badge('Consigliata per te')}</p>`:''}<h3>${esc(a.name)}</h3><p><strong>${dateLong(a.starts_at)}</strong></p><p>${activityBadges(a)}</p>${a.access_mode==='open'?'':`<p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p>`}<p class="muted">${esc(a.verification_rule)}</p>${action}`);
  }),'two'):card('<h3>Ancora nulla in calendario</h3><p>I referenti pubblicheranno qui le prossime attività.</p>');
- return title('Calendario','Le attività dello spazio. La prenotazione è una richiesta: un referente la conferma.')+section('Prossime attività',body)+
+ return title('Calendario','Per le attività ad accesso libero puoi presentarti direttamente. Dove serve una prenotazione, un referente conferma il posto.')+section('Prossime attività',body)+
   (S.me?section('Come funziona',card('<p>Quando prenoti, il posto resta riservato finché un referente decide. Alla fine il referente verifica di persona la tua presenza e ti assegna XP e Formaggi.</p>')):'')+mu('calendario');
 }
 
 async function spazio(){
- const st=await getStatus();
+ const [st,details,acts]=await Promise.all([getStatus(),visitInfo(),api('/activities').catch(()=>({activities:[]}))]);
  return title('Lo spazio','Un luogo gratuito pensato e gestito dai giovani di Cammarata e San Giovanni Gemini.')+
- section('Prima di venire',grid([
+ firstVisit(st,details,nextActivity(acts.activities))+
+ section('Chi può partecipare',grid([
   card('<h3>A chi si rivolge</h3><p>Il progetto si rivolge principalmente a chi ha tra 14 e 30 anni e vive nei due paesi. Puoi venire per studiare, incontrare altre persone o proporre un’attività.</p>'+link(S.me?'Apri il calendario':'Prima volta?',S.me?'calendario':'accedi')),
-  card('<h3>Quando ci trovi</h3>'+openingDetails(st)+link('Apri il calendario','calendario')),
   card(`<h3>Come entri</h3><p>All’ingresso e all’uscita puoi usare il QR. Un referente può aiutarti o registrare la tua presenza con la tessera.</p>${link(S.me?'Le mie presenze':'Accedi',S.me?'presenze':'accedi')}`,'green')
  ],'space-visit'))+
  section('Come si partecipa',card('<h3>Dall’idea all’assemblea</h3><p>Puoi proporre un laboratorio, dare una mano con le missioni o portare una questione all’assemblea in sede. Ascolta chi usa lo spazio, rispetta le differenze e lascia in ordine i materiali comuni.</p>'))+
@@ -507,7 +541,7 @@ async function profilo(){
 }
 
 /* ---- pannello referenti ---- */
-const tabs=[['panoramica','Panoramica'],['soci','Soci'],['presenze','Presenze'],['missioni','Missioni'],['putia','Putìa'],['attivita','Attività'],['statistiche','Statistiche']];
+const tabs=[['panoramica','Panoramica'],['soci','Soci'],['presenze','Presenze'],['missioni','Missioni'],['putia','Putìa'],['attivita','Attività'],['assemblea','Assemblea'],['sede','Prima visita'],['statistiche','Statistiche']];
 const tabBar=active=>`<div class="tabs" role="navigation" aria-label="Sezioni del pannello">${tabs.map(([id,name])=>`<a class="btn" href="#referenti/${id==='panoramica'?'':id}" ${id===active?'aria-current="page"':''}>${name}</a>`).join('')}</div>`;
 const copyBox=(url)=>`<div class="invite-link"><input readonly value="${esc(url)}" aria-label="Link d’invito"><button type="button" data-action="copy" data-value="${esc(url)}">Copia</button></div>`;
 const waNumber=raw=>{let d=String(raw||'').replace(/[^\d+]/g,'');if(d.startsWith('+'))d=d.slice(1);else if(d.startsWith('00'))d=d.slice(2);else if(d.startsWith('3')&&d.length>=9&&d.length<=10)d='39'+d;return /^\d{8,15}$/.test(d)?d:'';};
@@ -519,7 +553,7 @@ async function referenti(tab,extra){
  if(!S.me)return needLogin();
  if(!isOrganizer())return needOrganizer();
  const head=title('Area referenti','Gestione di soci, presenze, missioni e attività.')+tabBar(tab||'panoramica');
- const pages={panoramica:panPanoramica,soci:panSoci,presenze:panPresenze,missioni:panFaccende,putia:panPutia,attivita:()=>panAttivita(extra),statistiche:panStatistiche};
+ const pages={panoramica:panPanoramica,soci:panSoci,presenze:panPresenze,missioni:panFaccende,putia:panPutia,attivita:()=>panAttivita(extra),assemblea:panAssemblea,sede:panPrimaVisita,statistiche:panStatistiche};
  const render=pages[tab||'panoramica'];
  if(!render)return head+card('<p>Sezione non trovata.</p>');
  return head+await render();
@@ -572,18 +606,63 @@ async function panPutia(){
  section('Premi in vetrina',grid(rw.rewards.map(r=>card(`<h3>${esc(r.name)} ${r.active?'':badge('Non attivo')}</h3><p>${r.cost} Formaggi · ${r.stock===null?'scorta illimitata':r.stock+' disponibili'}</p>${form('rewardedit',field('cost','Costo','number',`required min="1" max="5000" value="${r.cost}"`)+field('quantity','Quantità totale (vuoto = illimitata)','number',`min="0" max="10000" value="${r.quantity??''}"`).replace(' required',''),'Salva',{id:r.id,cls:'inline-form'})}${btn(r.active?'Togli dalla vetrina':'Rimetti in vetrina','rewardActive',r.id,{secondary:true,extra:`data-active="${r.active?0:1}"`})}`)),'two'))+
  section('Nuovo premio',form('reward','<h3>Aggiungi un premio</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="300"').replace(' required','')+field('cost','Costo in Formaggi','number','required min="1" max="5000" value="20"')+field('quantity','Quantità (vuoto = illimitata)','number','min="0" max="10000"').replace(' required','')+`<label>Icona<select name="art">${ARTS.map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}</select></label>`,'Aggiungi il premio'));
 }
+const textArea=(name,label,max,value='',required=false)=>`<label>${label}<textarea name="${name}" maxlength="${max}"${required?' required':''}>${esc(value)}</textarea></label>`;
+async function panPrimaVisita(){
+ const {visit}=await api('/space/visit');
+ return section('Prima visita',form('visit', '<p>Queste informazioni sono pubbliche. Inserisci solo dettagli verificati sulla sede.</p>'+
+  field('address','Indirizzo','text',`maxlength="200" value="${esc(visit?.address)}"`)+
+  textArea('access','Modalità di accesso',600,visit?.access)+
+  textArea('accessibility','Accessibilità della sede',600,visit?.accessibility),'Salva informazioni'));
+}
+
+function decisionForm(d={}){
+ const status=`<label>Stato<select name="status">${Object.entries(decisionStates).map(([id,label])=>`<option value="${id}"${d.status===id?' selected':''}>${label}</option>`).join('')}</select></label>`;
+ return form('decision',
+  field('decidedOn','Data dell’assemblea','date',`required value="${esc(d.decidedOn)}"`)+
+  field('title','Titolo','text',`required maxlength="120" value="${esc(d.title)}"`)+
+  textArea('decision','Cosa è stato deciso',1000,d.decision,true)+textArea('reason','Perché',1000,d.reason,true)+
+  field('responsible','Gruppo o ruolo che se ne occupa','text',`required maxlength="120" value="${esc(d.responsible)}"`)+status,
+  d.id?'Aggiorna decisione':'Pubblica decisione',{id:d.id,cls:'plain'});
+}
+
+async function panAssemblea(){
+ const {meeting,decisions}=await api('/assembly');
+ const when=meeting?new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(meeting.startsAt*1000)).replace(' ','T'):'';
+ return section('Prossima assemblea',form('assembly',field('startsAt','Data e ora (Italia)','datetime-local',`required value="${esc(when)}"`)+
+  field('location','Luogo','text',`required maxlength="160" value="${esc(meeting?.location)}"`)+
+  textArea('agenda','Ordine del giorno',1600,meeting?.agenda,true),'Pubblica convocazione')+
+  (meeting?`<p class="subpage-back">${btn('Rimuovi convocazione','assembly-clear','',{secondary:true})}</p>`:''))+
+ section('Registra una decisione',card('<p>Riporta una decisione già presa in assemblea. Usa il nome di un gruppo o di un ruolo ed evita dati personali.</p>'+decisionForm()))+
+ section('Decisioni pubblicate',decisions.length?grid(decisions.map(d=>card(`<details class="disclosure"><summary>${esc(d.title)} · ${decisionStates[d.status]}</summary>${decisionForm(d)}</details>`)),'two'):card('<p>Ancora nessuna decisione.</p>'));
+}
+
+function activityAccessFields(a={}){
+ return `<label>Modalità di accesso<select name="accessMode"><option value="booking">Su prenotazione</option><option value="open"${a.accessMode==='open'?' selected':''}>Accesso libero</option></select></label>
+ <label class="sound-setting"><input name="publicEvent" type="checkbox"${a.publicEvent?' checked':''}> Mostra come evento pubblico</label>`;
+}
+
 async function panAttivita(id){
  if(id){
   const [{bookings},{activities}]=await Promise.all([api(`/activities/manage/${encodeURIComponent(id)}/bookings`),api('/activities/manage')]);
   const a=activities.find(x=>x.id===id);
   if(!a)return card('<p>Attività non trovata.</p>'+link('Torna alle attività','referenti/attivita'));
+  let walkIn='';
+  if(a.accessMode==='open'&&a.status==='published'){
+   const {members}=await api('/members');
+   const eligible=members.filter(m=>m.status==='approved'&&m.id!==S.me.id);
+   if(eligible.length)walkIn=section('Presenze ad accesso libero',form('walkin',
+    `<p>Registra solo persone verificate di persona, dopo l’inizio e nella stessa giornata.</p>
+     <label>Partecipante<select name="memberId" required><option value="">Seleziona</option>${eligible.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}</option>`).join('')}</select></label>`,
+    'Registra presenza',{id:a.id}));
+  }
   return section(esc(a.name),card(`<p>${dateLong(a.startsAt)} · ${statusText[a.status]} · ${a.capacity} posti</p><p class="muted">${esc(a.verificationRule)}</p><p>${a.xp} XP · ${a.cheese} Formaggi a chi partecipa</p>`)+`<p>${link('Tutte le attività','referenti/attivita')}</p>`)+
-  section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended&&b.memberId!==S.me.id?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>'));
+  section('Accesso all’attività',form('activity-access',activityAccessFields(a),'Salva modalità',{id:a.id}))+walkIn+
+  (a.accessMode==='open'?'':section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended&&b.memberId!==S.me.id?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>')));
  }
  const {activities}=await api('/activities/manage');
- const create=form('activity','<h3>Nuova attività</h3>'+field('name','Titolo','text','required maxlength="120"')+field('startsAt','Data e ora','datetime-local','required')+field('capacity','Posti','number','required min="1" max="500" value="25"')+field('verificationRule','Come verifichi la presenza','text','required maxlength="300" value="Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."')+field('xp','XP','number','required min="0" max="500" value="30"')+field('cheese','Formaggi','number','required min="0" max="200" value="5"')+`<label>Percorso (facoltativo, per i consigli)<select name="path"><option value="">Nessuno</option>${PATHS.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('')}</select></label><label>Stato<select name="status"><option value="draft">Bozza (non visibile)</option><option value="published">Pubblicata</option></select></label>`,'Crea attività');
+ const create=form('activity','<h3>Nuova attività</h3>'+field('name','Titolo','text','required maxlength="120"')+field('startsAt','Data e ora','datetime-local','required')+field('capacity','Posti','number','required min="1" max="500" value="25"')+activityAccessFields()+field('verificationRule','Come verifichi la presenza','text','required maxlength="300" value="Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."')+field('xp','XP','number','required min="0" max="500" value="30"')+field('cheese','Formaggi','number','required min="0" max="200" value="5"')+`<label>Percorso (facoltativo, per i consigli)<select name="path"><option value="">Nessuno</option>${PATHS.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('')}</select></label><label>Stato<select name="status"><option value="draft">Bozza (non visibile)</option><option value="published">Pubblicata</option></select></label>`,'Crea attività');
  const prefill=`<p><button type="button" class="secondary" data-action="prefill">Precompila con la prima attività reale</button></p>`;
- return section('Nuova attività',prefill+create)+section(`Attività (${activities.length})`,activities.length?grid(activities.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.startsAt)} · ${badge(statusText[a.status])}</p><p>${a.pending} in attesa · ${a.confirmed} confermate · ${a.attended} presenze · ${a.capacity} posti</p><div class="row">${a.status!=='published'&&a.status!=='cancelled'?btn('Pubblica','act-status',a.id,{extra:'data-status="published"'}):''}${a.status==='published'?btn('Torna a bozza','act-status',a.id,{secondary:true,extra:'data-status="draft"'}):''}${a.status!=='cancelled'?btn('Annulla','act-status',a.id,{secondary:true,extra:'data-status="cancelled"'}):''}<a class="btn" href="#referenti/attivita/${esc(a.id)}">Prenotazioni →</a></div>`)),'two'):card('<p>Nessuna attività creata.</p>'));
+ return section('Nuova attività',prefill+create)+section(`Attività (${activities.length})`,activities.length?grid(activities.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.startsAt)} · ${badge(statusText[a.status])}</p><p>${a.pending} in attesa · ${a.confirmed} confermate · ${a.attended} presenze · ${a.capacity} posti</p><div class="row">${a.status!=='published'&&a.status!=='cancelled'?btn('Pubblica','act-status',a.id,{extra:'data-status="published"'}):''}${a.status==='published'?btn('Torna a bozza','act-status',a.id,{secondary:true,extra:'data-status="draft"'}):''}${a.status!=='cancelled'?btn('Annulla','act-status',a.id,{secondary:true,extra:'data-status="cancelled"'}):''}<a class="btn" href="#referenti/attivita/${esc(a.id)}">Gestisci attività →</a></div>`)),'two'):card('<p>Nessuna attività creata.</p>'));
 }
 async function panStatistiche(){
  const s=await api('/stats/sede?days=90').catch(()=>api('/stats/sede'));
@@ -676,7 +755,7 @@ async function render(focus=false){
  if(!S.loaded)await loadSession();
  else if(S.me){await refreshTotals();checkLevelUp();}
  document.body.classList.toggle('tv',page==='tv');
- const known=['comunita','trofei','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','imposta-password'];
+ const known=['comunita','assemblea','trofei','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','imposta-password'];
  const active=known.includes(page)?page:'';
  renderChrome(active);
  main.setAttribute('aria-busy','true');
@@ -688,6 +767,7 @@ async function render(focus=false){
   else if(page==='spazio')html=await spazio();
   else if(page==='paese')html=await paese();
   else if(page==='comunita')html=await comunita();
+  else if(page==='assemblea')html=await assemblea();
   else if(page==='trofei')html=await trofei();
   else if(page==='putia')html=await putia();
   else if(page==='banca')html=await banca();
@@ -766,6 +846,7 @@ function openTrophy(t){
  const b=box.querySelector('button');b.onclick=close;b.focus();
 }
 const actions={
+ async 'assembly-clear'(){await run(()=>api('/assembly/meeting',{method:'PUT',body:{clear:true}}),'Convocazione rimossa.');},
  reload:()=>render(),
  trophy(id){const t=(S.trophies||[]).find(x=>x.id===id);if(t)openTrophy(t);},
  theme(){document.querySelector('#theme-toggle').click();render();},
@@ -811,6 +892,7 @@ const actions={
   f.elements.name.value='Giornata internazionale contro la violenza sulle donne';
   f.elements.startsAt.value='2026-11-25T17:30';f.elements.capacity.value='25';
   f.elements.status.value='draft';
+  f.elements.accessMode.value='booking';f.elements.publicEvent.checked=true;
  }
 };
 main.addEventListener('click',event=>{
@@ -823,6 +905,22 @@ main.addEventListener('click',event=>{
 });
 
 const submits={
+ async visit(_f,v){
+  await run(()=>api('/space/visit',{method:'PUT',body:{address:v('address'),access:v('access'),accessibility:v('accessibility')}}),'Informazioni della sede aggiornate.');
+ },
+ async assembly(_f,v){
+  await run(()=>api('/assembly/meeting',{method:'PUT',body:{startsAt:v('startsAt'),location:v('location'),agenda:v('agenda')}}),'Convocazione pubblicata.');
+ },
+ async decision(_f,v,id){
+  const body={decidedOn:v('decidedOn'),title:v('title'),decision:v('decision'),reason:v('reason'),responsible:v('responsible'),status:v('status')};
+  await run(()=>api(id?`/assembly/decisions/${encodeURIComponent(id)}`:'/assembly/decisions',{method:id?'PUT':'POST',body}),id?'Decisione aggiornata.':'Decisione pubblicata.');
+ },
+ async 'activity-access'(f,v,id){
+  await run(()=>api(`/activities/manage/${encodeURIComponent(id)}`,{method:'PATCH',body:{accessMode:v('accessMode'),publicEvent:f.elements.publicEvent.checked}}),'Modalità di accesso aggiornata.');
+ },
+ async walkin(_f,v,id){
+  await run(()=>api(`/activities/${encodeURIComponent(id)}/attendance`,{method:'POST',body:{memberId:v('memberId')}}),'Presenza registrata.');
+ },
  async learning(_f,v){
   await run(()=>api('/my/learning-journal',{method:'PUT',body:{goal:v('goal'),evidence:v('evidence'),reflection:v('reflection')}}),'Riflessione salvata nel tuo account.',{rerender:false});
  },
@@ -863,7 +961,7 @@ const submits={
  async choretype(f,v){await run(()=>api('/chore-types',{method:'POST',body:{name:v('name'),description:v('description'),xp:Number(v('xp')),cheese:Number(v('cheese')),path:v('path')}}),'Missione aggiunta al catalogo.');},
  async chorepath(f,v){await run(()=>api(`/chore-types/${encodeURIComponent(f.dataset.id)}`,{method:'PATCH',body:{path:v('path')}}),'Percorso aggiornato.');},
  async activity(f,v){
-  await run(()=>api('/activities/manage',{method:'POST',body:{name:v('name'),startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000),capacity:Number(v('capacity')),verificationRule:v('verificationRule'),xp:Number(v('xp')),cheese:Number(v('cheese')),path:v('path')||null,status:v('status')}}),'Attività creata.');
+  await run(()=>api('/activities/manage',{method:'POST',body:{name:v('name'),startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000),capacity:Number(v('capacity')),verificationRule:v('verificationRule'),xp:Number(v('xp')),cheese:Number(v('cheese')),path:v('path')||null,status:v('status'),accessMode:v('accessMode'),publicEvent:f.elements.publicEvent.checked}}),'Attività creata.');
  }
 };
 main.addEventListener('submit',async event=>{

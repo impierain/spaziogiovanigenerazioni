@@ -363,3 +363,64 @@ html[data-theme="night"] .home-shortcuts .shortcut-links a { background: #203228
 html[data-theme="night"] .home-shortcuts .shortcut-links a:hover { background: #D8B4F8; color: #2C3531; }
 @media(min-width:760px){.shortcut-links {grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media print {nav.home-shortcuts{display:none;}}
+
+/* Ritmo comune: due famiglie, griglia fluida e priorità leggibili. */
+:root {
+ --space-1: 8px; --space-2: 16px; --space-3: 24px; --space-4: 32px;
+ --font-body: system-ui, sans-serif;
+ --font-label: ui-monospace, monospace;
+}
+body, button, input, select, textarea { font-family: var(--font-body); }
+.eyebrow, .tag, .demo, .brand small { font-family: var(--font-label); }
+main { padding-block: var(--space-3) 112px; }
+main > section + section { margin-top: var(--space-4); }
+.section-head { gap: var(--space-2); margin-bottom: var(--space-2); flex-wrap: wrap; }
+h1 { line-height: 1.08; }
+h2 { line-height: 1.16; }
+h3 { line-height: 1.25; }
+p, li { line-height: 1.6; }
+.grid { gap: var(--space-2); align-items: stretch; }
+.grid > *, .row > *, .section-head > * { min-width: 0; }
+.card, .notice { padding: var(--space-3); gap: var(--space-2); }
+.card > :is(.btn,button):last-child { align-self: end; }
+.card > p { max-width: 65ch; }
+.card h3, .card p, .shortcut-links a { overflow-wrap: anywhere; }
+.row { gap: 12px; }
+button, .btn { border: 2px solid var(--ink); border-radius: 0; min-height: 46px; padding: 10px 16px; line-height: 1.35; }
+input, select, textarea { border-radius: 0; min-height: 46px; line-height: 1.4; }
+input:is([type=radio],[type=checkbox]) { min-height: auto; }
+fieldset { min-width: 0; margin: 0; padding: var(--space-2); gap: 12px; }
+form { gap: var(--space-2); }
+label { gap: 8px; }
+.page-title { padding: var(--space-3); margin-bottom: var(--space-3); }
+.page-title p { margin-top: 12px; max-width: 60ch; }
+.hero-copy { padding: clamp(24px,4vw,48px); }
+.hero-copy .row { margin-top: var(--space-3); }
+.tabs { gap: 8px; margin-block: var(--space-3); }
+.tabs :is(a,button):not([aria-current]):not([aria-pressed=true]) { background: var(--paper); color: inherit; box-shadow: none; }
+.tabs :is(a[aria-current],button[aria-pressed=true]) { border-bottom-width: 4px; }
+nav.home-shortcuts { gap: var(--space-2); padding: var(--space-3); margin-bottom: var(--space-4); }
+.home-shortcuts h2 { font-size: clamp(1.35rem,2vw,1.7rem); }
+.home-shortcuts h3 { padding-top: var(--space-2); border-top: 1px solid #81917D; }
+.shortcut-links { gap: 12px; }
+.home-shortcuts .shortcut-links a { padding: 12px; min-height: 48px; line-height: 1.4; border-color: #81917D; box-shadow: none; }
+.home-shortcuts .shortcut-primary a { background: #4E9F3D; color: #182018; border-color: #2C3531; font-size: .95rem; }
+.shortcut-more summary { cursor: pointer; min-height: 46px; padding-block: 12px; font-weight: 750; }
+.shortcut-more[open] summary { margin-bottom: 12px; }
+html[data-theme="night"] .home-shortcuts .shortcut-primary a { background: #4E9F3D; color: #182018; }
+html[data-theme="night"] .tabs :is(a,button):not([aria-current]):not([aria-pressed=true]) { background: #203228; color: #F4F1EA; border-color: #93A78D; }
+@media(max-width:420px) {
+ .card, .notice, .page-title, nav.home-shortcuts { padding: var(--space-2); }
+ .shortcut-primary { grid-template-columns: 1fr; }
+ .shortcut-links a { font-size: .85rem; }
+ .grid.stats { gap: 12px; }
+}
+@media(min-width:1000px) { main { padding: 32px 32px 48px; } }
+.home-shortcuts .shortcut-primary a:not(:first-child) { background: var(--paper); color: #2C3531; border-color: #81917D; }
+html[data-theme="night"] .home-shortcuts .shortcut-primary a:not(:first-child) { background: #203228; color: #F4F1EA; }
+.home-shortcuts .shortcut-primary a:hover, html[data-theme="night"] .home-shortcuts .shortcut-primary a:hover { background: #D8B4F8; color: #2C3531; }
+main .home-shortcuts .shortcut-links a { color: #2C3531; }
+main .home-shortcuts .shortcut-primary a:first-child { color: #182018; }
+html[data-theme="night"] main .home-shortcuts .shortcut-links a { color: #F4F1EA; }
+html[data-theme="night"] main .home-shortcuts .shortcut-primary a:first-child { color: #182018; }
+main .home-shortcuts .shortcut-links a:hover, html[data-theme="night"] main .home-shortcuts .shortcut-links a:hover { color: #2C3531; }

@@ -459,7 +459,8 @@ function homeShortcuts(){
  ];
  const links=items=>items.map(([name,route])=>`<a href="#${route}">${name}<span aria-hidden="true"> →</span></a>`).join('');
  return `<nav class="home-shortcuts" aria-label="Accessi rapidi">
-  <h2>Cosa vuoi fare?</h2><div class="shortcut-links">${links(personal)}</div>
+  <h2>Cosa vuoi fare?</h2><div class="shortcut-links shortcut-primary">${links(personal.slice(0,3))}</div>
+  <details class="shortcut-more"><summary>Comunità, percorso e informazioni</summary><div class="shortcut-links">${links(personal.slice(3))}</div></details>
   ${isOrganizer()?`<h3>Per i referenti</h3><div class="shortcut-links">${links(staff)}</div>`:''}
  </nav>`;
 }

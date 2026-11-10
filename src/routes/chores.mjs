@@ -1,6 +1,7 @@
 import {fail, json, readJson, integer, text} from '../lib/http.mjs';
 import {romeWeekStart} from '../lib/time.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
+import {checkTrophies} from '../lib/trophies.mjs';
 
 // Come per le missioni ripetibili: al massimo 12 Formaggi a settimana dalle missioni.
 export const WEEKLY_CHEESE_CAP = 12;
@@ -70,7 +71,7 @@ export async function listLogs({url, db, member}) {
 }
 
 // Applica la decisione del referente. Il tetto settimanale taglia i Formaggi, non gli XP.
-async function decide(db, logId, organizerId, verdict) {
+async function decide(db, logId, organizerId, verdict, env = {}) {
  const log = await db.prepare(`SELECT l.id, l.member_id, l.status, c.xp, c.cheese, c.name
   FROM chore_logs l JOIN chore_types c ON c.id = l.chore_type_id WHERE l.id = ?`).bind(logId).first();
  if (!log) fail(404, 'Missione non trovata.');
@@ -95,10 +96,11 @@ async function decide(db, logId, organizerId, verdict) {
  await notify(db, log.member_id, verdict === 'verified'
   ? {kind: 'faccenda', level: 'ok', title: `Missione confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${cheese} Formaggi.${cheeseCapped ? ' I Formaggi sono ridotti per il limite settimanale.' : ''}`}
   : {kind: 'faccenda', level: 'info', title: `Missione non confermata: ${log.name}`, body: 'Un referente non l’ha convalidata. Chiedi a lui il motivo.'});
+ if (verdict === 'verified') await checkTrophies(env, db, log.member_id);
  return {id: logId, status: verdict, xp, cheese, cheeseCapped};
 }
 
-export async function createLog({request, db, member}) {
+export async function createLog({request, env, db, member}) {
  const body = await readJson(request);
  const choreType = await db.prepare('SELECT id FROM chore_types WHERE id = ? AND active = 1').bind(text(body.typeId, 'Missione', {max: 80})).first();
  if (!choreType) fail(404, 'Missione non trovata.');
@@ -115,7 +117,7 @@ export async function createLog({request, db, member}) {
   await notifyOrganizers(db, memberId, {kind: 'faccenda', level: 'info', title: `Nuova missione da verificare: ${type?.name ?? ''}`, body: `Richiesta di ${name?.pseudonym ?? 'un socio'}. Vai in Referenti → Missioni.`});
  }
  // Un referente che registra la missione di un altro socio la convalida subito.
- const outcome = onBehalf ? await decide(db, id, member.id, 'verified') : null;
+ const outcome = onBehalf ? await decide(db, id, member.id, 'verified', env) : null;
  const row = await db.prepare(`${logSql} WHERE l.id = ?`).bind(id).first();
  return json({chore: row, outcome}, 201);
 }
@@ -126,8 +128,8 @@ const choreId = params => {
  return id;
 };
 
-export async function verify({db, member, params}) {
- return json({outcome: await decide(db, choreId(params), member.id, 'verified')});
+export async function verify({env, db, member, params}) {
+ return json({outcome: await decide(db, choreId(params), member.id, 'verified', env)});
 }
 
 export async function reject({db, member, params}) {

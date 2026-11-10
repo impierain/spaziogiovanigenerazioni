@@ -14,3 +14,7 @@ binding = "DB"
 database_name = "spaziogiovanigenerazioni"
 database_id = "dcaae33c-5fe3-4967-80f5-b6fd1dd456dd"
 migrations_dir = "migrations"
+
+# Promemoria e riepilogo settimanale: ogni giorno alle 07:00 UTC.
+[triggers]
+crons = ["0 7 * * *"]

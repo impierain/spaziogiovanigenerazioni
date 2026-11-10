@@ -8,6 +8,11 @@ import * as chores from './routes/chores.mjs';
 import * as members from './routes/members.mjs';
 import * as notifications from './routes/notifications.mjs';
 import * as stats from './routes/stats.mjs';
+import * as trophies from './routes/trophies.mjs';
+import * as putia from './routes/putia.mjs';
+import * as banca from './routes/banca.mjs';
+import * as proposte from './routes/proposte.mjs';
+import {runDaily} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
 const routes = [
@@ -48,6 +53,31 @@ const routes = [
  ['GET', '/api/activities/manage/:id/bookings', 'organizer', activities.bookings],
  ['GET', '/api/my/bookings', 'member', activities.mine],
  ['GET', '/api/my/progress', 'member', stats.progress],
+ ['GET', '/api/trophies', 'member', trophies.list],
+
+ ['GET', '/api/rewards', 'member', putia.list],
+ ['POST', '/api/rewards', 'organizer', putia.create],
+ ['PATCH', '/api/rewards/:id', 'organizer', putia.update],
+ ['POST', '/api/rewards/:id/redeem', 'member', putia.redeem],
+ ['GET', '/api/redemptions', 'member', putia.redemptions],
+ ['POST', '/api/redemptions/:id/deliver', 'organizer', putia.deliver],
+ ['POST', '/api/redemptions/:id/cancel', 'member', putia.cancel],
+
+ ['GET', '/api/time-offers', 'member', banca.list],
+ ['POST', '/api/time-offers', 'member', banca.createOffer],
+ ['POST', '/api/time-offers/:id/close', 'member', banca.closeOffer],
+ ['POST', '/api/time-offers/:id/request', 'member', banca.requestOffer],
+ ['POST', '/api/time-exchanges/:id/accept', 'member', banca.accept],
+ ['POST', '/api/time-exchanges/:id/decline', 'member', banca.decline],
+ ['POST', '/api/time-exchanges/:id/done', 'member', banca.done],
+ ['POST', '/api/time-exchanges/:id/cancel', 'member', banca.cancel],
+
+ ['GET', '/api/proposals', 'member', proposte.list],
+ ['POST', '/api/proposals', 'member', proposte.create],
+ ['POST', '/api/proposals/:id/vote', 'member', proposte.vote],
+ ['POST', '/api/proposals/:id/schedule', 'organizer', proposte.schedule],
+ ['POST', '/api/proposals/:id/decline', 'organizer', proposte.decline],
+
  ['GET', '/api/notifications', 'member', notifications.list],
  ['POST', '/api/notifications/read', 'member', notifications.markRead]
 ].map(([method, pattern, access, handler]) => ({method, access, handler, parts: pattern.split('/')}));
@@ -80,11 +110,14 @@ async function handle(request, env) {
  }
 
  // Attività e prenotazioni del pilota (elenco, prenota, annulla, conferma, convalida).
- if (parts[1] === 'api' && parts[2] === 'activities') return handleParticipation(request, db);
+ if (parts[1] === 'api' && parts[2] === 'activities') return handleParticipation(request, db, env);
  return json({error: 'Percorso non trovato.'}, 404);
 }
 
 export default {
+ async scheduled(event, env, ctx) {
+  ctx.waitUntil(runDaily(env));
+ },
  async fetch(request, env) {
   const url = new URL(request.url);
   if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);

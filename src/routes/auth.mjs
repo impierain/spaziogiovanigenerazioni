@@ -13,8 +13,8 @@ export const publicMember = member => ({
 });
 
 export async function memberTotals(db, memberId) {
- const row = await db.prepare('SELECT xp, cheese_earned FROM member_totals WHERE member_id = ?').bind(memberId).first();
- return {xp: row?.xp ?? 0, cheese: row?.cheese_earned ?? 0};
+ const row = await db.prepare('SELECT xp, cheese_earned, cheese_spent FROM member_totals WHERE member_id = ?').bind(memberId).first();
+ return {xp: row?.xp ?? 0, cheese: (row?.cheese_earned ?? 0) - (row?.cheese_spent ?? 0), earned: row?.cheese_earned ?? 0};
 }
 
 export async function login({request, db}) {

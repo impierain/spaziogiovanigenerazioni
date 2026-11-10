@@ -1,4 +1,5 @@
 import {fail, json, readJson, integer, text} from '../lib/http.mjs';
+import {checkTrophies} from '../lib/trophies.mjs';
 
 const STALE_SECONDS = 16 * 3600; // un ingresso senza uscita dopo 16 ore si considera dimenticato
 
@@ -24,7 +25,7 @@ export async function recordAccess(db, {memberId, direction, at, source, deviceI
  return {direction: next, at, sinceMinutes: next === 'OUT' && last ? Math.round((at - last.at) / 60) : null};
 }
 
-export async function create({request, db, member}) {
+export async function create({request, env, db, member}) {
  const body = await readJson(request);
  const memberId = text(body.memberId, 'Socio', {max: 64});
  const target = await db.prepare(`SELECT id, pseudonym FROM members WHERE id = ? AND status = 'approved'`).bind(memberId).first();
@@ -33,6 +34,7 @@ export async function create({request, db, member}) {
  const at = body.at === undefined ? now : integer(body.at, 'Orario', {min: now - 14 * 86400, max: now});
  if (body.direction !== undefined && !['IN', 'OUT'].includes(body.direction)) fail(400, 'Direzione non valida.');
  const result = await recordAccess(db, {memberId, direction: body.direction, at, source: 'pannello', recordedBy: member.id});
+ if (result.direction === 'IN') await checkTrophies(env, db, memberId);
  return json({access: {...result, memberId, name: target.pseudonym}}, 201);
 }
 

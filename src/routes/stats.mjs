@@ -226,5 +226,8 @@ export async function progress({db, member}) {
  const counts = Object.fromEntries(results.map(r => [r.path, r.n]));
  const attended = (await db.prepare('SELECT COUNT(*) AS n FROM attendance WHERE member_id = ?').bind(member.id).first())?.n ?? 0;
  counts.socialita = (counts.socialita ?? 0) + attended;
- return json({counts, attended});
+ const firstVisitCompleted = !!(await db.prepare(`SELECT 1 AS found FROM chore_logs
+  WHERE member_id = ? AND chore_type_id = 'prima-visita' AND status = 'verified' LIMIT 1`)
+  .bind(member.id).first());
+ return json({counts, attended, firstVisitCompleted});
 }

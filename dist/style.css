@@ -77,4 +77,4 @@ form.plain{border:0;box-shadow:none;background:transparent;padding:0}
 .muted-card{opacity:.65}
 .sr{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #status.error{background:#e9435d;color:#fff}
-.tabs a[aria-current]{font-weight:800;text-decoration:underline}
+.tabs a.btn{margin-top:0;font-size:.9rem}.tabs a.btn:not([aria-current]){background:var(--paper)}.tabs a[aria-current]{background:#284959;color:#fff3d5;border-color:#284959;box-shadow:none}[data-theme="night"] .tabs a.btn:not([aria-current]){background:#29384c;color:#fff3d5;border-color:#8095ad}[data-theme="night"] .tabs a[aria-current]{background:#8feafc;color:#171523;border-color:#8feafc}

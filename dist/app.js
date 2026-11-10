@@ -176,10 +176,9 @@ document.addEventListener('click',e=>{const m=e.target.closest('.mascot.talk');i
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.mascot.talk')){e.preventDefault();nextTip(e.target);}});
 
 const halfway=m=>m.value>=Math.ceil(m.target/2);
-const fx=()=>`<div class="fx" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="bird"></i><i class="smoke s1"></i><i class="smoke s2"></i><i class="star t1"></i><i class="star t2"></i><i class="star t3"></i></div>`;
 function villageScene(metrics){
  const reached=(metrics||[]).filter(halfway);
- return `<div class="village">${fx()}<img class="scenery-day" src="sicani.svg" alt="Paese pixel ispirato a Cammarata e San Giovanni Gemini"><img class="scenery-night" src="sicani-notte.svg" alt="" aria-hidden="true"><div aria-hidden="true">${reached.map(m=>pixelIcon(shapes[m.icon])).join('')}</div></div>`;
+ return `<div class="village"><img class="scenery-day" src="sicani.svg" alt="Paese pixel ispirato a Cammarata e San Giovanni Gemini"><img class="scenery-night" src="sicani-notte.svg" alt="" aria-hidden="true"><div aria-hidden="true">${reached.map(m=>pixelIcon(shapes[m.icon])).join('')}</div></div>`;
 }
 function villageCard(metrics){
  if(!metrics)return '';
@@ -318,7 +317,7 @@ function homeIntro(){
  <p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio gratuito per incontrarsi, studiare e far nascere idee insieme.</p>
  <div class="row">${link('Apri il calendario','calendario')} ${link(S.me?'Vai alle missioni':'Accedi o chiedi un invito',S.me?'missioni':'accedi')}</div>
  ${S.me?'':'<p class="entry-hint">Il calendario si apre senza account.</p>'}</div>
- <div class="home-scenery">${fx()}<img class="scenery-day" src="sicani.svg" alt="${artLabel}"><img class="scenery-night" src="sicani-notte.svg" alt="${artLabel} di notte"></div></header>
+ <div class="home-scenery"><img class="scenery-day" src="sicani.svg" alt="${artLabel}"><img class="scenery-night" src="sicani-notte.svg" alt="${artLabel} di notte"></div></header>
  <section class="space-signpost"><div><span class="eyebrow">LO SPAZIO GIOVANI</span><h2>Un posto da usare, uno spazio da fare insieme</h2>
  <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Scopri lo spazio','spazio')}</section>`;
 }

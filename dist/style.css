@@ -220,3 +220,31 @@ body.tv{overflow:hidden}body.tv header.top,body.tv nav,body.tv #banner,body.tv #
 /* Il panorama intero rimane visibile anche sui display stretti. */
 .home-hero img { height: auto; aspect-ratio: 384 / 176; }
 .site-foot { padding-bottom: 4px; }
+
+/* Grafica chibi su griglia pixel, con reazioni brevi e leggibili. */
+.avatar { border: 3px solid var(--ink); box-shadow: 2px 2px var(--ink); }
+.animal-picker .avatar { width: 64px; height: 64px; }
+.animal-picker label { padding: 8px 5px; gap: 7px; }
+.animal-picker label:has(input:checked) { background: #d9ed9d; color: #171523; box-shadow: inset 0 -4px #afc778; }
+.card .sprite-box { border: 3px solid var(--ink); box-shadow: inset 0 -5px #c6bba6; }
+.sprite, .pixel-icon, .avatar { image-rendering: pixelated; shape-rendering: crispEdges; }
+.mascot .mu-sprite { width: 64px; height: 64px; }
+button[data-action="share-progress"] { gap: 10px; background: #8feafc; box-shadow: 3px 3px var(--ink); border-width: 3px; }
+button[data-action="share-progress"]:hover { background: #b8eef4; }
+button[data-action="share-progress"]::before { content: "↗"; display: grid; place-items: center; width: 25px; height: 25px; background: #fff3d5; border: 2px solid #171523; color: #171523; flex: none; }
+.mascot p { transition: none; }
+@keyframes chibi-reaction { 0%,100% { transform: translateY(0); } 25%,75% { transform: translateY(-2px); } 50% { transform: translateY(-4px); } }
+@keyframes pixel-reveal { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes pixel-confetti { to { transform: translateY(400px); } }
+.banner { animation: none; }
+.celebration-card { animation: pixel-reveal 240ms steps(4,end); }
+.confetti i { animation: pixel-confetti 1600ms steps(16,end) 2; }
+.live-on .live-dot, .tv-live.live-on .live-dot { animation: none; }
+@media(prefers-reduced-motion:no-preference){
+ .mu-launch:hover .pixel-icon,.mu-launch:focus-visible .pixel-icon,.mascot:hover .mu-sprite { animation: chibi-reaction 420ms steps(1,end); }
+ .animal-picker label:has(input:checked) .avatar { animation: chibi-reaction 360ms steps(1,end); }
+ .reward-celebration .mascot .pixel-icon { animation: chibi-reaction 500ms steps(1,end) 2; }
+}
+@media(prefers-reduced-motion:reduce){
+ .celebration-card,.confetti i,.avatar,.mu-sprite,.pixel-icon,.sprite { animation:none!important; transition:none!important; }
+}

@@ -17,7 +17,7 @@ const shapes = {
  shirt:'<path fill="#171523" d="M5 1h6v1h2v2h2v5h-3v6H4V9H1V4h2V2h2z"/><path fill="#8feafc" d="M3 5h2V3h1v2h4V3h1v2h2v2h-3v6H6V7H3z"/><path fill="#6f440f" d="M7 7h2v2H7z"/>',
  star:'<path fill="#161525" d="M7 1h2v3h2v2h4v3h-3v3h1v3h-3v-2H6v2H3v-3h1V9H1V6h4V4h2z"/><path fill="#ffe043" d="M7 3h2v3h2v1h3v1h-3v4H9v-1H7v1H5V8H2V7h3V6h2z"/>'
 };
-const art = name=>`<div class="sprite-box"><svg class="sprite" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${shapes[name]}</svg></div>`;
+const art = name=>`<div class="sprite-box"><svg class="sprite" viewBox="-2 -2 20 20" shape-rendering="crispEdges" aria-hidden="true"><path fill="#b9a88d" d="M2 15h12v1H2z"/>${shapes[name]}<path fill="#fff3d5" opacity=".6" d="M-1 0h1v1h-1z M16 3h1v1h-1z"/></svg></div>`;
 const avatarColors = {
  rosa:['Rosa fichidindia','#ff55a1'],verde:['Verde salvia','#bce98d'],blu:['Blu cielo','#699cff'],
  sole:['Giallo ginestra','#ffce39'],terracotta:['Terracotta','#dc7046'],viola:['Viola tramonto','#ad82ed'],
@@ -38,15 +38,13 @@ const animals = {
  serpente:{name:'Serpente',art:'<path fill="#171523" d="M9 2h4v1h2v5h-3v4H2V9h2V7h5z"/><path fill="#69a650" d="M10 3h3v1h1v3h-3v4H3v-1h2V8h5z"/><path fill="#caff4d" d="M4 10h6v1H4z"/><path fill="#171523" d="M12 4h1v1h-1z"/><path fill="#fe4400" d="M13 7h3v1h-3z"/>'},
  cane:{name:'Cane',art:'<path fill="#171523" d="M2 3h4v1h4V3h4v7h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 4h2v5H3z M11 4h2v5h-2z"/><path fill="#fff3d5" d="M5 5h6v6H5z"/><path fill="#171523" d="M6 6h1v1H6z M9 6h1v1H9z M7 8h2v1H7z"/><path fill="#ee99aa" d="M7 10h2v1H7z"/>'},
  civetta:{name:'Civetta',art:'<path fill="#171523" d="M2 2h3v2h6V2h3v8h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 3h1v2h8V3h1v6h-2v2H5V9H3z"/><path fill="#fff3d5" d="M4 6h3v3H4z M9 6h3v3H9z"/><path fill="#171523" d="M5 7h1v1H5z M10 7h1v1h-1z"/><path fill="#fe4400" d="M7 9h2v1H7z"/>'},
- donna:{name:'Donna di Cammarata',art:'<path fill="#171523" d="M5 2h6v1h2v3h1v6h-3v1H3v-2h1V6H3V4h2z"/><path fill="#6f432d" d="M5 4h6v1h2v6h-2v-2H5z"/><path fill="#e4ad79" d="M6 5h4v1h2v3h-1v2H7v-1H5V6h1z"/><path fill="#171523" d="M7 7h1v1H7z M10 7h1v1h-1z"/><path fill="#fff3d5" d="M8 9h2v1H8z"/><path fill="#498560" d="M5 10h2v2H5z M10 11h2v1h-2z"/><path fill="#f1c965" d="M5 8h1v2H5z M11 9h1v2h-1z"/>'},
- leone:{name:'Leone di San Giovanni Gemini',art:'<path fill="#171523" d="M3 3h3V1h1v1h2V1h1v2h3v2h2v5h-2v2h-2v1H5v-1H3v-2H1V5h2z"/><path fill="#b96535" d="M4 4h8v1h2v4h-2v2h-2v1H6v-1H4V9H2V6h2z"/><path fill="#f1b951" d="M6 5h4v1h2v3h-1v2H5V9H4V6h2z M6 3h4v1H6z"/><path fill="#171523" d="M5 7h2v1H5z M9 7h2v1H9z M7 9h2v1H7z"/><path fill="#ffe5aa" d="M6 10h4v1H6z"/>'}
+ leone:{name:'Leone rampante',art:'<path fill="#171523" d="M3 3h3V1h1v1h2V1h1v2h3v2h2v5h-2v2h-2v1H5v-1H3v-2H1V5h2z"/><path fill="#b96535" d="M4 4h8v1h2v4h-2v2h-2v1H6v-1H4V9H2V6h2z"/><path fill="#f1b951" d="M6 5h4v1h2v3h-1v2H5V9H4V6h2z M6 3h4v1H6z"/><path fill="#171523" d="M5 7h2v1H5z M9 7h2v1H9z M7 9h2v1H7z"/><path fill="#ffe5aa" d="M6 10h4v1H6z"/>'}
 };
 const cheese='<path fill="#171523" d="M10 1h2v1h2v2h1v10H1V7h2V6h2V5h2V4h2V2h1z"/><path fill="#f4bf57" d="M10 3h2v1h1v2H5V5h2V4h3z"/><path fill="#ffd782" d="M3 8h10v4H3z"/><path fill="#a96a32" d="M5 9h2v2H5z M10 10h2v1h-2z"/>';
 function cowMascot(mood,text,tips=[]){
  const eyes={normale:'M6 6h1v2H6z M10 6h1v2h-1z',felice:'M5 7h1V6h2v1H5z M9 7h1V6h2v1H9z',curioso:'M6 6h1v2H6z M10 7h1v1h-1z',festoso:'M5 6h2v1H5z M10 6h2v1h-2z'};
- const sprite='<path fill="#171523" d="M2 4h2V2h3v2h2V2h3v2h2v1h2v4h-3v3h-2v2H5v-2H3V9H0V5h2z"/><path fill="#b9954b" d="M5 3h1v2H5z M10 3h1v2h-1z"/><path fill="#fff3d5" d="M2 6h3V5h6v1h3v2h-2v3h-2v2H6v-2H4V8H2z"/><path fill="#73584e" d="M4 6h3v2H4z"/><path fill="#ee99aa" d="M5 9h6v3H5z"/><path fill="#171523" d="M6 9h1v1H6z M9 9h1v1H9z M7 11h2v1H7z"/>';
  const all=[text,...tips.filter(t=>t&&t!==text)];
- return `<div class="mascot ${all.length>1?'talk':''}" ${all.length>1?`data-tips="${esc(JSON.stringify(all))}" data-i="0" tabindex="0" role="button" aria-label="Mù: tocca per un altro consiglio"`:''}>${pixelIcon(sprite+`<path fill="#171523" d="${eyes[mood]}"/>`,'mu-sprite')}<div><strong>Mù</strong><p aria-live="polite">${esc(text)}</p></div></div>`;
+ return `<div class="mascot ${all.length>1?'talk':''}" ${all.length>1?`data-tips="${esc(JSON.stringify(all))}" data-i="0" tabindex="0" role="button" aria-label="Mù: tocca per un altro consiglio"`:''}>${pixelIcon(animals.mucca.art+(mood==='normale'||mood==='curioso'?chibiFace('mucca'):`<path fill="#171523" d="${eyes[mood]}"/>`),'mu-sprite')}<div><strong>Mù</strong><p aria-live="polite">${esc(text)}</p></div></div>`;
 }
 const pixelIcon = (path,kind='')=>`<svg class="pixel-icon ${kind}" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${path}</svg>`;
 
@@ -94,6 +92,18 @@ const dateLong=sec=>fmt(sec,{weekday:'short',day:'numeric',month:'long',hour:'2-
 const dateShort=sec=>fmt(sec,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const duration=min=>min>=60?`${Math.floor(min/60)} h ${min%60?String(min%60).padStart(2,'0')+' min':''}`.trim():`${min} min`;
 const statusText={pending:'In attesa',verified:'Verificata',rejected:'Respinta',confirmed:'Confermata',declined:'Rifiutata',cancelled:'Annullata',draft:'Bozza',published:'Pubblicata',approved:'Attivo',disabled:'Disattivato'};
+function chibiFace(species){
+ const faces={
+  mucca:[6,6,10,6],pecora:[6,7,9,7],asino:[6,6,9,6],maiale:[5,6,10,6],
+  capra:[6,6,9,6],cane:[6,6,9,6],civetta:[5,7,10,7],leone:[5,7,9,7]
+ };
+ const eyes=faces[species];
+ if(!eyes)return '';
+ const [x,y,a,b]=eyes;
+ return `<path fill="#171523" d="M${x-.5} ${y}h2v2h-2z M${a-.5} ${b}h2v2h-2z"/>
+  <path fill="#fffdf4" d="M${x} ${y}h.5v.5h-.5z M${a} ${b}h.5v.5h-.5z"/>
+  <path fill="#e996a1" d="M${x-1} ${y+2}h1v.5h-1z M${a+1} ${b+2}h1v.5h-1z"/>`;
+}
 const avatarDetails={
  mucca:['#fff7ef','M10 11h2v2h-2z M18 13h2v2h-2z'],
  pecora:['#c6c4ea','M10 6h3v1h-3z M20 7h2v2h-2z M9 12h2v2H9z'],
@@ -107,7 +117,6 @@ const avatarDetails={
  serpente:['#f1db7f','M21 7h3v1h-3z M8 20h2v1H8z M15 18h2v1h-2z'],
  cane:['#f7c58f','M8 9h2v3H8z M24 9h2v3h-2z M14 15h4v1h-4z'],
  civetta:['#f8cc80','M8 9h3v1H8z M22 9h3v1h-3z M13 18h2v1h-2z M19 18h2v1h-2z'],
- donna:['#f8d997','M12 11h2v1h-2z M21 13h2v1h-2z'],
  leone:['#fff1b6','M12 8h2v2h-2z M19 8h2v2h-2z']
 };
 const avatar=(species=pref.get('species','mucca'),color=pref.get('color','rosa'))=>{
@@ -122,7 +131,7 @@ const avatar=(species=pref.get('species','mucca'),color=pref.get('color','rosa')
  return `<svg class="avatar" viewBox="0 0 32 32" shape-rendering="crispEdges" role="img" aria-label="Avatar pixel · ${animal.name}">
   ${backdrop}<path fill="#fff3d5" opacity=".68" d="M9 3h14v2h4v4h2v12h-2v4H5v-4H3V9h2V5h4z"/>
   <path fill="#fffdf4" d="M3 4h2v2H3z M27 5h2v2h-2z M3 21h1v1H3z M28 19h1v1h-1z"/>
-  <g transform="translate(0 1) scale(2)">${animal.art}</g><path fill="${highlight}" d="${detail}"/>
+  <g transform="translate(0 1) scale(2)">${animal.art}${chibiFace(key)}</g><path fill="${highlight}" d="${detail}"/>
   <path fill="#171523" d="M7 24h18v1h1v6H6v-6h1z"/><path fill="#fff3d5" d="M8 25h16v5H8z"/>
   <path fill="#171523" d="M10 26h3v1h-2v1h2v2h-3v-1h2v-1h-2z M15 26h3v1h-2v2h1v-1h1v2h-3z M20 26h3v1h-2v2h1v-1h1v2h-3z"/>
  </svg>`;
@@ -198,7 +207,7 @@ const MU_TIPS={
 };
 function mu(page,extra){
  const [m,t]=muSays(page,extra);
- return `<button type="button" class="mu-launch" popovertarget="mu-popover" aria-label="Apri i consigli di Mù">${pixelIcon(animals.mucca.art)}<span>Mù</span></button>
+ return `<button type="button" class="mu-launch" popovertarget="mu-popover" aria-label="Apri i consigli di Mù">${pixelIcon(animals.mucca.art+chibiFace('mucca'))}<span>Mù</span></button>
  <aside id="mu-popover" class="mu-popover" popover aria-label="I consigli di Mù">
   <button type="button" class="secondary mu-close" popovertarget="mu-popover" popovertargetaction="hide" aria-label="Chiudi i consigli">×</button>
   ${cowMascot(m,t)}
@@ -250,7 +259,7 @@ function treeGraphic(counts){
    <g transform="translate(${x-6} ${y-7}) scale(.75)">${shapes[icon]}</g>`;
   [5,3,1].forEach((need,step)=>{
    const node=y+8+step*10,on=n>=need;
-   svg+=`<rect x="${x-4}" y="${node-4}" width="8" height="8" rx="1" fill="#171523"/><rect x="${x-3}" y="${node-3}" width="6" height="6" fill="${on?cols[i]:'#344653'}"/>
+   svg+=`<rect x="${x-4}" y="${node-4}" width="8" height="8" fill="#171523"/><rect x="${x-3}" y="${node-3}" width="6" height="6" fill="${on?cols[i]:'#344653'}"/>
    <text x="${x}" y="${node+1.65}" text-anchor="middle" font-size="4.5" font-weight="800" fill="${on?'#171523':'#fff3d5'}">${need}</text>`;
   });
  });
@@ -303,7 +312,7 @@ async function comunita(){
  section('Scambia tempo e competenze',timeBankCard())+
  section('Cosa vuoi fare?',grid([
   card(`<span class="metric">${S.totals.cheese}</span><h3>A Putìa</h3><p>Spendi i tuoi Tumazzi in premi dello spazio.</p>${link('Apri la Putìa','putia')}`,'green'),
-  card(`<span class="metric">${got}/${tr.trophies.length}</span><h3>Trofei</h3><p>Si conquistano da soli: basta esserci.</p>${link('I miei trofei','trofei')}${btn('Condividi progressi','share-progress')}<p class="muted">Crea una card con il tuo livello e gli XP, senza nome o email.</p>`),
+  card(`<span class="metric">${got}/${tr.trophies.length}</span><h3>Trofei</h3><p>Si conquistano da soli: basta esserci.</p>${link('I miei trofei','trofei')}${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p>`),
   card(`<span class="metric">${open}</span><h3>Proposte e consultazioni</h3><p>Proponi un’attività e indica quali idee ti interessano. I voti orientano la discussione.</p>${link('Proponi e vota','proposte')}`),
   card(`<h3>U paisi crisci</h3><p>Come cresce il borgo con quello che facciamo insieme.</p>${link('Guarda il paese','paese')}`),
   card(`<h3>Le mie statistiche</h3><p>Ore in sede, serie, XP e percorsi.</p>${link('Le mie statistiche','presenze')}`)
@@ -482,7 +491,7 @@ function privacy(){
   card('<h3>Accesso e partecipazione</h3><p>Puoi consultare le pagine pubbliche e il calendario senza account. Per attivare il profilo e gestire prenotazioni, presenze, missioni e ricompense, trattiamo i dati necessari al servizio che richiedi. Usiamo nome, email, pseudonimo, ruolo e stato dell’account, oltre ai registri delle attività che svolgi. Telefono, interessi e tessera sono facoltativi. Le password sono conservate come impronte crittografiche.</p>'),
   card('<h3>Comunità e Youthpass</h3><p>Se usi la Banca del tempo o pubblichi una proposta, gli altri soci vedono lo pseudonimo e ciò che pubblichi. Le note di uno scambio sono visibili alle persone coinvolte. Il diario Youthpass è accessibile dal tuo account e resta fuori dal pannello referenti. Puoi svuotarlo e salvare per cancellare il testo.</p>'),
   card('<h3>Sicurezza</h3><p>Per proteggere gli account e limitare tentativi di accesso abusivi trattiamo le informazioni tecniche necessarie, compresa l’email usata nei tentativi falliti. La finestra usata per limitare i tentativi è di 15 minuti.</p>'),
-  card('<h3>Condivisione facoltativa</h3><p>La card dei progressi o dei trofei si crea sul tuo dispositivo. Contiene solo i progressi che scegli di condividere. È priva di nome, email, diario e storico delle presenze. Sei tu a scegliere dove inviarla. Quando usi un’app esterna si applica l’informativa di quell’app.</p>')
+  card('<h3>Condivisione facoltativa</h3><p>La card dei progressi o dei trofei si crea sul tuo dispositivo. Contiene il traguardo scelto o il tuo livello e gli XP, con l’avatar selezionato. È priva di nome, email, diario e storico delle presenze. Sei tu a scegliere dove inviarla. Quando usi un’app esterna si applica l’informativa di quell’app.</p>')
  ],'two'))+
  section('Su quale base usiamo i dati',card('<p>Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
  section('Chi può accedere ai dati',card('<p>I referenti autorizzati usano i dati di iscrizione e partecipazione per organizzare le attività. Il sito è ospitato su Cloudflare. Quando è configurato l’invio di email di servizio, i dati necessari alla consegna vengono trasmessi al fornitore di invio, Brevo o Resend. Le statistiche pubbliche sono aggregate.</p><p>Per informazioni sui fornitori, sui luoghi in cui trattano i dati e sulle garanzie applicate, contatta l’associazione.</p>'))+
@@ -577,10 +586,11 @@ async function profilo(){
    ...recActs.map(a=>card(`<span class="eyebrow">ATTIVITÀ</span><h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p>${activityDescription(a)}${link('Apri il calendario','calendario')}`)),
    ...recMissions.map(t=>card(`<span class="eyebrow">MISSIONE</span><h3>${esc(t.name)}</h3><p>${esc(t.description)}</p>${link('Vai alle missioni','missioni')}`))
   ],'two'):card('<p>Per ora non ci sono attività o missioni nei tuoi percorsi. Controlla più avanti!</p>')):card('<p>Scegli i tuoi interessi qui sotto e ti consigliamo missioni e attività su misura.</p>'));
- const species=pref.get('species','mucca'),color=pref.get('color','rosa');
+ const savedSpecies=pref.get('species','mucca');
+ const species=Object.hasOwn(animals,savedSpecies)?savedSpecies:'mucca',color=pref.get('color','rosa');
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="swatch-name">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
- section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}${btn('Condividi progressi','share-progress')}<p class="muted">Crea una card con il tuo livello e gli XP, senza nome o email.</p>`),
+ section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p>`),
   card(`<details class="disclosure"><summary>Cambia avatar</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`)],'two'))+
  section('Diario di apprendimento Youthpass',journal)+
  recommend+skillTree(prog.counts,types.types.filter(t=>t.active))+
@@ -907,53 +917,80 @@ function shareCardImage({kicker,headline,subtitle,trophy}){
  canvas.height=1080;
  const ctx=canvas.getContext('2d');
  if(!ctx)throw new Error('La card non è disponibile in questo browser.');
+ ctx.imageSmoothingEnabled=false;
+ const ink='#231d33',cream='#fff3d5',gold='#f1b951',sky='#8feafc';
  const block=(color,x,y,w,h)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
- const ink='#171523',cream='#fff3d5',lime='#d9ed9d';
- block('#8feafc',0,0,1080,1080);
- for(const [x,y] of [[120,135],[927,120],[962,746],[116,800]]){
-  block(cream,x-7,y-21,14,42);
-  block(cream,x-21,y-7,42,14);
- }
- block(ink,67,64,966,949);
- block(cream,67,64,946,929);
- ctx.lineWidth=9;
- ctx.strokeStyle=ink;
- ctx.strokeRect(67,64,946,929);
- block(ink,67,64,946,140);
- ctx.textAlign='center';
- ctx.fillStyle=cream;
- ctx.font='900 52px system-ui, sans-serif';
- ctx.fillText('CCA SIEMMU',540,153);
- ctx.font='800 24px ui-monospace, monospace';
- ctx.fillStyle=ink;
- ctx.fillText(kicker,540,277,800);
- block(ink,462,326,156,156);
- block(trophy?'#ffbc55':lime,470,334,140,140);
- const sprite=trophy?navIcons.missioni:navIcons.home;
- for(const [,fill,outline] of sprite.matchAll(/<path(?: fill="([^"]+)")? d="([^"]+)"\/>/g)){
+ const text=(value,x,y,size,color=ink,max=880)=>{
+  ctx.fillStyle=color;
+  ctx.font=`900 ${size}px system-ui,sans-serif`;
+  ctx.fillText(value,x,y,max);
+ };
+ function sprite(art,x,y,scale){
   ctx.save();
-  ctx.translate(484,348);
-  ctx.scale(7,7);
-  ctx.fillStyle=fill||ink;
-  ctx.fill(new Path2D(outline));
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+  for(const [,fill,d] of art.matchAll(/<path(?: fill="([^"]+)")? d="([^"]+)"\/>/g)){
+   ctx.fillStyle=fill||ink;
+   ctx.fill(new Path2D(d));
+  }
   ctx.restore();
  }
- ctx.fillStyle=ink;
- ctx.font='900 69px system-ui, sans-serif';
+ block(sky,0,0,1080,1080);
+ // Each graphic unit is aligned to an 8px tile.
+ for(const [x,y] of [[72,104],[856,72],[936,336]]){
+  block('#fffaf0',x,y,64,16);
+  block('#fffaf0',x+16,y-16,32,16);
+ }
+ block(ink,56,40,984,1008);
+ block(cream,40,24,984,1008);
+ block(ink,40,24,984,8);
+ block(ink,40,24,8,1008);
+ block(ink,1016,24,8,1008);
+ block(ink,40,1024,984,8);
+ ctx.textAlign='center';
+ text('CCA SIEMMU',532,113,58);
+ text('E BONI SIEMMU',532,151,23,'#6e5a66');
+ block(ink,104,198,856,62);
+ block(trophy?gold:'#d9ed9d',96,190,856,62);
+ text(kicker,524,232,24);
+ // A pixel stage frames the character like an RPG portrait.
+ block('#d5eeea',112,282,840,320);
+ block('#96c3b0',112,530,840,72);
+ block('#66937a',112,562,840,40);
+ for(const [x,y,w] of [[112,506,128],[240,482,112],[352,522,104],[648,514,120],[768,490,184]]){
+  block('#3e6b62',x,y,w,64);
+  block('#85ac87',x+16,y+16,w-32,32);
+ }
+ block(ink,400,298,264,264);
+ block(trophy?gold:'#f1dfb7',392,290,264,264);
+ block(cream,408,306,232,232);
+ const saved=pref.get('species','mucca');
+ const species=Object.hasOwn(animals,saved)?saved:'mucca';
+ sprite(trophy?navIcons.missioni:animals[species].art,428,318,12);
+ if(!trophy)sprite(chibiFace(species),428,318,12);
+ for(const [x,y] of [[288,344],[744,392],[680,300]]){
+  block('#f1b951',x-8,y-24,16,48);
+  block('#f1b951',x-24,y-8,48,16);
+  block('#fff3d5',x-4,y-12,8,24);
+ }
+ ctx.font='900 62px system-ui,sans-serif';
  const lines=[];
  let line='';
  for(const word of headline.split(' ')){
   const next=line?line+' '+word:word;
-  if(line&&ctx.measureText(next).width>812){lines.push(line);line=word;}
+  if(line&&ctx.measureText(next).width>800){lines.push(line);line=word;}
   else line=next;
  }
  if(line)lines.push(line);
- lines.forEach((value,i)=>ctx.fillText(value,540,596+i*77,810));
- block('#fe4400',426,776,228,8);
- ctx.font='700 32px system-ui, sans-serif';
- ctx.fillText(subtitle,540,850,810);
- ctx.font='800 24px ui-monospace, monospace';
- ctx.fillText('CAMMARATA + SAN GIOVANNI GEMINI',540,946,810);
+ lines.slice(0,3).forEach((value,i)=>text(value,532,686+i*64,62));
+ const subtitleY=Math.max(794,710+(lines.length-1)*64);
+ text(subtitle,532,subtitleY,30);
+ const l=level(S.totals.xp);
+ for(let i=0;i<16;i++){
+  block(ink,148+i*48,866,40,24);
+  block(trophy||l.top||i<Math.floor(l.progress/l.range*16)?'#f1b951':'#c9c4ba',152+i*48,870,32,16);
+ }
+ text('CAMMARATA + SAN GIOVANNI GEMINI',532,960,21,'#6e5a66');
  return canvas.toDataURL('image/png');
 }
 

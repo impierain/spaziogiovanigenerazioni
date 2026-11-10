@@ -496,3 +496,6 @@ html[data-theme="night"] .confirm-dialog { background:#33153B; color:#FFF9F1; bo
 html[data-theme="night"] button:not(:disabled):hover, html[data-theme="night"] .btn:hover { background:#0F857F; color:#FFFFFF; }
 .page-title { border-top-color:#B95B36; }
 .home-shortcuts h3 { border-top-color:#8F6446; }
+/* Variante scura dell’ottanio: testo bianco oltre 4,5:1 anche in hover. */
+button:not(:disabled):hover, .btn:hover,
+html[data-theme="night"] button:not(:disabled):hover, html[data-theme="night"] .btn:hover { background:#0B746F; color:#FFFFFF; }

@@ -71,7 +71,7 @@ export async function checkMailIdle(env, nowMs = Date.now()) {
   const days = Math.floor((now - last) / 86400);
   const {results: organizers} = await db.prepare(`SELECT id FROM members WHERE role = 'organizer' AND status = 'approved'`).all();
   for (const {id} of organizers) {
-   await notify(db, id, {kind: 'riepilogo', level: 'warning', title: 'Le email rischiano di fermarsi', body: `Nessuna email inviata da ${days} giorni: la chiave del servizio email scade dopo 90 giorni di inattività.`});
+   await notify(db, id, {kind: 'riepilogo', level: 'error', title: 'Le email rischiano di fermarsi', body: `Nessuna email inviata da ${days} giorni: la chiave del servizio email scade dopo 90 giorni di inattività.`});
    await mailMember(env, db, id, name => layout({
     subject: 'Attenzione: la chiave email sta per scadere · CCA SIEMMU', title: 'La chiave email sta per scadere',
     intro: `Ciao ${name}, da ${days} giorni il sito non invia email. Il servizio (Brevo) disattiva la chiave API dopo 90 giorni di inattività.`,

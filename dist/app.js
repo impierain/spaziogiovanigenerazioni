@@ -109,10 +109,10 @@ const needOrganizer=()=>title('Area referenti','Riservata ai referenti.')+card('
 /* ---- navigazione ---- */
 const navDefs={
  home:['Home','home'],calendario:['Calendario','calendario'],spazio:['Spazio','comunita'],accedi:['Accedi','profilo'],
- missioni:['Missioni','missioni'],presenze:['Presenze','comunita'],referenti:['Referenti','comunita'],profilo:['Profilo','profilo']
+ missioni:['Missioni','missioni'],presenze:['Statistiche','comunita'],referenti:['Referenti','comunita'],profilo:['Profilo','profilo']
 };
 function renderChrome(active){
- const ids=!S.me?['home','calendario','spazio','accedi']:isOrganizer()?['home','calendario','missioni','referenti','profilo']:['home','calendario','missioni','presenze','profilo'];
+ const ids=!S.me?['home','calendario','spazio','accedi']:isOrganizer()?['home','calendario','missioni','presenze','referenti','profilo']:['home','calendario','missioni','presenze','profilo'];
  const nav=document.querySelector('#nav');
  nav.style.setProperty('--cols',ids.length);
  nav.innerHTML=ids.map(id=>`<a href="#${id}" ${active===id?'aria-current="page"':''}><span class="nav-icon-tile" aria-hidden="true">${pixelIcon(navIcons[navDefs[id][1]],'nav-icon')}</span>${navDefs[id][0]}</a>`).join('');
@@ -216,13 +216,13 @@ async function home(){
  return null;
 }
 async function homeMember(){
- const [acts,mine,chores,st,metrics]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending'),getStatus(),getCommunity()]);
+ const [acts,mine,chores,st,metrics]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending&memberId='+encodeURIComponent(S.me.id)),getStatus(),getCommunity()]);
  const booked=new Map(mine.bookings.map(b=>[b.activityId,b.status]));
  const upcoming=acts.activities.filter(a=>a.starts_at>Date.now()/1000-3600).slice(0,3);
  let extra='';
  if(isOrganizer()){
   const [inside,pending]=await Promise.all([api('/inside'),api('/chores?status=pending')]);
-  const mineAll=pending.chores.length;
+  const mineAll=pending.chores.filter(c=>c.memberId!==S.me.id).length;
   extra=section('Da gestire',grid([
    card(`<span class="metric">${inside.presenti.length}</span><h3>In sede adesso</h3><p>${inside.presenti.length?esc(inside.presenti.map(p=>p.name).join(', ')):'Nessuno è registrato dentro.'}</p>${link('Registra ingressi','referenti/presenze')}`,'green'),
    card(`<span class="metric">${mineAll}</span><h3>Missioni da verificare</h3><p>Le richieste in attesa aspettano una decisione.</p>${link('Verifica','referenti/missioni')}`),
@@ -231,7 +231,7 @@ async function homeMember(){
  }
  return title(`Ciao, ${esc(S.me.pseudonym)}`,'Ecco il tuo spazio.')+
   section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi guadagnati</strong></div>`),
-   card(`<h3>Le mie richieste</h3><p>${chores.chores.length} missioni in attesa di verifica.</p>${link('Vai alle missioni','missioni')}${link('Le mie presenze','presenze')}`)],'two'))+
+   card(`<h3>Le mie richieste</h3><p>${chores.chores.length} missioni in attesa di verifica.</p>${link('Vai alle missioni','missioni')}${link('Le mie statistiche','presenze')}`)],'two'))+
   section('Quando siamo aperti',openingCard(st))+
   extra+
   section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p><p>${a.available>0?`${a.available} posti liberi su ${a.capacity}`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}`)),'three')+`<p>${link('Tutto il calendario','calendario')}</p>`:card('<p>Non ci sono ancora attività in calendario.</p>'))+villageCard(metrics)+mu('home');
@@ -300,7 +300,7 @@ async function impostaPassword(token){
 /* ---- missioni (missioni) ---- */
 async function missioni(){
  if(!S.me)return needLogin();
- const [types,logs]=await Promise.all([api('/chore-types'),api('/chores?limit=30')]);
+ const [types,logs]=await Promise.all([api('/chore-types'),api('/chores?limit=30&memberId='+encodeURIComponent(S.me.id))]);
  const active=types.types.filter(t=>t.active);
  const pending=logs.chores.filter(c=>c.status==='pending').length;
  return title('Missioni','Le missioni che tengono vivo lo spazio. Falla, chiedi la verifica a un referente e ricevi XP e Formaggi.')+
@@ -313,19 +313,24 @@ async function missioni(){
 const weekdayBars=(rows,key)=>{const max=Math.max(1,...rows.map(r=>r[key]));return rows.map(r=>bar(r[key],max,r.name.slice(0,3))).join('');};
 async function presenze(){
  if(!S.me)return needLogin();
- const [stats,acc]=await Promise.all([api('/stats/members/'+S.me.id),api('/access?limit=40')]);
- const t=stats.totals;
- return title('Le mie presenze','Quanto tempo passi in sede e cosa hai guadagnato.')+
+ const [stats,acc,prog]=await Promise.all([api('/stats/members/'+S.me.id),api('/access?limit=40&memberId='+encodeURIComponent(S.me.id)),api('/my/progress').catch(()=>({counts:{}}))]);
+ const t=stats.totals,l=level(t.xp);
+ const monthMax=Math.max(0.1,...stats.months.map(m=>m.hours));
+ const pathRows=PATHS.map(([id,name])=>bar(prog.counts[id]||0,Math.max(1,...PATHS.map(([k])=>prog.counts[k]||0)),name.split(' ')[0]));
+ return title('Le mie statistiche','Quanto tempo passi in sede, cosa hai guadagnato e come stai crescendo.')+
+ section('Il mio livello',card(profileChip()))+
  section('In breve',grid([
   card(`<span class="metric">${stats.visits}</span><h3>Visite</h3><p>${stats.insideNow?badge('Sei dentro adesso'):'Negli ultimi 12 mesi'}</p>`),
-  card(`<span class="metric">${stats.hours}</span><h3>Ore in sede</h3><p>Media ${duration(stats.avgVisitMinutes)} a visita</p>`),
-  card(`<span class="metric">${stats.streak.current}</span><h3>Serie di giorni</h3><p>Giorni di apertura consecutivi con almeno una tua visita</p>`)
+  card(`<span class="metric">${stats.hours}</span><h3>Ore in sede</h3><p>${stats.visits?`Media ${duration(stats.avgVisitMinutes)} a visita`:'Appena inizi a venire, le conteremo qui.'}</p>`),
+  card(`<span class="metric">${stats.streak.current}</span><h3>Serie di giorni</h3><p>Giorni di apertura consecutivi con una tua visita · record ${stats.streak.best}</p>`)
  ]))+
  section('I miei guadagni',grid([
   card(`<span class="metric">${t.xp}</span><h3>XP</h3><p>${stats.activitiesAttended} attività · ${stats.choresVerified} missioni verificate</p>`),
   card(`<span class="metric">${t.cheese}</span><h3>Formaggi guadagnati</h3><p>Il riscatto dei premi arriverà più avanti.</p>`)
  ],'two'))+
+ section('Ore in sede per mese',stats.months.length?card(stats.months.map(m=>bar(m.hours,monthMax,m.month.slice(2),' h')).join('')):card('<p>Ancora nessun dato.</p>'))+
  section('Quando vieni',card(weekdayBars(stats.weekdays,'visits')))+
+ section('Missioni per percorso',card(pathRows.join('')+`<p>${link('Vedi l’albero delle competenze','profilo')}</p>`))+
  section('Ultime visite',stats.recent.length?card(`<ul class="list">${stats.recent.map(r=>`<li>${dateLong(r.start)} · ${duration(r.minutes)}</li>`).join('')}</ul>`):card('<p>Nessuna visita registrata.</p>'))+
  section('Registro ingressi e uscite',acc.accessi.length?card(`<ul class="list">${acc.accessi.map(a=>`<li>${a.direction==='IN'?'Ingresso':'Uscita'} · ${dateShort(a.at)}</li>`).join('')}</ul>`):card('<p>Ancora nessun movimento negli ultimi 30 giorni.</p>'));
 }
@@ -337,7 +342,7 @@ async function profilo(){
  const species=pref.get('species','mucca'),color=pref.get('color','rosa');
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="sr">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
- section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi guadagnati</strong></div>${link('Le mie presenze','presenze')}`),
+ section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi guadagnati</strong></div>${link('Le mie statistiche','presenze')}`),
   card(`<details class="disclosure"><summary>Cambia avatar</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`)],'two'))+
 skillTree(prog.counts,types.types.filter(t=>t.active))+
  section('Account',grid([
@@ -370,7 +375,7 @@ async function panPanoramica(){
  const t=sede.totals;
  return section('Adesso',grid([
   card(`<span class="metric">${inside.presenti.length}</span><h3>In sede</h3><p>${inside.presenti.length?inside.presenti.map(p=>`${esc(p.name)} (dalle ${fmt(p.since,{hour:'2-digit',minute:'2-digit'})})`).join(', '):'Nessuno è registrato dentro.'}</p>${link('Registra','referenti/presenze')}`,'green'),
-  card(`<span class="metric">${chores.chores.length}</span><h3>Missioni da verificare</h3><p>Richieste in attesa di una decisione.</p>${link('Verifica','referenti/missioni')}`)
+  card(`<span class="metric">${chores.chores.filter(c=>c.memberId!==S.me.id).length}</span><h3>Missioni da verificare</h3><p>Richieste degli altri soci. Le tue le verifica un altro referente.</p>${link('Verifica','referenti/missioni')}`)
  ],'two'))+
  section(`Ultimi ${sede.periodDays} giorni`,grid([
   card(`<span class="metric">${t.hoursOpen}</span><h3>Ore di apertura</h3><p>Ore con almeno una persona dentro</p>`),
@@ -401,9 +406,9 @@ async function panPresenze(){
 const pathSelect=cur=>`<label>Percorso<select name="path">${PATHS.map(([id,name])=>`<option value="${id}" ${id===cur?'selected':''}>${name}</option>`).join('')}</select></label>`;
 async function panFaccende(){
  const [pending,types,members]=await Promise.all([api('/chores?status=pending'),api('/chore-types'),api('/members')]);
- const active=members.members.filter(m=>m.status==='approved');
- return section(`Da verificare (${pending.chores.length})`,pending.chores.length?grid(pending.chores.map(c=>card(`<h3>${esc(c.choreName)}</h3><p>${esc(c.memberName)} · ${dateShort(c.requestedAt)}</p>${c.note?`<p class="muted">${esc(c.note)}</p>`:''}<p>${c.xp||''}</p><div class="row">${btn('Conferma','verify',c.id)}${btn('Respingi','reject',c.id,{secondary:true})}</div>`.replace('<p></p>',''))),'two'):card('<p>Nessuna missione in attesa.</p>'))+
- section('Registra una missione fatta',types.types.some(t=>t.active)?form('logchore',`<label>Socio<select name="memberId" required>${active.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}</option>`).join('')}</select></label><label>Missione<select name="typeId" required>${types.types.filter(t=>t.active).map(t=>`<option value="${esc(t.id)}">${esc(t.name)} (${t.xp} XP, ${t.cheese} F.)</option>`).join('')}</select></label>${field('note','Nota (facoltativa)','text','maxlength="200"').replace(' required','')}<p class="muted">Registrata da un referente, viene convalidata subito.</p>`,'Registra e convalida'):card('<p>Crea prima una missione nel catalogo.</p>'))+
+ const active=members.members.filter(m=>m.status==='approved'&&m.id!==S.me.id);
+ return section(`Da verificare (${pending.chores.length})`,pending.chores.length?grid(pending.chores.map(c=>card(`<h3>${esc(c.choreName)}</h3><p>${esc(c.memberName)} · ${dateShort(c.requestedAt)}</p>${c.note?`<p class="muted">${esc(c.note)}</p>`:''}<p>${c.xp||''}</p>${c.memberId===S.me.id?'<p class="muted">È una tua missione: la verifica un altro referente.</p>':`<div class="row">${btn('Conferma','verify',c.id)}${btn('Respingi','reject',c.id,{secondary:true})}</div>`}`.replace('<p></p>',''))),'two'):card('<p>Nessuna missione in attesa.</p>'))+
+ section('Registra una missione fatta',types.types.some(t=>t.active)?form('logchore',`<label>Socio<select name="memberId" required>${active.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}</option>`).join('')}</select></label><label>Missione<select name="typeId" required>${types.types.filter(t=>t.active).map(t=>`<option value="${esc(t.id)}">${esc(t.name)} (${t.xp} XP, ${t.cheese} F.)</option>`).join('')}</select></label>${field('note','Nota (facoltativa)','text','maxlength="200"').replace(' required','')}<p class="muted">Registrata da un referente, viene convalidata subito. Le tue missioni le richiedi dalla pagina Missioni e le verifica un altro referente.</p>`,'Registra e convalida'):card('<p>Crea prima una missione nel catalogo.</p>'))+
  section('Catalogo missioni',grid(types.types.map(t=>card(`<h3>${esc(t.name)}</h3><p>${esc(t.description)}</p><p>${t.xp} XP · ${t.cheese} Formaggi ${t.active?'':badge('Non attiva')}</p>${form('chorepath',pathSelect(t.path),'Salva',{id:t.id,cls:'inline-form'})}${btn(t.active?'Disattiva':'Riattiva','choreActive',t.id,{secondary:true,extra:`data-active="${t.active?0:1}"`})}`)),'two'))+
  section('Nuova missione nel catalogo',form('choretype','<h3>Aggiungi una missione</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="400"').replace(' required','')+field('xp','XP','number','required min="0" max="500" value="10"')+field('cheese','Formaggi','number','required min="0" max="200" value="2"')+pathSelect('solidarieta'),'Aggiungi'));
 }
@@ -413,7 +418,7 @@ async function panAttivita(id){
   const a=activities.find(x=>x.id===id);
   if(!a)return card('<p>Attività non trovata.</p>'+link('Torna alle attività','referenti/attivita'));
   return section(esc(a.name),card(`<p>${dateLong(a.startsAt)} · ${statusText[a.status]} · ${a.capacity} posti</p><p class="muted">${esc(a.verificationRule)}</p><p>${a.xp} XP · ${a.cheese} Formaggi a chi partecipa</p>`)+`<p>${link('Tutte le attività','referenti/attivita')}</p>`)+
-  section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>'));
+  section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended&&b.memberId!==S.me.id?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>'));
  }
  const {activities}=await api('/activities/manage');
  const create=form('activity','<h3>Nuova attività</h3>'+field('name','Titolo','text','required maxlength="120"')+field('startsAt','Data e ora','datetime-local','required')+field('capacity','Posti','number','required min="1" max="500" value="25"')+field('verificationRule','Come verifichi la presenza','text','required maxlength="300" value="Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."')+field('xp','XP','number','required min="0" max="500" value="30"')+field('cheese','Formaggi','number','required min="0" max="200" value="5"')+`<label>Stato<select name="status"><option value="draft">Bozza (non visibile)</option><option value="published">Pubblicata</option></select></label>`,'Crea attività');

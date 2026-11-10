@@ -2,7 +2,7 @@ import {fail, json, readJson, integer, text} from '../lib/http.mjs';
 import {romeWeekStart} from '../lib/time.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
 
-// Come per le missioni ripetibili: al massimo 12 Formaggi a settimana dalle faccende.
+// Come per le missioni ripetibili: al massimo 12 Formaggi a settimana dalle missioni.
 export const WEEKLY_CHEESE_CAP = 12;
 export const PATHS = ['studio', 'creativita', 'socialita', 'cittadinanza', 'solidarieta'];
 const pathOf = value => PATHS.includes(value) ? value : fail(400, 'Percorso non valido.');
@@ -43,7 +43,7 @@ export async function updateType({request, db, params}) {
  if ('active' in body) put('active', body.active ? 1 : 0);
  if (!sets.length) fail(400, 'Nessuna modifica indicata.');
  const result = await db.prepare(`UPDATE chore_types SET ${sets.join(', ')} WHERE id = ?`).bind(...values, params.id).run();
- if (!result.meta.changes) fail(404, 'Faccenda non trovata.');
+ if (!result.meta.changes) fail(404, 'Missione non trovata.');
  const row = await db.prepare('SELECT id, name, description, xp, cheese, active, path FROM chore_types WHERE id = ?').bind(params.id).first();
  return json({type: typeShape(row)});
 }
@@ -73,8 +73,8 @@ export async function listLogs({url, db, member}) {
 async function decide(db, logId, organizerId, verdict) {
  const log = await db.prepare(`SELECT l.id, l.member_id, l.status, c.xp, c.cheese, c.name
   FROM chore_logs l JOIN chore_types c ON c.id = l.chore_type_id WHERE l.id = ?`).bind(logId).first();
- if (!log) fail(404, 'Faccenda non trovata.');
- if (log.status !== 'pending') fail(409, 'Questa faccenda è già stata decisa.');
+ if (!log) fail(404, 'Missione non trovata.');
+ if (log.status !== 'pending') fail(409, 'Questa missione è già stata decisa.');
  let xp = 0;
  let cheese = 0;
  if (verdict === 'verified') {
@@ -86,22 +86,22 @@ async function decide(db, logId, organizerId, verdict) {
  try {
   const result = await db.prepare(`UPDATE chore_logs SET status = ?, xp = ?, cheese = ?, decided_at = unixepoch(), decided_by = ?
    WHERE id = ? AND status = 'pending'`).bind(verdict, xp, cheese, organizerId, logId).run();
-  if (!result.meta.changes) fail(409, 'Questa faccenda è già stata decisa.');
+  if (!result.meta.changes) fail(409, 'Questa missione è già stata decisa.');
  } catch (error) {
-  if (String(error).includes('chore_not_authorized')) fail(403, 'Non puoi decidere su una tua faccenda.');
+  if (String(error).includes('chore_not_authorized')) fail(403, 'Non puoi decidere su una tua missione.');
   throw error;
  }
  const cheeseCapped = verdict === 'verified' && cheese < log.cheese;
  await notify(db, log.member_id, verdict === 'verified'
-  ? {kind: 'faccenda', level: 'ok', title: `Faccenda confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${cheese} Formaggi.${cheeseCapped ? ' I Formaggi sono ridotti per il limite settimanale.' : ''}`}
-  : {kind: 'faccenda', level: 'info', title: `Faccenda non confermata: ${log.name}`, body: 'Un referente non l’ha convalidata. Chiedi a lui il motivo.'});
+  ? {kind: 'faccenda', level: 'ok', title: `Missione confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${cheese} Formaggi.${cheeseCapped ? ' I Formaggi sono ridotti per il limite settimanale.' : ''}`}
+  : {kind: 'faccenda', level: 'info', title: `Missione non confermata: ${log.name}`, body: 'Un referente non l’ha convalidata. Chiedi a lui il motivo.'});
  return {id: logId, status: verdict, xp, cheese, cheeseCapped};
 }
 
 export async function createLog({request, db, member}) {
  const body = await readJson(request);
- const choreType = await db.prepare('SELECT id FROM chore_types WHERE id = ? AND active = 1').bind(text(body.typeId, 'Faccenda', {max: 80})).first();
- if (!choreType) fail(404, 'Faccenda non trovata.');
+ const choreType = await db.prepare('SELECT id FROM chore_types WHERE id = ? AND active = 1').bind(text(body.typeId, 'Missione', {max: 80})).first();
+ if (!choreType) fail(404, 'Missione non trovata.');
  const onBehalf = member.role === 'organizer' && body.memberId && body.memberId !== member.id;
  const memberId = onBehalf ? text(body.memberId, 'Socio', {max: 64}) : member.id;
  const target = await db.prepare(`SELECT id FROM members WHERE id = ? AND status = 'approved'`).bind(memberId).first();
@@ -112,9 +112,9 @@ export async function createLog({request, db, member}) {
  if (!onBehalf) {
   const name = await db.prepare('SELECT pseudonym FROM members WHERE id = ?').bind(memberId).first();
   const type = await db.prepare('SELECT name FROM chore_types WHERE id = ?').bind(choreType.id).first();
-  await notifyOrganizers(db, memberId, {kind: 'faccenda', level: 'info', title: `Nuova faccenda da verificare: ${type?.name ?? ''}`, body: `Richiesta di ${name?.pseudonym ?? 'un socio'}. Vai in Referenti → Faccende.`});
+  await notifyOrganizers(db, memberId, {kind: 'faccenda', level: 'info', title: `Nuova missione da verificare: ${type?.name ?? ''}`, body: `Richiesta di ${name?.pseudonym ?? 'un socio'}. Vai in Referenti → Missioni.`});
  }
- // Un referente che registra la faccenda di un altro socio la convalida subito.
+ // Un referente che registra la missione di un altro socio la convalida subito.
  const outcome = onBehalf ? await decide(db, id, member.id, 'verified') : null;
  const row = await db.prepare(`${logSql} WHERE l.id = ?`).bind(id).first();
  return json({chore: row, outcome}, 201);
@@ -122,7 +122,7 @@ export async function createLog({request, db, member}) {
 
 const choreId = params => {
  const id = Number(params.id);
- if (!Number.isInteger(id)) fail(404, 'Faccenda non trovata.');
+ if (!Number.isInteger(id)) fail(404, 'Missione non trovata.');
  return id;
 };
 

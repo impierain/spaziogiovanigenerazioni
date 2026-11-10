@@ -443,6 +443,27 @@ async function home(){
    card('<h3>Cresci</h3><p>Sali di livello, guarda le tue presenze e contribuisci a far crescere lo spazio.</p>')
   ]))+villageCard(metrics)+mu('home');
 }
+function homeShortcuts(){
+ const personal=[
+  ['Prenota un’attività','calendario'],['Missioni','missioni'],['A Putìa','putia'],
+  ['Banca del tempo','banca'],['Proposte e voti','proposte'],['Assemblea e decisioni','assemblea'],
+  ['Trofei','trofei'],['Diario Youthpass','profilo/diario'],['Interessi e avatar','profilo'],
+  ['Statistiche personali','presenze'],['Orari e sede','spazio'],['U paisi crisci','paese']
+ ];
+ const staff=[
+  ['Prenotazioni e presenze agli eventi','referenti/attivita'],
+  ['Convalida missioni','referenti/missioni'],['Soci e inviti','referenti/soci'],
+  ['Ingressi e uscite','referenti/presenze'],['Consegna ricompense','referenti/putia'],
+  ['Convocazioni e decisioni','referenti/assemblea'],['Informazioni della sede','referenti/sede'],
+  ['Statistiche della sede','referenti/statistiche']
+ ];
+ const links=items=>items.map(([name,route])=>`<a href="#${route}">${name}<span aria-hidden="true"> →</span></a>`).join('');
+ return `<nav class="home-shortcuts" aria-label="Accessi rapidi">
+  <h2>Cosa vuoi fare?</h2><div class="shortcut-links">${links(personal)}</div>
+  ${isOrganizer()?`<h3>Per i referenti</h3><div class="shortcut-links">${links(staff)}</div>`:''}
+ </nav>`;
+}
+
 async function homeMember(){
  const [acts,mine,chores,st,metrics,pres,details,progress]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending&memberId='+encodeURIComponent(S.me.id)),getStatus(),getCommunity(),api('/checkin').catch(()=>null),visitInfo(),api('/my/progress').catch(()=>({firstVisitCompleted:false}))]);
  const presenceCard=pres?card('<span class="eyebrow">LA MIA PRESENZA</span>'+(pres.inside?`<h3>Sei in sede dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</h3><p>Quando esci registra l’uscita da qui, oppure inquadra il QR all’ingresso.</p>${btn('Registra la mia uscita','checkout')}`:`<h3>Non hai ancora registrato l’ingresso</h3><p>Se sei in sede, segna la tua presenza: basta un tocco, senza approvazione. Puoi anche inquadrare il QR all’ingresso.</p>${btn('Registra il mio ingresso','checkin')}`)):'';
@@ -457,7 +478,7 @@ async function homeMember(){
    card(`<span class="metric">${mineAll}</span><h3>Missioni da verificare</h3><p>Le richieste in attesa aspettano una decisione.</p>${link('Verifica','referenti/missioni')}`)
   ],'two'));
  }
- return homeIntro()+(progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
+ return homeShortcuts()+homeIntro()+(progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
   `<div class="grid stats home-stats" aria-label="Il mio personaggio, Tumazzi e orari">${card(profileChip(),'profile-stat')}
    ${card(`<span class="eyebrow">TUMAZZI</span><div class="stat-figure">${pixelIcon(cheese)}<div><strong class="metric">${S.totals.cheese}</strong><span class="stat-label">${S.totals.cheese===1?'Tumuzzu disponibile':'Tumazzi disponibili'}</span></div></div>${link('A Putìa','putia')}`,'wallet')}
    ${openingCard(st)}</div>`+
@@ -610,7 +631,7 @@ async function profilo(){
  return title('Profilo','Il tuo personaggio e il tuo account.')+
  section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p>`),
   card(`<details class="disclosure"><summary>Cambia avatar</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`)],'two'))+
- section('Diario di apprendimento Youthpass',journal)+
+ section('Diario di apprendimento Youthpass',journal,'','learning-journal')+
  recommend+skillTree(prog.counts,types.types.filter(t=>t.active))+
  section('Preferenze',card(`<label class="sound-setting"><input type="checkbox" id="sound-toggle" ${pref.get('sound','off')==='on'?'checked':''}> Suoni dei pulsanti</label><p class="muted">Breve suono pixel quando usi un pulsante o un link. La scelta vale su questo browser.</p>`))+
  section('Il mio account',grid([
@@ -876,7 +897,7 @@ async function render(focus=false){
  main.removeAttribute('aria-busy');
  if(page==='tv')fitTv();
  if(focus){
-  const target=page==='banca'&&(detail==='offri'?'time-offer':detail==='scambi'?'time-exchanges':null);
+  const target=page==='profilo'&&detail==='diario'?'learning-journal':page==='banca'&&(detail==='offri'?'time-offer':detail==='scambi'?'time-exchanges':null);
   const node=target&&document.getElementById(target);
   if(node){node.focus({preventScroll:true});node.scrollIntoView();}
   else{window.scrollTo(0,0);main.focus({preventScroll:true});}

@@ -424,3 +424,31 @@ main .home-shortcuts .shortcut-primary a:first-child { color: #182018; }
 html[data-theme="night"] main .home-shortcuts .shortcut-links a { color: #F4F1EA; }
 html[data-theme="night"] main .home-shortcuts .shortcut-primary a:first-child { color: #182018; }
 main .home-shortcuts .shortcut-links a:hover, html[data-theme="night"] main .home-shortcuts .shortcut-links a:hover { color: #2C3531; }
+
+/* Missioni, comunità e profilo: contenuti operativi prima dei dettagli. */
+.mission-heading { display:flex; gap:16px; align-items:center; }
+.mission-heading > div { min-width:0; }
+.mission-heading .sprite-box { width:64px; min-width:64px; min-height:64px; }
+.mission-heading h3 { font-size:1.25rem; margin-bottom:8px; }
+.mission-heading .pill { font-size:.75rem; }
+.mission-reward { display:flex; flex-wrap:wrap; gap:8px 16px; align-items:baseline; }
+.mission-reward strong { font-size:1.15rem; }
+.mission-reward span { font-size:.9rem; }
+.mission-note summary { min-height:44px; cursor:pointer; padding-block:10px; font-size:.9rem; }
+.mission-note label { margin-block:8px; }
+.inline-form:has(.mission-note) { display:grid; gap:12px; }
+.inline-form:has(.mission-note) button { width:100%; }
+.support-links { display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center; }
+.support-links a { display:inline-flex; align-items:center; min-height:44px; font-weight:750; }
+.profile-overview { max-width:900px; }
+.profile-overview .support-links { border-top:1px solid #81917D; padding-top:12px; }
+.profile-sharing { margin-top:8px; font-size:.95rem; }
+.profile-sharing button { margin-block:12px; }
+.account-settings { border:var(--line); padding:16px; }
+.account-settings > summary { cursor:pointer; min-height:44px; font-weight:800; }
+.account-settings[open] > summary { margin-bottom:24px; }
+@media(max-width:420px) {
+ .mission-heading { gap:12px; align-items:flex-start; }
+ .mission-heading .sprite-box { width:52px; min-width:52px; min-height:52px; }
+ .mission-heading h3 { font-size:1.15rem; }
+}

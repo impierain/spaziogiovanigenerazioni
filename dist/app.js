@@ -325,16 +325,14 @@ async function comunita(){
  const [tr,prop]=await Promise.all([api('/trophies').catch(()=>({trophies:[]})),api('/proposals').catch(()=>({proposals:[]}))]);
  const got=tr.trophies.filter(t=>t.earned).length;
  const open=prop.proposals.filter(p=>p.status==='open').length;
- return title('Comunità','Qui si spendono i Tumazzi, si scambia tempo, si propone e si vota.')+
- section('Assemblea e decisioni',card('<p>Consulta il prossimo incontro, l’ordine del giorno e le decisioni prese insieme.</p>'+link('Vai all’assemblea','assemblea')))+
- section('Scambia tempo e competenze',timeBankCard())+
- section('Cosa vuoi fare?',grid([
-  card(`<span class="metric">${S.totals.cheese}</span><h3>A Putìa</h3><p>Spendi i tuoi Tumazzi in premi dello spazio.</p>${link('Apri la Putìa','putia')}`,'green'),
-  card(`<span class="metric">${got}/${tr.trophies.length}</span><h3>Trofei</h3><p>Si conquistano da soli: basta esserci.</p>${link('I miei trofei','trofei')}${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p>`),
-  card(`<span class="metric">${open}</span><h3>Proposte e consultazioni</h3><p>Proponi un’attività e indica quali idee ti interessano. I voti orientano la discussione.</p>${link('Proponi e vota','proposte')}`),
-  card(`<h3>U paisi crisci</h3><p>Come cresce il borgo con quello che facciamo insieme.</p>${link('Guarda il paese','paese')}`),
-  card(`<h3>Le mie statistiche</h3><p>Ore in sede, serie, XP e percorsi.</p>${link('Le mie statistiche','presenze')}`)
- ]))+mu('home');
+ return title('Comunità','Scambia competenze, porta un’idea e partecipa alle decisioni dello spazio.')+
+ section('Partecipa alla vita dello spazio',grid([
+  timeBankCard(),
+  card('<span class="eyebrow">DECIDERE INSIEME</span><h3>Assemblea e decisioni</h3><p>Il prossimo incontro, l’ordine del giorno e le decisioni prese insieme.</p>'+link('Vai all’assemblea','assemblea')),
+  card(`<span class="eyebrow">LE IDEE DEL GRUPPO</span><h3>Proposte e consultazioni</h3><p>${open} proposte aperte. Proponi un’attività o indica le idee che ti interessano.</p>${link('Proponi e vota','proposte')}`)
+ ],'two'))+
+ section('Il percorso della comunità',card(`<h3>U paisi crisci</h3><p>Come cresce il borgo con quello che facciamo insieme.</p>${link('Guarda il paese','paese')}`))+
+ section('Ricompense e percorso personale',`<div class="support-links"><a href="#putia">A Putìa · ${tumazzi(S.totals.cheese)} →</a><a href="#trofei">Trofei · ${got}/${tr.trophies.length} →</a><a href="#presenze">Le mie statistiche →</a></div>`)+mu('home');
 }
 async function trofei(){
  if(!S.me)return needLogin();
@@ -563,7 +561,7 @@ async function missioni(){
  const active=types.types.filter(t=>t.active);
  const pending=logs.chores.filter(c=>c.status==='pending').length;
  return title('Missioni','Le missioni che tengono vivo lo spazio. Falla, chiedi la verifica a un referente e ricevi XP e Tumazzi.')+
- section('Missioni disponibili',active.length?grid(active.map(t=>card(`${art(pathInfo(t.path)[2])}<h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}${(S.me.interests||[]).includes(t.path)?' '+badge('Consigliata per te'):''}</p><p>${esc(t.description)}</p><p><strong>${t.xp} XP</strong> · <strong>${tumazzi(t.cheese)}</strong></p>${form('chore',field('note','Nota (facoltativa)','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"').replace(' required',''),'Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
+ section('Missioni disponibili',active.length?grid(active.map(t=>card(`<div class="mission-heading">${art(pathInfo(t.path)[2])}<div><h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}${(S.me.interests||[]).includes(t.path)?' '+badge('Consigliata per te'):''}</p></div></div><div class="mission-reward"><strong>${t.xp} XP</strong><span>${tumazzi(t.cheese)}</span></div><details class="disclosure"><summary>Cosa fare</summary><p>${esc(t.description)||'Svolgi l’attività in sede e chiedi la verifica a un referente.'}</p></details>${form('chore','<details class="mission-note"><summary>Aggiungi una nota (facoltativa)</summary>'+field('note','La tua nota','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"')+'</details>','Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
  `<p class="muted">Le missioni ripetibili danno al massimo ${tumazzi(WEEKLY_CHEESE)} a settimana (da lunedì a domenica). Gli XP si contano sempre.</p>`+
  section(`Le mie richieste${pending?` · ${pending} in attesa`:''}`,logs.chores.length?card(`<ul class="list">${logs.chores.map(c=>`<li><strong>${esc(c.choreName)}</strong> · ${dateShort(c.requestedAt)} · ${badge(statusText[c.status])}${c.status==='verified'?` · ${c.xp} XP, ${tumazzi(c.cheese)}`:''}${c.note?`<br><span class="muted">${esc(c.note)}</span>`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora richiesto nessuna missione.</p>'))+mu('missioni',{pending});
 }
@@ -630,17 +628,17 @@ async function profilo(){
  const species=Object.hasOwn(animals,savedSpecies)?savedSpecies:'mucca',color=pref.get('color','rosa');
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="swatch-name">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
- section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p>`),
-  card(`<details class="disclosure"><summary>Cambia avatar</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`)],'two'))+
+ section('Il mio personaggio',card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div><div class="support-links"><a href="#presenze">Le mie statistiche →</a><a href="#trofei">I miei trofei →</a></div><details class="disclosure profile-sharing"><summary>Condividi il tuo percorso</summary>${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p></details>`,'profile-overview'))+
  section('Diario di apprendimento Youthpass',journal,'','learning-journal')+
  recommend+skillTree(prog.counts,types.types.filter(t=>t.active))+
+ section('Personalizza il profilo',card(`<details class="disclosure"><summary>Cambia avatar e colore</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`))+
  section('Preferenze',card(`<label class="sound-setting"><input type="checkbox" id="sound-toggle" ${pref.get('sound','off')==='on'?'checked':''}> Suoni dei pulsanti</label><p class="muted">Breve suono pixel quando usi un pulsante o un link. La scelta vale su questo browser.</p>`))+
- section('Il mio account',grid([
+ section('Il mio account','<details class="disclosure account-settings"><summary>Gestisci nome, interessi e accesso</summary>'+grid([
   form('nick','<h3>Nome utente</h3><p class="muted">È il nome che vedono gli altri soci.</p>'+field('pseudonym','Il tuo nome utente','text',`required maxlength="28" value="${esc(S.me.pseudonym)}"`),'Salva nome utente'),
   form('interests',interestsForm,'Salva interessi'),
   card(`<h3>${esc(S.me.fullName||S.me.pseudonym)}</h3><p>${esc(S.me.email)}</p><p>${badge(isOrganizer()?'Referente':'Socio')}</p>${btn('Esci','logout','',{secondary:true})}`),
   form('changepw','<h3>Cambia password</h3>'+field('current','Password attuale','password','required autocomplete="current-password"')+field('next','Nuova password (almeno 10 caratteri)','password','required minlength="10" autocomplete="new-password"'),'Cambia password')
- ],'two'))+
+ ],'two')+'</details>')+
  mu('profilo');
 }
 

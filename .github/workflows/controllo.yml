@@ -1,0 +1,21 @@
+name: Controllo
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  controllo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sintassi di codice e interfaccia
+        run: |
+          for f in $(git ls-files 'src/**/*.mjs' 'src/*.mjs'); do node --check "$f"; done
+          node --check dist/app.js
+      - name: Migrazioni su database di prova
+        run: |
+          npm install --no-save wrangler@4
+          npx wrangler d1 migrations apply DB --local

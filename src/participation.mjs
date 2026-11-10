@@ -1,5 +1,6 @@
 import {sessionToken, tokenHash} from './tokens.mjs';
 import {notify} from './lib/notify.mjs';
+import {checkTrophies} from './lib/trophies.mjs';
 
 const romeDate = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Rome', year:'numeric', month:'2-digit', day:'2-digit'});
 const json = (body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
@@ -15,7 +16,7 @@ async function sessionMember(request,db){
  WHERE s.token_hash=? AND s.expires_at>unixepoch() AND m.status='approved'`,hash).first();
 }
 
-export async function handleParticipation(request,db){
+export async function handleParticipation(request,db,env={}){
  const url=new URL(request.url);
  const path=url.pathname.split('/');
  const [,api,resource,activity,action]=path;
@@ -88,5 +89,6 @@ export async function handleParticipation(request,db){
  const attendance=await query(db,'SELECT xp,cheese FROM attendance WHERE activity_id=? AND member_id=?',activity,member).first();
  if(!attendance)return json({error:'L’attività è stata modificata. Riprova.'},409);
  await notifyMember(db,member,'ok','Presenza registrata',`${await activityName(db,activity)}: +${attendance.xp} XP e +${attendance.cheese} Formaggi.`);
+ await checkTrophies(env,db,member);
  return json({attendance});
 }

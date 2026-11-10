@@ -108,11 +108,11 @@ const needOrganizer=()=>title('Area referenti','Riservata ai referenti.')+card('
 
 /* ---- navigazione ---- */
 const navDefs={
- home:['Home','home'],calendario:['Calendario','calendario'],spazio:['Spazio','comunita'],accedi:['Accedi','profilo'],
- missioni:['Missioni','missioni'],presenze:['Statistiche','comunita'],referenti:['Referenti','comunita'],profilo:['Profilo','profilo']
+ home:['Home','home'],calendario:['Calendario','calendario'],spazio:['Spazio','comunita'],comunita:['Comunità','comunita'],accedi:['Accedi','profilo'],
+ missioni:['Missioni','missioni'],presenze:['Statistiche','comunita'],trofei:['Trofei','comunita'],putia:['Putìa','comunita'],banca:['Banca','comunita'],proposte:['Proposte','comunita'],referenti:['Referenti','comunita'],profilo:['Profilo','profilo']
 };
 function renderChrome(active){
- const ids=!S.me?['home','calendario','spazio','accedi']:isOrganizer()?['home','calendario','missioni','presenze','referenti','profilo']:['home','calendario','missioni','presenze','profilo'];
+ const ids=!S.me?['home','calendario','spazio','accedi']:isOrganizer()?['home','calendario','missioni','comunita','referenti','profilo']:['home','calendario','missioni','comunita','profilo'];
  const nav=document.querySelector('#nav');
  nav.style.setProperty('--cols',ids.length);
  nav.innerHTML=ids.map(id=>`<a href="#${id}" ${active===id?'aria-current="page"':''}><span class="nav-icon-tile" aria-hidden="true">${pixelIcon(navIcons[navDefs[id][1]],'nav-icon')}</span>${navDefs[id][0]}</a>`).join('');
@@ -121,7 +121,7 @@ function renderChrome(active){
  if(S.me){bell.setAttribute('aria-label',S.unread?`Notifiche, ${S.unread} da leggere`:'Notifiche');bell.innerHTML=bellIcon()+(S.unread?`<span class="unread" aria-hidden="true">${S.unread}</span>`:'');}
  const wallet=document.querySelector('#wallet-link');
  wallet.hidden=!S.me;
- if(S.me){wallet.innerHTML=pixelIcon(cheese)+`<span>${S.totals.cheese}</span>`;wallet.setAttribute('aria-label',`${S.totals.cheese} Formaggi guadagnati · apri le missioni`);}
+ if(S.me){wallet.innerHTML=pixelIcon(cheese)+`<span>${S.totals.cheese}</span>`;wallet.setAttribute('aria-label',`${S.totals.cheese} Formaggi · apri la Putìa`);wallet.setAttribute('href','#putia');}
 }
 
 /* ---- orari, stato live, Mù, paese, albero, festa ---- */
@@ -204,6 +204,73 @@ function celebrate(n){
  const b=box.querySelector('button');b.onclick=close;b.focus();
 }
 
+
+/* ---- comunità: trofei, Putìa, banca del tempo, proposte ---- */
+const ARTS=[['star','Stella'],['pin','Spilla'],['book','Libro'],['bag','Borsa'],['shirt','Maglietta'],['heart','Cuore'],['plant','Pianta'],['camera','Foto']];
+const dayLong=sec=>fmt(sec,{day:'numeric',month:'long',year:'numeric'});
+async function comunita(){
+ if(!S.me)return needLogin();
+ const [tr,prop,offers]=await Promise.all([api('/trophies').catch(()=>({trophies:[]})),api('/proposals').catch(()=>({proposals:[]})),api('/time-offers').catch(()=>({offers:[]}))]);
+ const got=tr.trophies.filter(t=>t.earned).length;
+ const open=prop.proposals.filter(p=>p.status==='open').length;
+ return title('Comunità','Qui si spendono i Formaggi, si scambia tempo, si propone e si vota.')+
+ section('Cosa vuoi fare?',grid([
+  card(`<span class="metric">${S.totals.cheese}</span><h3>A Putìa</h3><p>Spendi i tuoi Formaggi in premi dello spazio.</p>${link('Apri la Putìa','putia')}`,'green'),
+  card(`<span class="metric">${got}/${tr.trophies.length}</span><h3>Trofei</h3><p>Si conquistano da soli: basta esserci.</p>${link('I miei trofei','trofei')}`),
+  card(`<span class="metric">${offers.offers.length}</span><h3>Banca del tempo</h3><p>Un’ora tua per un’ora di qualcun altro.</p>${link('Scambia tempo','banca')}`),
+  card(`<span class="metric">${open}</span><h3>Proposte</h3><p>Proponi un’attività e vota quelle degli altri: le più votate vanno in calendario.</p>${link('Proponi e vota','proposte')}`),
+  card(`<h3>U paisi crisci</h3><p>Come cresce il borgo con quello che facciamo insieme.</p>${link('Guarda il paese','paese')}`),
+  card(`<h3>Le mie statistiche</h3><p>Ore in sede, serie, XP e percorsi.</p>${link('Le mie statistiche','presenze')}`)
+ ]))+mu('home');
+}
+async function trofei(){
+ if(!S.me)return needLogin();
+ const {trophies}=await api('/trophies');
+ const groups=[...new Set(trophies.map(t=>t.group))];
+ const got=trophies.filter(t=>t.earned).length;
+ return title('Trofei',`${got} su ${trophies.length} conquistati. Arrivano da soli quando i dati verificati raggiungono la soglia, e ti avvisiamo anche per email.`)+
+ groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`${art(t.icon)}<h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}`,t.earned?'green':'')),'three'))).join('');
+}
+async function putia(){
+ if(!S.me)return needLogin();
+ const [rw,rd]=await Promise.all([api('/rewards'),api('/redemptions')]);
+ const bal=rw.balance;
+ const list=rw.rewards.filter(r=>r.active);
+ return title('A Putìa','Il negozietto dello spazio: spendi i Formaggi guadagnati in premi. Si ritirano in sede.')+
+ section('Il mio saldo',card(`<div class="stat-figure">${pixelIcon(cheese)}<strong class="metric">${bal} Formaggi</strong></div><p class="muted">${rw.earned} guadagnati · ${rw.spent} spesi</p>`))+
+ section('Premi',list.length?grid(list.map(r=>{
+  const out=r.stock!==null&&r.stock<=0,poor=bal<r.cost;
+  return card(`${art(r.art)}<h3>${esc(r.name)}</h3><p>${esc(r.description)}</p><p><strong>${r.cost} Formaggi</strong>${r.stock!==null?` · ${out?'esaurito':`${r.stock} disponibili`}`:''}</p>${out?badge('Esaurito'):poor?`<p class="muted">Ti mancano ${r.cost-bal} Formaggi.</p>`:btn('Riscatta','redeem',r.id)}`);
+ }),'three'):card('<p>I referenti non hanno ancora messo premi in vetrina.</p>'))+
+ section('I miei riscatti',rd.redemptions.length?card(`<ul class="list">${rd.redemptions.map(x=>`<li><strong>${esc(x.rewardName)}</strong> · ${x.cost} F. · ${dateShort(x.createdAt)} · ${badge(x.status==='pending'?'Da ritirare':x.status==='delivered'?'Consegnato':'Annullato')}${x.status==='pending'?` ${btn('Annulla','redeemCancel',x.id,{secondary:true})}`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora riscattato nulla.</p>'))+
+ `<p class="muted">Ogni premio riscattato ti arriva anche via email, con le istruzioni per il ritiro.</p>`;
+}
+async function banca(){
+ if(!S.me)return needLogin();
+ const d=await api('/time-offers');
+ const mine=d.offers.filter(o=>o.mine),others=d.offers.filter(o=>!o.mine);
+ const statusLabel={requested:'In attesa',accepted:'Accettata',done:'Conclusa'};
+ return title('Banca del tempo',`Offri un’ora di qualcosa che sai fare e chiedi l’ora di qualcun altro. Ogni scambio concluso vale ${d.reward.xp} XP e ${d.reward.cheese} Formaggio a testa (massimo ${d.reward.weekly} premiati a settimana).`)+
+ section('Offerte dei soci',others.length?grid(others.map(o=>card(`<h3>${esc(o.title)}</h3><p>${esc(o.description)}</p><p class="muted">di ${esc(o.memberName)}</p>${o.myStatus?badge(statusLabel[o.myStatus]):form('request',field('note','Un messaggio (facoltativo)','text','maxlength="300"').replace(' required',''),'Chiedi quest’ora',{id:o.id,cls:'inline-form'})}`)),'two'):card('<p>Ancora nessuna offerta. Pubblica la prima!</p>'))+
+ section('I miei scambi',d.exchanges.length?card(`<ul class="list">${d.exchanges.map(x=>{
+  const owner=x.ownerId===S.me.id;
+  const who=owner?`${esc(x.requesterName)} chiede la tua ora`:`La tua richiesta a ${esc(x.ownerName)}`;
+  const acts=x.status==='requested'?(owner?btn('Accetta','xAccept',x.id)+' '+btn('Rifiuta','xDecline',x.id,{secondary:true}):btn('Annulla','xCancel',x.id,{secondary:true})):x.status==='accepted'?(owner?'<span class="muted">Dopo l’incontro, chi ha ricevuto l’ora la conferma.</span> '+btn('Annulla','xCancel',x.id,{secondary:true}):btn('Ho ricevuto l’ora','xDone',x.id)+' '+btn('Annulla','xCancel',x.id,{secondary:true})):'';
+  return `<li><strong>${esc(x.offerTitle)}</strong> · ${who} · ${badge(statusLabel[x.status])}${x.note?`<br><span class="muted">${esc(x.note)}</span>`:''}${acts?`<div class="row">${acts}</div>`:''}</li>`;}).join('')}</ul>`):card('<p>Nessuno scambio in corso.</p>'))+
+ section('Le mie offerte',(mine.length?grid(mine.map(o=>card(`<h3>${esc(o.title)}</h3><p>${esc(o.description)}</p>${btn('Chiudi l’offerta','offerClose',o.id,{secondary:true})}`)),'two'):'')+form('offer','<h3>Offri un’ora</h3>'+field('title','Cosa offri (es. ripetizioni di inglese)','text','required maxlength="80"')+field('description','Dettagli (facoltativo)','text','maxlength="400"').replace(' required',''),'Pubblica l’offerta'));
+}
+async function proposte(){
+ if(!S.me)return needLogin();
+ const d=await api('/proposals');
+ const open=d.proposals.filter(p=>p.status==='open'),closed=d.proposals.filter(p=>p.status!=='open');
+ const org=isOrganizer();
+ const item=p=>card(`<h3>${esc(p.title)}</h3><p>${esc(p.description)}</p><p class="muted">di ${esc(p.memberName)} · ${dateShort(p.createdAt)}</p><p><strong>${p.votes}</strong> ${p.votes===1?'voto':'voti'}</p>${p.status==='open'?`${p.mine?badge('La tua proposta'):btn(p.voted?'Togli il voto':'Vota','vote',p.id,{secondary:p.voted,extra:`data-on="${p.voted?0:1}"`})}${org?form('schedule',field('startsAt','Quando','datetime-local','required'),'Porta in calendario',{id:p.id,cls:'inline-form'})+btn('Non accolta','pdecline',p.id,{secondary:true}):''}`:badge(p.status==='scheduled'?'In calendario':'Non accolta')}`);
+ return title('Proposte e votazioni',`Proponi un’attività e vota quelle degli altri. Le più votate i referenti le portano in calendario, e chi ha avuto l’idea riceve ${d.reward.xp} XP e ${d.reward.cheese} Formaggi.`)+
+ section('In votazione',open.length?grid(open.map(item),'two'):card('<p>Nessuna proposta aperta. Fatti avanti!</p>'))+
+ section('Fai una proposta',form('proposal','<h3>Un’idea per lo spazio</h3>'+field('title','Titolo','text','required maxlength="100"')+field('description','Descrivila in due righe','text','maxlength="600"').replace(' required',''),'Pubblica la proposta'))+
+ (closed.length?section('Già decise',grid(closed.map(item),'two')):'');
+}
+
 /* ---- viste pubbliche ---- */
 async function home(){
  if(!S.me){const [st,metrics]=await Promise.all([getStatus(),getCommunity()]);return `<div class="hero"><img class="scenery-day" src="sicani.svg" alt="Illustrazione pixel di un borgo tra i Monti Sicani"><img class="scenery-night" src="sicani-notte.svg" alt="Borgo dei Monti Sicani di notte, con luna e finestre illuminate"><div class="hero-copy"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1><p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio gratuito per incontrarsi, studiare e far nascere idee insieme.</p>${link('Guarda il calendario','calendario')} ${link('Accedi','accedi')}<p class="muted entry-hint">Il calendario è aperto a tutti. Per prenotare e guadagnare Formaggi serve l’account che ti danno i referenti.</p></div></div>`+
@@ -230,7 +297,7 @@ async function homeMember(){
   ]));
  }
  return title(`Ciao, ${esc(S.me.pseudonym)}`,'Ecco il tuo spazio.')+
-  section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi guadagnati</strong></div>`),
+  section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi</strong></div>`),
    card(`<h3>Le mie richieste</h3><p>${chores.chores.length} missioni in attesa di verifica.</p>${link('Vai alle missioni','missioni')}${link('Le mie statistiche','presenze')}`)],'two'))+
   section('Quando siamo aperti',openingCard(st))+
   extra+
@@ -342,7 +409,7 @@ async function profilo(){
  const species=pref.get('species','mucca'),color=pref.get('color','rosa');
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="sr">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
- section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi guadagnati</strong></div>${link('Le mie statistiche','presenze')}`),
+ section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${S.totals.cheese} Formaggi</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}`),
   card(`<details class="disclosure"><summary>Cambia avatar</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`)],'two'))+
 skillTree(prog.counts,types.types.filter(t=>t.active))+
  section('Account',grid([
@@ -353,7 +420,7 @@ skillTree(prog.counts,types.types.filter(t=>t.active))+
 }
 
 /* ---- pannello referenti ---- */
-const tabs=[['panoramica','Panoramica'],['soci','Soci'],['presenze','Presenze'],['missioni','Missioni'],['attivita','Attività'],['statistiche','Statistiche']];
+const tabs=[['panoramica','Panoramica'],['soci','Soci'],['presenze','Presenze'],['missioni','Missioni'],['putia','Putìa'],['attivita','Attività'],['statistiche','Statistiche']];
 const tabBar=active=>`<div class="tabs" role="navigation" aria-label="Sezioni del pannello">${tabs.map(([id,name])=>`<a class="btn" href="#referenti/${id==='panoramica'?'':id}" ${id===active?'aria-current="page"':''}>${name}</a>`).join('')}</div>`;
 const copyBox=(url)=>`<div class="invite-link"><input readonly value="${esc(url)}" aria-label="Link d’invito"><button type="button" data-action="copy" data-value="${esc(url)}">Copia</button></div>`;
 const waNumber=raw=>{let d=String(raw||'').replace(/[^\d+]/g,'');if(d.startsWith('+'))d=d.slice(1);else if(d.startsWith('00'))d=d.slice(2);else if(d.startsWith('3')&&d.length>=9&&d.length<=10)d='39'+d;return /^\d{8,15}$/.test(d)?d:'';};
@@ -365,7 +432,7 @@ async function referenti(tab,extra){
  if(!S.me)return needLogin();
  if(!isOrganizer())return needOrganizer();
  const head=title('Area referenti','Gestione di soci, presenze, missioni e attività.')+tabBar(tab||'panoramica');
- const pages={panoramica:panPanoramica,soci:panSoci,presenze:panPresenze,missioni:panFaccende,attivita:()=>panAttivita(extra),statistiche:panStatistiche};
+ const pages={panoramica:panPanoramica,soci:panSoci,presenze:panPresenze,missioni:panFaccende,putia:panPutia,attivita:()=>panAttivita(extra),statistiche:panStatistiche};
  const render=pages[tab||'panoramica'];
  if(!render)return head+card('<p>Sezione non trovata.</p>');
  return head+await render();
@@ -411,6 +478,12 @@ async function panFaccende(){
  section('Registra una missione fatta',types.types.some(t=>t.active)?form('logchore',`<label>Socio<select name="memberId" required>${active.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}</option>`).join('')}</select></label><label>Missione<select name="typeId" required>${types.types.filter(t=>t.active).map(t=>`<option value="${esc(t.id)}">${esc(t.name)} (${t.xp} XP, ${t.cheese} F.)</option>`).join('')}</select></label>${field('note','Nota (facoltativa)','text','maxlength="200"').replace(' required','')}<p class="muted">Registrata da un referente, viene convalidata subito. Le tue missioni le richiedi dalla pagina Missioni e le verifica un altro referente.</p>`,'Registra e convalida'):card('<p>Crea prima una missione nel catalogo.</p>'))+
  section('Catalogo missioni',grid(types.types.map(t=>card(`<h3>${esc(t.name)}</h3><p>${esc(t.description)}</p><p>${t.xp} XP · ${t.cheese} Formaggi ${t.active?'':badge('Non attiva')}</p>${form('chorepath',pathSelect(t.path),'Salva',{id:t.id,cls:'inline-form'})}${btn(t.active?'Disattiva':'Riattiva','choreActive',t.id,{secondary:true,extra:`data-active="${t.active?0:1}"`})}`)),'two'))+
  section('Nuova missione nel catalogo',form('choretype','<h3>Aggiungi una missione</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="400"').replace(' required','')+field('xp','XP','number','required min="0" max="500" value="10"')+field('cheese','Formaggi','number','required min="0" max="200" value="2"')+pathSelect('solidarieta'),'Aggiungi'));
+}
+async function panPutia(){
+ const [pend,rw]=await Promise.all([api('/redemptions'),api('/rewards')]);
+ return section(`Premi da consegnare (${pend.redemptions.length})`,pend.redemptions.length?grid(pend.redemptions.map(x=>card(`<h3>${esc(x.rewardName)}</h3><p>${esc(x.memberName)} · ${x.cost} Formaggi · ${dateShort(x.createdAt)}</p>${x.memberId===S.me.id?'<p class="muted">È un tuo premio: lo consegna un altro referente.</p>':`<div class="row">${btn('Consegnato','redDeliver',x.id)}${btn('Annulla','redeemCancel',x.id,{secondary:true})}</div>`}`)),'two'):card('<p>Nessun premio da consegnare.</p>'))+
+ section('Premi in vetrina',grid(rw.rewards.map(r=>card(`<h3>${esc(r.name)} ${r.active?'':badge('Non attivo')}</h3><p>${r.cost} Formaggi · ${r.stock===null?'scorta illimitata':r.stock+' disponibili'}</p>${form('rewardedit',field('cost','Costo','number',`required min="1" max="5000" value="${r.cost}"`)+field('quantity','Quantità totale (vuoto = illimitata)','number',`min="0" max="10000" value="${r.quantity??''}"`).replace(' required',''),'Salva',{id:r.id,cls:'inline-form'})}${btn(r.active?'Togli dalla vetrina':'Rimetti in vetrina','rewardActive',r.id,{secondary:true,extra:`data-active="${r.active?0:1}"`})}`)),'two'))+
+ section('Nuovo premio',form('reward','<h3>Aggiungi un premio</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="300"').replace(' required','')+field('cost','Costo in Formaggi','number','required min="1" max="5000" value="20"')+field('quantity','Quantità (vuoto = illimitata)','number','min="0" max="10000"').replace(' required','')+`<label>Icona<select name="art">${ARTS.map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}</select></label>`,'Aggiungi il premio'));
 }
 async function panAttivita(id){
  if(id){
@@ -459,7 +532,7 @@ async function notifiche(){
 }
 
 /* ---- router ---- */
-const redirects={benvenuto:'accedi',comunita:'home',formaggi:'missioni',vasceddi:'missioni',paisi:'home',condividi:'profilo'};
+const redirects={benvenuto:'accedi',formaggi:'putia',vasceddi:'missioni',paisi:'home',condividi:'profilo'};
 let renderId=0;
 async function render(focus=false){
  const id=++renderId;
@@ -468,7 +541,7 @@ async function render(focus=false){
  if(redirects[page]){location.replace('#'+redirects[page]);return;}
  if(!S.loaded)await loadSession();
  else if(S.me){await refreshTotals();checkLevelUp();}
- const known=['paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','imposta-password'];
+ const known=['comunita','trofei','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','imposta-password'];
  const active=known.includes(page)?page:'';
  renderChrome(active);
  main.setAttribute('aria-busy','true');
@@ -479,6 +552,11 @@ async function render(focus=false){
   else if(page==='notifiche')html=await notifiche();
   else if(page==='spazio')html=await spazio();
   else if(page==='paese')html=await paese();
+  else if(page==='comunita')html=await comunita();
+  else if(page==='trofei')html=await trofei();
+  else if(page==='putia')html=await putia();
+  else if(page==='banca')html=await banca();
+  else if(page==='proposte')html=await proposte();
   else if(page==='privacy')html=privacy();
   else if(page==='accedi')html=accedi();
   else if(page==='imposta-password')html=await impostaPassword(detail);
@@ -528,6 +606,17 @@ async function refreshTotals(){try{const d=await api('/auth/me');if(d.member){S.
 /* ---- azioni ---- */
 const actions={
  reload:()=>render(),
+ async redeem(id){let r;await run(async()=>{r=await api(`/rewards/${encodeURIComponent(id)}/redeem`,{method:'POST',body:{}});},null,{rerender:false})&&(say(`Premio riscattato! ${r.emailSent?'Ti abbiamo scritto una email con le istruzioni.':'Passa in sede per ritirarlo.'}`),await render());},
+ async redeemCancel(id){await run(()=>api(`/redemptions/${encodeURIComponent(id)}/cancel`,{method:'POST',body:{}}),'Riscatto annullato: i Formaggi sono tornati.');},
+ async redDeliver(id){await run(()=>api(`/redemptions/${encodeURIComponent(id)}/deliver`,{method:'POST',body:{}}),'Premio consegnato. Il socio è stato avvisato anche via email.');},
+ async rewardActive(id,el){await run(()=>api(`/rewards/${encodeURIComponent(id)}`,{method:'PATCH',body:{active:el.dataset.active==='1'}}),'Vetrina aggiornata.');},
+ async xAccept(id){await run(()=>api(`/time-exchanges/${encodeURIComponent(id)}/accept`,{method:'POST',body:{}}),'Richiesta accettata.');},
+ async xDecline(id){await run(()=>api(`/time-exchanges/${encodeURIComponent(id)}/decline`,{method:'POST',body:{}}),'Richiesta rifiutata.');},
+ async xCancel(id){await run(()=>api(`/time-exchanges/${encodeURIComponent(id)}/cancel`,{method:'POST',body:{}}),'Scambio annullato.');},
+ async xDone(id){let r;await run(async()=>{r=await api(`/time-exchanges/${encodeURIComponent(id)}/done`,{method:'POST',body:{}});},null,{rerender:false})&&(say(r.awarded?'Scambio concluso! Hai ricevuto XP e Formaggi.':'Scambio concluso. Hai già raggiunto il limite di premi della settimana.'),await render());},
+ async offerClose(id){await run(()=>api(`/time-offers/${encodeURIComponent(id)}/close`,{method:'POST',body:{}}),'Offerta chiusa.');},
+ async vote(id,el){await run(()=>api(`/proposals/${encodeURIComponent(id)}/vote`,{method:'POST',body:{on:el.dataset.on==='1'}}),el.dataset.on==='1'?'Voto registrato.':'Voto tolto.');},
+ async pdecline(id){await run(()=>api(`/proposals/${encodeURIComponent(id)}/decline`,{method:'POST',body:{}}),'Proposta segnata come non accolta.');},
  async reserve(id){await run(()=>api(`/activities/${encodeURIComponent(id)}/reserve`,{method:'POST',body:{}}),'Richiesta inviata: un referente la confermerà.');},
  async cancel(id){await run(()=>api(`/activities/${encodeURIComponent(id)}/cancel`,{method:'POST',body:{}}),'Prenotazione annullata.');},
  async logout(){await run(()=>api('/auth/logout',{method:'POST',body:{}}),null,{rerender:false});S.me=null;S.totals={xp:0,cheese:0};S.invite=null;location.hash='#home';render(true);},
@@ -566,6 +655,12 @@ main.addEventListener('click',event=>{
 });
 
 const submits={
+ async request(f,v){await run(()=>api(`/time-offers/${encodeURIComponent(f.dataset.id)}/request`,{method:'POST',body:{note:v('note')}}),'Richiesta inviata: chi offre l’ora riceve un avviso.');},
+ async offer(f,v){await run(()=>api('/time-offers',{method:'POST',body:{title:v('title'),description:v('description')}}),'Offerta pubblicata.');},
+ async proposal(f,v){await run(()=>api('/proposals',{method:'POST',body:{title:v('title'),description:v('description')}}),'Proposta pubblicata: ora il gruppo può votarla.');},
+ async schedule(f,v){await run(()=>api(`/proposals/${encodeURIComponent(f.dataset.id)}/schedule`,{method:'POST',body:{startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000)}}),'Proposta in calendario (bozza): completala in Referenti → Attività. Chi l’ha proposta è stato avvisato.');},
+ async reward(f,v){await run(()=>api('/rewards',{method:'POST',body:{name:v('name'),description:v('description'),cost:Number(v('cost')),quantity:v('quantity')===''?null:Number(v('quantity')),art:v('art')}}),'Premio aggiunto alla vetrina.');},
+ async rewardedit(f,v){await run(()=>api(`/rewards/${encodeURIComponent(f.dataset.id)}`,{method:'PATCH',body:{cost:Number(v('cost')),quantity:v('quantity')===''?null:Number(v('quantity'))}}),'Premio aggiornato.');},
  async login(f,v){
   const ok=await run(async()=>{const d=await api('/auth/login',{method:'POST',body:{email:v('email'),password:v('password')}});S.me=d.member;},null,{rerender:false});
   if(ok){await refreshTotals();location.hash='#home';await render(true);say('Bentornatə!');}

@@ -52,21 +52,31 @@ function addMinutesPerHour(target, start, end) {
  }
 }
 
+// Serie di giorni di apertura consecutivi. La sede è aperta da lunedì a venerdì:
+// il fine settimana non interrompe la serie e le visite di sabato e domenica non contano.
+const DAY = 86400000;
+const isWeekend = ms => [0, 6].includes(new Date(ms).getUTCDay());
+function previousOpenDay(ms) {
+ let cursor = ms - DAY;
+ while (isWeekend(cursor)) cursor -= DAY;
+ return cursor;
+}
 function streakDays(daySet, nowMs) {
- let current = 0;
- let cursor = romeDayStart(nowMs);
- if (!daySet.has(romeDay((cursor + 3600) * 1000))) cursor -= 86400; // oggi non conta ancora come interruzione
- while (daySet.has(romeDay((cursor + 3600) * 1000))) { current++; cursor -= 86400; }
- const days = [...daySet].sort();
+ const days = [...daySet].map(day => Date.parse(day)).filter(ms => !isWeekend(ms)).sort((a, b) => a - b);
+ const have = new Set(days);
  let best = 0;
  let run = 0;
  let previous = null;
- for (const day of days) {
-  const gap = previous ? (Date.parse(day) - Date.parse(previous)) / 86400000 : 0;
-  run = previous && gap === 1 ? run + 1 : 1;
+ for (const ms of days) {
+  run = previous !== null && previousOpenDay(ms) === previous ? run + 1 : 1;
   best = Math.max(best, run);
-  previous = day;
+  previous = ms;
  }
+ // La serie in corso parte da oggi (se è un giorno di apertura e c'è già una visita) o dall'ultimo giorno di apertura.
+ const today = Date.parse(romeDay(nowMs));
+ let cursor = !isWeekend(today) && have.has(today) ? today : previousOpenDay(today);
+ let current = 0;
+ while (have.has(cursor)) { current++; cursor = previousOpenDay(cursor); }
  return {current, best};
 }
 
@@ -200,7 +210,7 @@ export async function community({db}) {
   {key: 'giovani', label: 'Giovani coinvolti', value: youngs, target: 120, note: 'Obiettivo del primo anno', icon: 'heart'},
   {key: 'apertura', label: 'Ore di apertura questa settimana', value: round(hoursWeek), target: 20, note: 'Obiettivo settimanale', icon: 'book'},
   {key: 'attivita', label: 'Attività svolte', value: activities, target: 18, note: 'Obiettivo del primo anno', icon: 'star'},
-  {key: 'faccende', label: 'Faccende verificate', value: chores, target: 50, note: 'Cura dello spazio, fatta insieme', icon: 'plant'}
+  {key: 'missioni', label: 'Missioni verificate', value: chores, target: 50, note: 'Cura dello spazio, fatta insieme', icon: 'plant'}
  ]});
 }
 

@@ -41,7 +41,7 @@ export function inviteEmail({name, url, purpose}) {
  const button = reset ? 'Scegli la nuova password' : 'Completa il mio profilo';
  const steps = reset
   ? ['Apri il link.', 'Scegli una password di almeno 10 caratteri.', 'Accedi con la tua email e la nuova password.']
-  : ['Apri il link.', 'Scegli una password di almeno 10 caratteri.', 'Da quel momento puoi prenotare le attività, chiedere la verifica delle faccende e vedere i tuoi progressi.'];
+  : ['Apri il link.', 'Scegli una password di almeno 10 caratteri.', 'Da quel momento puoi prenotare le attività, chiedere la verifica delle missioni e vedere i tuoi progressi.'];
 
  const text = `${title}\n\nCiao ${name},\n${intro}\n\n${button}:\n${url}\n\nCome si fa\n${steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}\n\nIl link vale 7 giorni e si usa una sola volta. Se non te l'aspettavi, ignora questa email: non succede nulla.\n\nE boni siemmu,\nSpazio Giovani Generazioni\n`;
 

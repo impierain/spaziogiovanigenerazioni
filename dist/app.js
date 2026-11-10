@@ -37,7 +37,9 @@ const animals = {
  torre:{name:'Torre in rovina',art:'<path fill="#171523" d="M3 2h3v2h2v1h2V3h3v9H3z"/><path fill="#b9954b" d="M4 3h1v2h3v1h3V4h1v7H4z"/><path fill="#fff3d5" d="M4 6h3v1H4z M9 7h3v1H9z"/><path fill="#171523" d="M7 7h2v4H7z M5 9h1v1H5z M10 9h1v1h-1z"/>'},
  serpente:{name:'Serpente',art:'<path fill="#171523" d="M9 2h4v1h2v5h-3v4H2V9h2V7h5z"/><path fill="#69a650" d="M10 3h3v1h1v3h-3v4H3v-1h2V8h5z"/><path fill="#caff4d" d="M4 10h6v1H4z"/><path fill="#171523" d="M12 4h1v1h-1z"/><path fill="#fe4400" d="M13 7h3v1h-3z"/>'},
  cane:{name:'Cane',art:'<path fill="#171523" d="M2 3h4v1h4V3h4v7h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 4h2v5H3z M11 4h2v5h-2z"/><path fill="#fff3d5" d="M5 5h6v6H5z"/><path fill="#171523" d="M6 6h1v1H6z M9 6h1v1H9z M7 8h2v1H7z"/><path fill="#ee99aa" d="M7 10h2v1H7z"/>'},
- civetta:{name:'Civetta',art:'<path fill="#171523" d="M2 2h3v2h6V2h3v8h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 3h1v2h8V3h1v6h-2v2H5V9H3z"/><path fill="#fff3d5" d="M4 6h3v3H4z M9 6h3v3H9z"/><path fill="#171523" d="M5 7h1v1H5z M10 7h1v1h-1z"/><path fill="#fe4400" d="M7 9h2v1H7z"/>'}
+ civetta:{name:'Civetta',art:'<path fill="#171523" d="M2 2h3v2h6V2h3v8h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 3h1v2h8V3h1v6h-2v2H5V9H3z"/><path fill="#fff3d5" d="M4 6h3v3H4z M9 6h3v3H9z"/><path fill="#171523" d="M5 7h1v1H5z M10 7h1v1h-1z"/><path fill="#fe4400" d="M7 9h2v1H7z"/>'},
+ donna:{name:'Donna di Cammarata',art:'<path fill="#171523" d="M5 2h6v1h2v3h1v6h-3v1H3v-2h1V6H3V4h2z"/><path fill="#6f432d" d="M5 4h6v1h2v6h-2v-2H5z"/><path fill="#e4ad79" d="M6 5h4v1h2v3h-1v2H7v-1H5V6h1z"/><path fill="#171523" d="M7 7h1v1H7z M10 7h1v1h-1z"/><path fill="#fff3d5" d="M8 9h2v1H8z"/><path fill="#498560" d="M5 10h2v2H5z M10 11h2v1h-2z"/><path fill="#f1c965" d="M5 8h1v2H5z M11 9h1v2h-1z"/>'},
+ leone:{name:'Leone di San Giovanni Gemini',art:'<path fill="#171523" d="M3 3h3V1h1v1h2V1h1v2h3v2h2v5h-2v2h-2v1H5v-1H3v-2H1V5h2z"/><path fill="#b96535" d="M4 4h8v1h2v4h-2v2h-2v1H6v-1H4V9H2V6h2z"/><path fill="#f1b951" d="M6 5h4v1h2v3h-1v2H5V9H4V6h2z M6 3h4v1H6z"/><path fill="#171523" d="M5 7h2v1H5z M9 7h2v1H9z M7 9h2v1H7z"/><path fill="#ffe5aa" d="M6 10h4v1H6z"/>'}
 };
 const cheese='<path fill="#171523" d="M10 1h2v1h2v2h1v10H1V7h2V6h2V5h2V4h2V2h1z"/><path fill="#f4bf57" d="M10 3h2v1h1v2H5V5h2V4h3z"/><path fill="#ffd782" d="M3 8h10v4H3z"/><path fill="#a96a32" d="M5 9h2v2H5z M10 10h2v1h-2z"/>';
 function cowMascot(mood,text,tips=[]){
@@ -104,7 +106,9 @@ const avatarDetails={
  torre:['#d28e54','M9 12h3v1H9z M20 9h3v1h-3z M21 19h3v1h-3z'],
  serpente:['#f1db7f','M21 7h3v1h-3z M8 20h2v1H8z M15 18h2v1h-2z'],
  cane:['#f7c58f','M8 9h2v3H8z M24 9h2v3h-2z M14 15h4v1h-4z'],
- civetta:['#f8cc80','M8 9h3v1H8z M22 9h3v1h-3z M13 18h2v1h-2z M19 18h2v1h-2z']
+ civetta:['#f8cc80','M8 9h3v1H8z M22 9h3v1h-3z M13 18h2v1h-2z M19 18h2v1h-2z'],
+ donna:['#f8d997','M12 11h2v1h-2z M21 13h2v1h-2z'],
+ leone:['#fff1b6','M12 8h2v2h-2z M19 8h2v2h-2z']
 };
 const avatar=(species=pref.get('species','mucca'),color=pref.get('color','rosa'))=>{
  const key=Object.hasOwn(animals,species)?species:'mucca';
@@ -299,7 +303,7 @@ async function comunita(){
  section('Scambia tempo e competenze',timeBankCard())+
  section('Cosa vuoi fare?',grid([
   card(`<span class="metric">${S.totals.cheese}</span><h3>A Putìa</h3><p>Spendi i tuoi Tumazzi in premi dello spazio.</p>${link('Apri la Putìa','putia')}`,'green'),
-  card(`<span class="metric">${got}/${tr.trophies.length}</span><h3>Trofei</h3><p>Si conquistano da soli: basta esserci.</p>${link('I miei trofei','trofei')}`),
+  card(`<span class="metric">${got}/${tr.trophies.length}</span><h3>Trofei</h3><p>Si conquistano da soli: basta esserci.</p>${link('I miei trofei','trofei')}${btn('Condividi progressi','share-progress')}<p class="muted">Crea una card con il tuo livello e gli XP, senza nome o email.</p>`),
   card(`<span class="metric">${open}</span><h3>Proposte e consultazioni</h3><p>Proponi un’attività e indica quali idee ti interessano. I voti orientano la discussione.</p>${link('Proponi e vota','proposte')}`),
   card(`<h3>U paisi crisci</h3><p>Come cresce il borgo con quello che facciamo insieme.</p>${link('Guarda il paese','paese')}`),
   card(`<h3>Le mie statistiche</h3><p>Ore in sede, serie, XP e percorsi.</p>${link('Le mie statistiche','presenze')}`)
@@ -311,7 +315,7 @@ async function trofei(){
  const groups=[...new Set(trophies.map(t=>t.group))];
  const got=trophies.filter(t=>t.earned).length;
  return title('Trofei',`${got} su ${trophies.length} conquistati. Arrivano da soli quando i dati verificati raggiungono la soglia, e ti avvisiamo anche per email.`)+
- (S.trophies=trophies,groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`<div class="${t.earned?'':'locked'}">${art(t.icon)}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<p>${badge('Bloccato')}</p><progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}${btn(t.earned?'Apri il trofeo':'Come si sblocca','trophy',t.id,{secondary:true})}`,t.earned?'green':'')),'three'))).join(''));
+ (S.trophies=trophies,groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`<div class="${t.earned?'':'locked'}">${art(t.icon)}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<p>${badge('Bloccato')}</p><progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}${btn(t.earned?'Apri il trofeo':'Come si sblocca','trophy',t.id,{secondary:true})}${t.earned?btn('Condividi trofeo','share-trophy',t.id):''}`,t.earned?'green':'')),'three'))).join(''));
 }
 async function putia(){
  if(!S.me)return needLogin();
@@ -387,12 +391,12 @@ function firstVisit(st,details,upcoming){
    <div><h3>Dove e quando</h3><p>${esc(details?.address||venueAddress)}</p><p class="muted">alla partenza del Carro</p>${openingDetails(st)}</div>
    <div><h3>Prossima attività</h3>${upcoming?`<p><strong>${esc(upcoming.name)}</strong><br>${dateLong(upcoming.starts_at)}</p><p>${activityBadges(upcoming)}</p>${activityDescription(upcoming)}`:'<p>Consulta il calendario per i prossimi appuntamenti.</p>'}</div>
    <div><h3>Come si entra</h3><p class="meeting-notes">${esc(details?.access||'Lo spazio è gratuito. Il calendario indica se puoi presentarti direttamente o se serve prenotare.')}</p></div>
-   <div><h3>Accessibilità</h3><p class="meeting-notes">${esc(details?.accessibility||'Per informazioni sull’accesso alla sede, scrivici prima di venire.')}</p></div>
+   <div><h3>Accessibilità</h3><p class="meeting-notes">${details?.accessibility?esc(details.accessibility)+' ':''}Per informazioni sull’accesso alla sede, <a href="mailto:spaziogiovanigenerazioni@gmail.com">scrivici</a> prima di venire.</p></div>
   </div>
-  <div class="row">${link('Apri il calendario','calendario')} <a href="mailto:spaziogiovanigenerazioni@gmail.com">Scrivici</a></div>`,'visit-card'));
+  <div class="row">${link('Apri il calendario','calendario')}</div>`,'visit-card'));
 }
 function homeIntro(){
- const artLabel='Borgo dei Monti Sicani in pixel art';
+ const artLabel='Cammarata e San Giovanni Gemini ai piedi di Monte Cammarata, in pixel art';
  return `<header class="hero home-hero"><div class="hero-copy"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1>
  <p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio gratuito per incontrarsi, studiare e far nascere idee insieme.</p>
  <div class="row">${link('Apri il calendario','calendario')} ${link(S.me?'Vai alle missioni':'Accedi o chiedi un invito',S.me?'missioni':'accedi')}</div>
@@ -469,19 +473,22 @@ async function spazio(){
  section('Il progetto',card('<p>Cca Siemmu è promosso da Spazio Giovani Generazioni ed è finanziato dal Corpo europeo di solidarietà. Contatti: <a href="mailto:spaziogiovanigenerazioni@gmail.com">spaziogiovanigenerazioni@gmail.com</a>.</p>'));
 }
 
+const privacyLink='<a href="#privacy">Privacy e cookie</a>';
 function privacy(){
- const mail='spaziogiovanigenerazioni@gmail.com',c=`<a href="mailto:${mail}">${mail}</a>`;
- return title('Informativa sulla privacy','Cca Siemmu · Spazio Giovani Generazioni')+
- section('Chi gestisce i dati',card(`<p>Spazio Giovani Generazioni gestisce la piattaforma. Per domande o richieste sui tuoi dati scrivi a ${c}.</p><p class="muted"><strong>Stato dell’informativa.</strong> Questa pagina elenca i dati che il sistema registra davvero. Basi giuridiche, tempi di conservazione e ruoli (titolare, responsabili) devono essere definiti e firmati dall’associazione prima dell’uso con i soci reali.</p>`))+
- section('Quali dati registriamo',grid([
-  card('<h3>Account</h3><p>Nome e cognome, email, telefono (facoltativo), pseudonimo, ruolo e stato dell’account. La password è conservata solo come impronta crittografica, mai in chiaro. Il codice della tessera, se assegnata.</p>'),
-  card('<h3>Presenze in sede</h3><p>Data e ora di ingresso e uscita, e chi le ha registrate. Servono a calcolare le ore di apertura e le tue statistiche personali.</p>'),
-  card('<h3>Attività e missioni</h3><p>Prenotazioni, presenze convalidate, richieste di missioni con eventuale nota, decisioni dei referenti, XP e Tumazzi.</p>'),
-  card('<h3>Diario Youthpass</h3><p>Se lo usi, salviamo obiettivi, esperienze e riflessioni nel tuo account. Puoi modificare o svuotare i campi in ogni momento. Evita nomi di altre persone e informazioni sensibili.</p>'),
-  card('<h3>Sessione</h3><p>Dopo l’accesso usiamo un solo cookie tecnico di sessione, necessario al funzionamento. Non usiamo cookie di analisi o pubblicità. Le preferenze di tema e suono restano nel browser. I tentativi di accesso falliti sono registrati per un breve periodo per limitare gli abusi.</p>')
+ const mail='spaziogiovanigenerazioni@gmail.com',contact=`<a href="mailto:${mail}">${mail}</a>`;
+ return title('Privacy e cookie','Come Cca Siemmu usa i dati di chi visita il sito o partecipa alle attività.')+
+ section('Chi gestisce il sito',card(`<p>Il titolare del trattamento è APS/ASD Spazio Giovani Generazioni. Per domande o richieste sui tuoi dati scrivi a ${contact}.</p>`))+
+ section('Quali dati usiamo e perché',grid([
+  card('<h3>Accesso e partecipazione</h3><p>Puoi consultare le pagine pubbliche e il calendario senza account. Per attivare il profilo e gestire prenotazioni, presenze, missioni e ricompense, trattiamo i dati necessari al servizio che richiedi. Usiamo nome, email, pseudonimo, ruolo e stato dell’account, oltre ai registri delle attività che svolgi. Telefono, interessi e tessera sono facoltativi. Le password sono conservate come impronte crittografiche.</p>'),
+  card('<h3>Comunità e Youthpass</h3><p>Se usi la Banca del tempo o pubblichi una proposta, gli altri soci vedono lo pseudonimo e ciò che pubblichi. Le note di uno scambio sono visibili alle persone coinvolte. Il diario Youthpass è accessibile dal tuo account e resta fuori dal pannello referenti. Puoi svuotarlo e salvare per cancellare il testo.</p>'),
+  card('<h3>Sicurezza</h3><p>Per proteggere gli account e limitare tentativi di accesso abusivi trattiamo le informazioni tecniche necessarie, compresa l’email usata nei tentativi falliti. La finestra usata per limitare i tentativi è di 15 minuti.</p>'),
+  card('<h3>Condivisione facoltativa</h3><p>La card dei progressi o dei trofei si crea sul tuo dispositivo. Contiene solo i progressi che scegli di condividere. È priva di nome, email, diario e storico delle presenze. Sei tu a scegliere dove inviarla. Quando usi un’app esterna si applica l’informativa di quell’app.</p>')
  ],'two'))+
- section('Chi vede cosa',card('<p>Ogni socio vede i propri dati. I referenti autorizzati vedono l’elenco dei soci, le presenze, le missioni e le statistiche della sede. Il diario è accessibile dal tuo account e non compare nel pannello referenti. Le statistiche pubbliche non mostrano dati personali.</p>'))+
- section('I tuoi diritti',card(`<p>Puoi scrivere a ${c} per chiedere accesso, rettifica o cancellazione dei tuoi dati, limitazione del trattamento e, quando applicabili, portabilità e opposizione. Puoi presentare reclamo al <a href="https://www.garanteprivacy.it/">Garante per la protezione dei dati personali</a>.</p>`));
+ section('Su quale base usiamo i dati',card('<p>Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
+ section('Chi può accedere ai dati',card('<p>I referenti autorizzati usano i dati di iscrizione e partecipazione per organizzare le attività. Il sito è ospitato su Cloudflare. Quando è configurato l’invio di email di servizio, i dati necessari alla consegna vengono trasmessi al fornitore di invio, Brevo o Resend. Le statistiche pubbliche sono aggregate.</p><p>Per informazioni sui fornitori, sui luoghi in cui trattano i dati e sulle garanzie applicate, contatta l’associazione.</p>'))+
+ section('Per quanto tempo',card(`<p>La sessione dura fino a 30 giorni. Le notifiche in-app oltre 90 giorni vengono eliminate quando apri l’elenco. I dati di account e di attività sono conservati secondo il tempo necessario a gestire la partecipazione e gli eventuali obblighi di rendicontazione. Per conoscere i tempi applicati a un dato specifico o chiedere la cancellazione, scrivi a ${contact}.</p>`))+
+ section('Cookie e dati nel browser',card('<p>Dopo l’accesso, il cookie tecnico <code>__Host-cca_session</code> mantiene la sessione. Scade entro 30 giorni e viene rimosso all’uscita dall’account. Il browser conserva anche le tue preferenze locali, come tema, suono e avatar, e può ricordare temporaneamente la pagina a cui tornare dopo l’accesso. Puoi eliminare questi dati dalle impostazioni del browser. Il sito non usa strumenti di analisi o profilazione pubblicitaria.</p>'))+
+ section('I tuoi diritti',card(`<p>Puoi scrivere a ${contact} per chiedere accesso, rettifica, cancellazione o limitazione del trattamento e, quando applicabili, portabilità e opposizione. Se sei minorenne, puoi farti aiutare da un adulto di fiducia. Puoi presentare reclamo al <a href="https://www.garanteprivacy.it/">Garante per la protezione dei dati personali</a>.</p>`));
 }
 
 /* ---- accesso ---- */
@@ -489,7 +496,7 @@ function accedi(destination){
  if(S.me)return title('Sei già dentro',`Accesso effettuato come ${esc(S.me.pseudonym)}.`)+card(link('Vai alla Home','home'));
  return title('Accedi','Usa l’email con cui i referenti ti hanno registrato.')+
  grid([form('login',(destination==='banca'?'<input type="hidden" name="next" value="#banca">':'')+field('email','Email','email','required autocomplete="username"')+field('password','Password','password','required autocomplete="current-password"'),'Accedi'),
-  card('<h3>Prima volta?</h3><p>Non ti puoi iscrivere da solo: un referente ti registra in sede e ti invia un link per scegliere la password. Se non l’hai ricevuto, chiedi di rigenerarlo.</p>')],'two');
+  card('<h3>Prima volta?</h3><p>Non ti puoi iscrivere da solo: un referente ti registra in sede e ti invia un link per scegliere la password. Se non l’hai ricevuto, chiedi di rigenerarlo.</p><p>'+privacyLink+'</p>')],'two');
 }
 async function impostaPassword(token){
  if(!token)return title('Link non valido','')+card('<p>Il link è incompleto.</p>'+link('Accedi','accedi'));
@@ -521,7 +528,7 @@ async function presenze(){
  const monthMax=Math.max(0.1,...stats.months.map(m=>m.hours));
  const pathRows=PATHS.map(([id,name])=>bar(prog.counts[id]||0,Math.max(1,...PATHS.map(([k])=>prog.counts[k]||0)),name.split(' ')[0]));
  return title('Le mie statistiche','Quanto tempo passi in sede, cosa hai guadagnato e come stai crescendo.')+
- section('Il mio livello',card(profileChip()))+
+ section('Il mio livello',card(profileChip()+btn('Condividi progressi','share-progress')))+
  section('In breve',grid([
   card(`<span class="metric">${stats.visits}</span><h3>Visite</h3><p>${stats.insideNow?badge('Sei dentro adesso'):'Negli ultimi 12 mesi'}</p>`),
   card(`<span class="metric">${stats.hours}</span><h3>Ore in sede</h3><p>${stats.visits?`Media ${duration(stats.avgVisitMinutes)} a visita`:'Appena inizi a venire, le conteremo qui.'}</p>`),
@@ -573,7 +580,7 @@ async function profilo(){
  const species=pref.get('species','mucca'),color=pref.get('color','rosa');
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="swatch-name">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
- section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}`),
+ section('Il mio personaggio',grid([card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div>${link('Le mie statistiche','presenze')}${link('I miei trofei','trofei')}${btn('Condividi progressi','share-progress')}<p class="muted">Crea una card con il tuo livello e gli XP, senza nome o email.</p>`),
   card(`<details class="disclosure"><summary>Cambia avatar</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`)],'two'))+
  section('Diario di apprendimento Youthpass',journal)+
  recommend+skillTree(prog.counts,types.types.filter(t=>t.active))+
@@ -584,7 +591,7 @@ async function profilo(){
   card(`<h3>${esc(S.me.fullName||S.me.pseudonym)}</h3><p>${esc(S.me.email)}</p><p>${badge(isOrganizer()?'Referente':'Socio')}</p>${btn('Esci','logout','',{secondary:true})}`),
   form('changepw','<h3>Cambia password</h3>'+field('current','Password attuale','password','required autocomplete="current-password"')+field('next','Nuova password (almeno 10 caratteri)','password','required minlength="10" autocomplete="new-password"'),'Cambia password')
  ],'two'))+
- mu('profilo')+`<p><a href="#privacy">Informativa sulla privacy</a></p>`;
+ mu('profilo');
 }
 
 /* ---- pannello referenti ---- */
@@ -836,6 +843,7 @@ async function render(focus=false){
  }
  if(id!==renderId)return;
  main.innerHTML=html;
+ if(!['tv','cartello'].includes(page))main.insertAdjacentHTML('beforeend',`<footer class="foot site-foot">${privacyLink}</footer>`);
  if(!['tv','cartello'].includes(page)&&!main.querySelector('#mu-popover'))main.insertAdjacentHTML('beforeend',mu(page));
  main.removeAttribute('aria-busy');
  if(page==='tv')fitTv();
@@ -893,7 +901,96 @@ function openTrophy(t){
  box.onclick=e=>{if(e.target===box)close();};
  const b=box.querySelector('button');b.onclick=close;b.focus();
 }
+function shareCardImage({kicker,headline,subtitle,trophy}){
+ const canvas=document.createElement('canvas');
+ canvas.width=1080;
+ canvas.height=1080;
+ const ctx=canvas.getContext('2d');
+ if(!ctx)throw new Error('La card non è disponibile in questo browser.');
+ const block=(color,x,y,w,h)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
+ const ink='#171523',cream='#fff3d5',lime='#d9ed9d';
+ block('#8feafc',0,0,1080,1080);
+ for(const [x,y] of [[120,135],[927,120],[962,746],[116,800]]){
+  block(cream,x-7,y-21,14,42);
+  block(cream,x-21,y-7,42,14);
+ }
+ block(ink,67,64,966,949);
+ block(cream,67,64,946,929);
+ ctx.lineWidth=9;
+ ctx.strokeStyle=ink;
+ ctx.strokeRect(67,64,946,929);
+ block(ink,67,64,946,140);
+ ctx.textAlign='center';
+ ctx.fillStyle=cream;
+ ctx.font='900 52px system-ui, sans-serif';
+ ctx.fillText('CCA SIEMMU',540,153);
+ ctx.font='800 24px ui-monospace, monospace';
+ ctx.fillStyle=ink;
+ ctx.fillText(kicker,540,277,800);
+ block(ink,462,326,156,156);
+ block(trophy?'#ffbc55':lime,470,334,140,140);
+ const sprite=trophy?navIcons.missioni:navIcons.home;
+ for(const [,fill,outline] of sprite.matchAll(/<path(?: fill="([^"]+)")? d="([^"]+)"\/>/g)){
+  ctx.save();
+  ctx.translate(484,348);
+  ctx.scale(7,7);
+  ctx.fillStyle=fill||ink;
+  ctx.fill(new Path2D(outline));
+  ctx.restore();
+ }
+ ctx.fillStyle=ink;
+ ctx.font='900 69px system-ui, sans-serif';
+ const lines=[];
+ let line='';
+ for(const word of headline.split(' ')){
+  const next=line?line+' '+word:word;
+  if(line&&ctx.measureText(next).width>812){lines.push(line);line=word;}
+  else line=next;
+ }
+ if(line)lines.push(line);
+ lines.forEach((value,i)=>ctx.fillText(value,540,596+i*77,810));
+ block('#fe4400',426,776,228,8);
+ ctx.font='700 32px system-ui, sans-serif';
+ ctx.fillText(subtitle,540,850,810);
+ ctx.font='800 24px ui-monospace, monospace';
+ ctx.fillText('CAMMARATA + SAN GIOVANNI GEMINI',540,946,810);
+ return canvas.toDataURL('image/png');
+}
+
+async function shareProgress(trophy){
+ if(!S.me)return;
+ const l=level(S.totals.xp);
+ try{
+  const png=shareCardImage(trophy
+   ?{kicker:'TROFEO SBLOCCATO',headline:trophy.name,subtitle:'E boni siemmu!',trophy:true}
+   :{kicker:'IL MIO PERCORSO',headline:l.name,subtitle:`Livello ${l.number} · ${l.xp} XP`});
+  const filename=trophy?'cca-siemmu-trofeo.png':'cca-siemmu-progressi.png';
+  if(typeof File==='function'&&navigator.share&&navigator.canShare){
+   const bytes=Uint8Array.from(atob(png.split(',')[1]),c=>c.charCodeAt(0));
+   const files=[new File([bytes],filename,{type:'image/png'})];
+   if(navigator.canShare({files})){
+    try{
+     await navigator.share({files,title:'Cca Siemmu'});
+     return;
+    }catch(e){if(e.name==='AbortError')return;}
+   }
+  }
+  const download=document.createElement('a');
+  download.href=png;
+  download.download=filename;
+  document.body.append(download);
+  download.click();
+  download.remove();
+  say('Card PNG pronta da condividere.');
+ }catch(e){say(e.message||'Impossibile creare la card.',true);}
+}
+
 const actions={
+ 'share-progress':()=>shareProgress(),
+ 'share-trophy'(id){
+  const trophy=(S.trophies||[]).find(t=>String(t.id)===id&&t.earned);
+  if(trophy)return shareProgress(trophy);
+ },
  'mu-next'(_id,el){
   const tips=JSON.parse(el.dataset.tips);
   const i=Number(el.dataset.i);

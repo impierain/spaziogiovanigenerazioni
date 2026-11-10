@@ -216,3 +216,7 @@ body.tv{overflow:hidden}body.tv header.top,body.tv nav,body.tv #banner,body.tv #
 [data-theme="night"] .mu-popover { background: #232e45; color: #fff3d5; }
 @media(min-width:1000px){ .mu-launch { bottom: 16px; } .mu-popover { bottom: 70px; } }
 @media print { .mu-launch,.mu-popover { display: none!important; } }
+
+/* Il panorama intero rimane visibile anche sui display stretti. */
+.home-hero img { height: auto; aspect-ratio: 384 / 176; }
+.site-foot { padding-bottom: 4px; }

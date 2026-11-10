@@ -169,9 +169,12 @@ export async function socio({db, member, params}) {
  const hours = sessions.reduce((sum, s) => sum + (s.end - s.start), 0) / 3600;
  const perWeekday = DAY_NAMES.map(name => ({name, visits: 0}));
  const visitDays = new Set();
+ const monthHours = new Map();
  for (const session of sessions) {
   perWeekday[romeWeekday(session.start * 1000)].visits++;
   visitDays.add(romeDay(session.start * 1000));
+  const month = romeMonth(session.start * 1000);
+  monthHours.set(month, (monthHours.get(month) ?? 0) + (session.end - session.start) / 3600);
  }
  const [attendance, chores] = await Promise.all([
   db.prepare('SELECT COUNT(*) AS n FROM attendance WHERE member_id = ?').bind(target.id).first(),
@@ -186,6 +189,7 @@ export async function socio({db, member, params}) {
   insideNow: inside.length > 0,
   streak: streakDays(visitDays, nowMs),
   weekdays: perWeekday,
+  months: [...monthHours.entries()].sort((x, y) => x[0].localeCompare(y[0])).slice(-6).map(([month, h]) => ({month, hours: round(h)})),
   recent: sessions.slice(-10).reverse().map(s => ({start: s.start, end: s.end, minutes: Math.round((s.end - s.start) / 60)})),
   activitiesAttended: attendance.n,
   choresVerified: chores.n

@@ -172,10 +172,9 @@ document.addEventListener('click',e=>{const m=e.target.closest('.mascot.talk');i
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.mascot.talk')){e.preventDefault();nextTip(e.target);}});
 
 const halfway=m=>m.value>=Math.ceil(m.target/2);
-const fx=()=>`<div class="fx" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="bird"></i><i class="smoke s1"></i><i class="smoke s2"></i><i class="star t1"></i><i class="star t2"></i><i class="star t3"></i></div>`;
 function villageScene(metrics){
  const reached=(metrics||[]).filter(halfway);
- return `<div class="village">${fx()}<img class="scenery-day" src="sicani.svg" alt="Paese pixel ispirato a Cammarata e San Giovanni Gemini"><img class="scenery-night" src="sicani-notte.svg" alt="" aria-hidden="true"><div aria-hidden="true">${reached.map(m=>pixelIcon(shapes[m.icon])).join('')}</div></div>`;
+ return `<div class="village"><img class="scenery-day" src="sicani.svg" alt="Paese pixel ispirato a Cammarata e San Giovanni Gemini"><img class="scenery-night" src="sicani-notte.svg" alt="" aria-hidden="true"><div aria-hidden="true">${reached.map(m=>pixelIcon(shapes[m.icon])).join('')}</div></div>`;
 }
 function villageCard(metrics){
  if(!metrics)return '';
@@ -303,7 +302,7 @@ async function proposte(){
 
 /* ---- viste pubbliche ---- */
 async function home(){
- if(!S.me){const [st,metrics]=await Promise.all([getStatus(),getCommunity()]);return `<div class="hero">${fx()}<img class="scenery-day" src="sicani.svg" alt="Illustrazione pixel di un borgo tra i Monti Sicani"><img class="scenery-night" src="sicani-notte.svg" alt="Borgo dei Monti Sicani di notte, con luna e finestre illuminate"><div class="hero-copy"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1><p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio gratuito per incontrarsi, studiare e far nascere idee insieme.</p>${link('Guarda il calendario','calendario')} ${link('Accedi','accedi')}<p class="muted entry-hint">Il calendario è aperto a tutti. Per prenotare e guadagnare Formaggi serve l’account che ti danno i referenti.</p></div></div>`+
+ if(!S.me){const [st,metrics]=await Promise.all([getStatus(),getCommunity()]);return `<div class="hero"><img class="scenery-day" src="sicani.svg" alt="Illustrazione pixel di un borgo tra i Monti Sicani"><img class="scenery-night" src="sicani-notte.svg" alt="Borgo dei Monti Sicani di notte, con luna e finestre illuminate"><div class="hero-copy"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1><p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio gratuito per incontrarsi, studiare e far nascere idee insieme.</p>${link('Guarda il calendario','calendario')} ${link('Accedi','accedi')}<p class="muted entry-hint">Il calendario è aperto a tutti. Per prenotare e guadagnare Formaggi serve l’account che ti danno i referenti.</p></div></div>`+
   section('Quando siamo aperti',openingCard(st))+
   section('Come funziona',grid([
    card('<h3>Vieni in sede</h3><p>Ingresso e uscita vengono registrati dai referenti: così sappiamo quante ore lo spazio resta vivo.</p>'),

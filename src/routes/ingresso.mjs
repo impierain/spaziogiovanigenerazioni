@@ -44,8 +44,8 @@ export async function mine({db, member}) {
 export async function checkin({request, env, db, member}) {
  const body = await readJson(request);
  const now = Math.floor(Date.now() / 1000);
- const code = await currentCode(db);
- if (!same(typeof body.code === 'string' ? body.code : '', code)) fail(403, 'Codice non valido o cambiato: scansiona il QR aggiornato all’ingresso.');
+ // Il codice del QR è facoltativo: chi registra da solo dal sito (senza QR) non lo manda.
+ if (body.code !== undefined && !same(typeof body.code === 'string' ? body.code : '', await currentCode(db))) fail(403, 'Codice non valido o cambiato: scansiona il QR aggiornato all’ingresso.');
  const result = await recordAccess(db, {memberId: member.id, direction: undefined, at: now, source: 'pannello', recordedBy: member.id});
  if (result.direction === 'IN') await checkTrophies(env, db, member.id);
  return json({access: result});

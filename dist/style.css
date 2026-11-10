@@ -316,3 +316,28 @@ html[data-theme="night"] :is(.pill,.card .pill,.tabs a[aria-current],.tabs butto
 main a:not(.btn):not(.share-download) { color: #316527; }
 main .site-foot a { color: #316527; }
 html[data-theme="night"] main a:not(.btn) { color: #B7DAA4; }
+
+/* Accenti lavanda e riconoscimenti del progetto */
+.live-on .live-dot, .tv-live.live-on .live-dot {
+ background: #D8B4F8;
+ border: 2px solid #2C3531;
+ opacity: 1;
+ flex: none;
+}
+.mu-advice { cursor: pointer; padding-top: 8px; padding-right: 28px; }
+.mu-advice .mascot { padding-right: 0; }
+.site-foot .project-logos {
+ display: grid;
+ grid-template-columns: repeat(2,minmax(0,1fr));
+ gap: 16px;
+ width: 100%;
+ flex-basis: 100%;
+ padding: 16px;
+ background: #fff;
+}
+.site-foot .project-logos .organizer-name { grid-column: 1/-1; height: auto; max-width: none; }
+.site-foot .project-logos img { display: block; width: 100%; max-width: 330px; height: 80px; object-fit: contain; margin: auto; }
+@media(max-width:390px){
+ .site-foot .project-logos { grid-template-columns: 1fr; }
+ .site-foot .project-logos img { max-width: 290px; height: 70px; }
+}

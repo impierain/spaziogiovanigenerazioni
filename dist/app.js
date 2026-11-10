@@ -1,6 +1,6 @@
 /* CCA SIEMMU · sito collegato alle API del Worker */
 const navIcons = {
- home:'<path d="M1 7h2V5h2V3h2V1h2v2h2v2h2v2h2v3h-2v5H3v-5H1z"/><path fill="#4e9f3d" d="M3 8h2V6h2V4h2v2h2v2h2v1H3z"/><path fill="#f4f1ea" d="M5 10h6v3H9v-2H7v2H5z"/>',
+ home:'<path d="M1 7h2V5h2V3h2V1h2v2h2v2h2v2h2v3h-2v5H3v-5H1z"/><path fill="#d8b4f8" d="M3 8h2V6h2V4h2v2h2v2h2v1H3z"/><path fill="#f4f1ea" d="M5 10h6v3H9v-2H7v2H5z"/>',
  calendario:'<path d="M4 1h2v2h4V1h2v2h3v12H1V3h3z"/><path fill="#4e9f3d" d="M3 5h10v2H3z"/><path fill="#f4f1ea" d="M3 8h10v5H3z"/><path fill="#6f440f" d="M4 9h2v1H4z M7 9h2v1H7z M10 9h2v1h-2z M4 11h2v1H4z M7 11h2v1H7z"/>',
  missioni:'<path d="M4 1h8v2h3v5h-2v2h-3v2h3v3H3v-3h3v-2H3V8H1V3h3z"/><path fill="#b9954b" d="M5 3h6v5h-1v1H6V8H5z M7 10h2v2H7z M5 13h6v1H5z"/><path fill="#f4f1ea" d="M7 4h2v2H7z M3 5h1v2H3z M12 5h1v2h-1z"/>',
  comunita:'<path d="M2 2h4v1h1v4H6v1h4V7H9V3h1V2h4v1h1v4h-1v2h1v1h1v4H0v-4h1V9h1V7H1V3h1z"/><path fill="#bdd9da" d="M3 4h2v2H3z M2 10h4v2H2z"/><path fill="#4e9f3d" d="M11 4h2v2h-2z M10 10h4v2h-4z"/>',
@@ -210,10 +210,28 @@ function mu(page,extra){
  return `<button type="button" class="mu-launch" popovertarget="mu-popover" aria-label="Apri i consigli di Mù">${pixelIcon(animals.mucca.art+chibiFace('mucca'))}<span>Mù</span></button>
  <aside id="mu-popover" class="mu-popover" popover aria-label="I consigli di Mù">
   <button type="button" class="secondary mu-close" popovertarget="mu-popover" popovertargetaction="hide" aria-label="Chiudi i consigli">×</button>
-  ${cowMascot(m,t)}
-  <button type="button" data-action="mu-next" data-tips="${esc(JSON.stringify([...(MU_TIPS[page]||[]),...MU_TIPS.generic]))}" data-i="0">Altro consiglio</button>
+  <div class="mu-advice" role="button" tabindex="0" aria-label="Mù: prossimo consiglio" data-tips="${esc(JSON.stringify([t,...(MU_TIPS[page]||[]),...MU_TIPS.generic]))}" data-i="0">
+   ${cowMascot(m,t)}<span class="muted">Tocca per un altro consiglio</span>
+  </div>
  </aside>`;
 }
+function advanceMu(el){
+ const tips=JSON.parse(el.dataset.tips);
+ const i=(Number(el.dataset.i)+1)%tips.length;
+ el.querySelector('.mascot p').textContent=tips[i];
+ el.dataset.i=i;
+}
+document.addEventListener('click',event=>{
+ const popup=event.target.closest('#mu-popover');
+ if(!popup||event.target.closest('button,a'))return;
+ advanceMu(popup.querySelector('.mu-advice'));
+});
+document.addEventListener('keydown',event=>{
+ if(!event.target.matches('.mu-advice')||!['Enter',' '].includes(event.key))return;
+ event.preventDefault();
+ advanceMu(event.target);
+});
+
 function nextTip(el){
  if(!el||!el.dataset.tips)return;
  let tips;try{tips=JSON.parse(el.dataset.tips);}catch{return;}
@@ -411,8 +429,8 @@ function homeIntro(){
  <div class="row">${link('Apri il calendario','calendario')} ${link(S.me?'Vai alle missioni':'Accedi o chiedi un invito',S.me?'missioni':'accedi')}</div>
  ${S.me?'':'<p class="entry-hint">Il calendario si apre senza account.</p>'}</div>
  <div class="home-scenery"><img class="scenery-day" src="sicani.svg" alt="${artLabel}"><img class="scenery-night" src="sicani-notte.svg" alt="${artLabel} di notte"></div></header>
- <section class="space-signpost"><div><span class="eyebrow">LO SPAZIO GIOVANI</span><h2>Un posto da usare, uno spazio da fare insieme</h2>
- <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Vieni per la prima volta?','spazio')}</section>`;
+ ${!S.me?`<section class="space-signpost"><div><span class="eyebrow">LO SPAZIO GIOVANI</span><h2>Un posto da usare, uno spazio da fare insieme</h2>
+ <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Vieni per la prima volta?','spazio')}</section>`:''}`;
 }
 async function home(){
  const [st,metrics,details,acts]=await Promise.all([getStatus(),getCommunity(),visitInfo(),api('/activities').catch(()=>({activities:[]}))]);
@@ -426,7 +444,7 @@ async function home(){
   ]))+villageCard(metrics)+mu('home');
 }
 async function homeMember(){
- const [acts,mine,chores,st,metrics,pres,details]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending&memberId='+encodeURIComponent(S.me.id)),getStatus(),getCommunity(),api('/checkin').catch(()=>null),visitInfo()]);
+ const [acts,mine,chores,st,metrics,pres,details,progress]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending&memberId='+encodeURIComponent(S.me.id)),getStatus(),getCommunity(),api('/checkin').catch(()=>null),visitInfo(),api('/my/progress').catch(()=>({firstVisitCompleted:false}))]);
  const presenceCard=pres?card('<span class="eyebrow">LA MIA PRESENZA</span>'+(pres.inside?`<h3>Sei in sede dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</h3><p>Quando esci registra l’uscita da qui, oppure inquadra il QR all’ingresso.</p>${btn('Registra la mia uscita','checkout')}`:`<h3>Non hai ancora registrato l’ingresso</h3><p>Se sei in sede, segna la tua presenza: basta un tocco, senza approvazione. Puoi anche inquadrare il QR all’ingresso.</p>${btn('Registra il mio ingresso','checkin')}`)):'';
  const booked=new Map(mine.bookings.map(b=>[b.activityId,b.status]));
  const upcoming=acts.activities.filter(a=>a.starts_at>Date.now()/1000-3600).slice(0,3);
@@ -439,7 +457,7 @@ async function homeMember(){
    card(`<span class="metric">${mineAll}</span><h3>Missioni da verificare</h3><p>Le richieste in attesa aspettano una decisione.</p>${link('Verifica','referenti/missioni')}`)
   ],'two'));
  }
- return homeIntro()+firstVisit(st,details,nextActivity(acts.activities))+
+ return homeIntro()+(progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
   `<div class="grid stats home-stats" aria-label="Il mio personaggio, Tumazzi e orari">${card(profileChip(),'profile-stat')}
    ${card(`<span class="eyebrow">TUMAZZI</span><div class="stat-figure">${pixelIcon(cheese)}<div><strong class="metric">${S.totals.cheese}</strong><span class="stat-label">${S.totals.cheese===1?'Tumuzzu disponibile':'Tumazzi disponibili'}</span></div></div>${link('A Putìa','putia')}`,'wallet')}
    ${openingCard(st)}</div>`+
@@ -853,7 +871,7 @@ async function render(focus=false){
  }
  if(id!==renderId)return;
  main.innerHTML=html;
- if(!['tv','cartello'].includes(page))main.insertAdjacentHTML('beforeend',`<footer class="foot site-foot">${privacyLink}</footer>`);
+ if(!['tv','cartello'].includes(page))main.insertAdjacentHTML('beforeend',`<footer class="foot site-foot">${document.querySelector('#project-logos').innerHTML}${privacyLink}</footer>`);
  if(!['tv','cartello'].includes(page)&&!main.querySelector('#mu-popover'))main.insertAdjacentHTML('beforeend',mu(page));
  main.removeAttribute('aria-busy');
  if(page==='tv')fitTv();
@@ -1027,13 +1045,6 @@ const actions={
  'share-trophy'(id){
   const trophy=(S.trophies||[]).find(t=>String(t.id)===id&&t.earned);
   if(trophy)return shareProgress(trophy);
- },
- 'mu-next'(_id,el){
-  const tips=JSON.parse(el.dataset.tips);
-  const i=Number(el.dataset.i);
-  const panel=el.closest('.mu-popover');
-  panel.querySelector('.mascot p').textContent=tips[i];
-  el.dataset.i=(i+1)%tips.length;
  },
  async 'assembly-clear'(){await run(()=>api('/assembly/meeting',{method:'PUT',body:{clear:true}}),'Convocazione rimossa.');},
  reload:()=>render(),

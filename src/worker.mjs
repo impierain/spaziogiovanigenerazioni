@@ -3,6 +3,7 @@ import {currentMember} from './lib/session.mjs';
 import {handleParticipation} from './participation.mjs';
 import * as activities from './routes/activities.mjs';
 import * as accessi from './routes/accessi.mjs';
+import * as ingresso from './routes/ingresso.mjs';
 import * as auth from './routes/auth.mjs';
 import * as chores from './routes/chores.mjs';
 import * as members from './routes/members.mjs';
@@ -33,6 +34,11 @@ const routes = [
  ['DELETE', '/api/members/:id/card', 'organizer', members.removeCard],
 
  ['POST', '/api/access', 'organizer', accessi.create],
+ ['GET', '/api/checkin', 'member', ingresso.mine],
+ ['POST', '/api/checkin', 'member', ingresso.checkin],
+ ['POST', '/api/checkout', 'member', ingresso.checkout],
+ ['GET', '/api/checkin-code', 'organizer', ingresso.getCode],
+ ['POST', '/api/checkin-code/rotate', 'organizer', ingresso.rotateCode],
  ['GET', '/api/access', 'member', accessi.list],
  ['GET', '/api/inside', 'organizer', accessi.presenti],
 

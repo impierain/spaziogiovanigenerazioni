@@ -134,22 +134,8 @@ body.tv{overflow:hidden}body.tv header.top,body.tv nav,body.tv #banner,body.tv #
 [data-theme="night"] .tv-screen{background:#131a2a;color:#fff3d5}[data-theme="night"] .tv-acts li{background:#232e45;color:#fff3d5}[data-theme="night"] .tv-live{color:#171523}
 @media(max-width:900px){.tv-main{grid-template-columns:1fr}}
 
-/* Pixel art animata, a ciclo continuo */
-.village,.hero{position:relative}.fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}.hero .hero-copy{z-index:2}
-.fx i{position:absolute;display:block}
-.cloud{width:8px;height:8px;background:#fff;box-shadow:8px 0 #fff,16px 0 #fff,24px 0 #fff,8px -8px #fff,16px -8px #fff;left:-10%;animation:drift 46s linear infinite}.cloud.c1{top:14%}.cloud.c2{top:26%;transform:scale(.7);animation-duration:64s;animation-delay:-28s}
-@keyframes drift{from{left:-12%}to{left:104%}}
-.bird{width:4px;height:4px;background:#171523;top:20%;left:-6%;box-shadow:4px -4px #171523,8px 0 #171523;animation:fly 26s linear infinite,flap .5s steps(1) infinite}
-@keyframes fly{from{left:-6%;top:22%}50%{top:12%}to{left:104%;top:24%}}@keyframes flap{0%{box-shadow:4px -4px #171523,8px 0 #171523}50%{box-shadow:4px 4px #171523,8px 0 #171523}}
-.smoke{width:4px;height:4px;background:#e9e4d4;border:1px solid #171523;opacity:0;animation:rise 4s steps(8) infinite}.smoke.s1{left:57%;top:46%}.smoke.s2{left:79%;top:50%;animation-delay:-2s}
-@keyframes rise{from{transform:translateY(0);opacity:.9}to{transform:translateY(-28px) translateX(6px);opacity:0}}
-.star{display:none;width:3px;height:3px;background:#fff3d5;animation:twinkle 2.2s steps(1) infinite}.star.t1{left:18%;top:10%}.star.t2{left:46%;top:18%;animation-delay:-.8s}.star.t3{left:72%;top:8%;animation-delay:-1.5s}
-[data-theme="night"] .star{display:block}[data-theme="night"] .cloud{opacity:.35}[data-theme="night"] .bird{display:none}
-@keyframes twinkle{50%{opacity:.2}}
-.mu-sprite{animation:bob 1.4s steps(1) infinite}@keyframes bob{50%{transform:translateY(-2px)}}
-.sprite-box .sprite{animation:hop 2.8s steps(1) infinite}.card:nth-child(2n) .sprite-box .sprite{animation-delay:-.7s}.card:nth-child(3n) .sprite-box .sprite{animation-delay:-1.4s}@keyframes hop{0%,86%{transform:none}90%{transform:translateY(-4px)}95%{transform:translateY(-2px)}}
-.locked .sprite{animation:none;filter:grayscale(1)}.locked{opacity:.55}
+/* Mù, albero e trofei */
 .mascot.talk{cursor:pointer}.mascot p{transition:opacity .22s}.mascot p.tip-out{opacity:0}
-.tree-box{max-width:520px;margin:auto}.tree-box svg{width:100%;height:auto;display:block}.tree-on{animation:glow 2.4s steps(1) infinite}@keyframes glow{50%{opacity:.7}}
-.trophy-card{max-height:92vh;overflow:auto;display:grid;gap:10px;justify-items:center}.trophy-art .sprite-box{width:130px;height:130px}.trophy-art .sprite{width:92px;height:92px}.trophy-on .trophy-art .sprite{animation:hop 1.4s steps(1) infinite}.trophy-card progress{width:100%}
-@media(prefers-reduced-motion:reduce){.fx i,.mu-sprite,.sprite-box .sprite,.tree-on,.trophy-on .trophy-art .sprite,.tv-live .live-dot{animation:none!important}}
+.tree-box{max-width:520px;margin:auto}.tree-box svg{width:100%;height:auto;display:block}
+.trophy-card{max-height:92vh;overflow:auto;display:grid;gap:10px;justify-items:center}.trophy-art .sprite-box{width:130px;height:130px}.trophy-art .sprite{width:92px;height:92px}.trophy-card progress{width:100%}
+.locked .sprite{filter:grayscale(1)}.locked{opacity:.55}

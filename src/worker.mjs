@@ -6,6 +6,7 @@ import * as accessi from './routes/accessi.mjs';
 import * as ingresso from './routes/ingresso.mjs';
 import * as auth from './routes/auth.mjs';
 import * as chores from './routes/chores.mjs';
+import * as learning from './routes/learning.mjs';
 import * as members from './routes/members.mjs';
 import * as notifications from './routes/notifications.mjs';
 import * as stats from './routes/stats.mjs';
@@ -60,6 +61,8 @@ const routes = [
  ['GET', '/api/activities/manage/:id/bookings', 'organizer', activities.bookings],
  ['GET', '/api/my/bookings', 'member', activities.mine],
  ['GET', '/api/my/progress', 'member', stats.progress],
+ ['GET', '/api/my/learning-journal', 'member', learning.get],
+ ['PUT', '/api/my/learning-journal', 'member', learning.save],
  ['GET', '/api/trophies', 'member', trophies.list],
 
  ['GET', '/api/rewards', 'member', putia.list],

@@ -341,3 +341,25 @@ html[data-theme="night"] main a:not(.btn) { color: #B7DAA4; }
  .site-foot .project-logos { grid-template-columns: 1fr; }
  .site-foot .project-logos img { max-width: 290px; height: 70px; }
 }
+
+/* Accessi rapidi della dashboard, distinti dalla navigazione principale. */
+nav.home-shortcuts {
+ position: static; inset: auto; height: auto; display: grid; grid-template-columns: minmax(0,1fr); gap: 12px; width: auto; z-index: auto;
+ margin: 0 0 24px; padding: 16px; background: var(--ui-surface);
+ border: var(--line); box-shadow: 3px 3px var(--ink);
+}
+.home-shortcuts h2 { font-size: 1.35rem; }
+.home-shortcuts h3 { margin-top: 4px; font-size: 1rem; }
+.shortcut-links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.home-shortcuts .shortcut-links a {
+ display: flex; align-items: center; justify-content: space-between; gap: 6px;
+ min-height: 44px; padding: 8px; font-size: .85rem; font-weight: 800;
+ text-align: left; background: var(--paper); color: var(--ink);
+ border: 2px solid var(--ink); text-decoration: none;
+}
+.home-shortcuts .shortcut-links a span { font-size: 1rem; }
+.home-shortcuts .shortcut-links a:hover { background: #D8B4F8; color: #2C3531; }
+html[data-theme="night"] .home-shortcuts .shortcut-links a { background: #203228; color: #F4F1EA; }
+html[data-theme="night"] .home-shortcuts .shortcut-links a:hover { background: #D8B4F8; color: #2C3531; }
+@media(min-width:760px){.shortcut-links {grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media print {nav.home-shortcuts{display:none;}}

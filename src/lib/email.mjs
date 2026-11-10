@@ -23,7 +23,12 @@ export async function sendEmail(env, {to, subject, text, html}) {
     body: JSON.stringify({from: env.MAIL_FROM, to: [to], subject, text, ...(html ? {html} : {})})
    });
   }
-  return response.ok ? {sent: true} : {sent: false, reason: `errore ${response.status}`};
+  if (response.ok) {
+   // Ricorda l'ultimo invio riuscito: serve ad avvisare prima che la chiave del servizio email scada per inattività.
+   try { await env.DB?.prepare(`INSERT INTO app_state (key, value) VALUES ('mail_last_ok', unixepoch()) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = unixepoch()`).run(); } catch { /* tabella non ancora creata: nessun problema */ }
+   return {sent: true};
+  }
+  return {sent: false, reason: `errore ${response.status}`};
  } catch {
   return {sent: false, reason: 'rete non raggiungibile'};
  }

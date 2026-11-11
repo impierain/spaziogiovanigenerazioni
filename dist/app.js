@@ -1,6 +1,6 @@
 /* CCA SIEMMU · sito collegato alle API del Worker */
 const navIcons = {
- home:'<path d="M1 7h2V5h2V3h2V1h2v2h2v2h2v2h2v3h-2v5H3v-5H1z"/><path fill="#FFD400" d="M3 8h2V6h2V4h2v2h2v2h2v1H3z"/><path fill="#FFFFFF" d="M5 10h6v3H9v-2H7v2H5z"/>',
+ home:'<path d="M1 7h2V5h2V3h2V1h2v2h2v2h2v2h2v3h-2v5H3v-5H1z"/><path fill="#B30016" d="M3 8h2V6h2V4h2v2h2v2h2v1H3z"/><path fill="#FFFFFF" d="M5 10h6v3H9v-2H7v2H5z"/>',
  calendario:'<path d="M4 1h2v2h4V1h2v2h3v12H1V3h3z"/><path fill="#B30016" d="M3 5h10v2H3z"/><path fill="#FFFFFF" d="M3 8h10v5H3z"/><path fill="#6f440f" d="M4 9h2v1H4z M7 9h2v1H7z M10 9h2v1h-2z M4 11h2v1H4z M7 11h2v1H7z"/>',
  missioni:'<path d="M4 1h8v2h3v5h-2v2h-3v2h3v3H3v-3h3v-2H3V8H1V3h3z"/><path fill="#b9954b" d="M5 3h6v5h-1v1H6V8H5z M7 10h2v2H7z M5 13h6v1H5z"/><path fill="#FFFFFF" d="M7 4h2v2H7z M3 5h1v2H3z M12 5h1v2h-1z"/>',
  comunita:'<path d="M2 2h4v1h1v4H6v1h4V7H9V3h1V2h4v1h1v4h-1v2h1v1h1v4H0v-4h1V9h1V7H1V3h1z"/><path fill="#bdd9da" d="M3 4h2v2H3z M2 10h4v2H2z"/><path fill="#B30016" d="M11 4h2v2h-2z M10 10h4v2h-4z"/>',
@@ -11,7 +11,7 @@ const shapes = {
  book:'<path fill="#111111" d="M1 3h6v1h2V3h6v10H9v1H7v-1H1z"/><path fill="#eee7d9" d="M2 4h4v1h1v7H6v-1H2z M9 5h1V4h4v7h-4v1H9z"/><path fill="#5876df" d="M3 6h3v1H3z M3 8h3v1H3z M10 6h3v1h-3z M10 8h3v1h-3z"/>',
  camera:'<path fill="#111111" d="M1 5h3V3h7v2h4v9H1z"/><path fill="#eee7d9" d="M2 6h12v6H2z"/><path fill="#73528f" d="M6 6h5v1h1v4h-1v1H6v-1H5V7h1z"/><path fill="#9de2ff" d="M7 7h3v3H7z"/>',
  plant:'<path fill="#111111" d="M1 2h5v2h2v2h1V4h2V2h4v6h-2v2h-3v2h3v3H3v-3h4v-2H4V8H1z"/><path fill="#a8ef69" d="M2 3h3v2h2v4H5V7H2z M11 5h1V3h2v4h-2v2h-2V6h1z"/><path fill="#d37c4a" d="M4 13h8v1H4z"/>',
- heart:'<path fill="#111111" d="M1 3h5v1h4V3h5v6h-2v2h-2v2H9v2H7v-2H5v-2H3V9H1z"/><path fill="#FFD400" d="M2 4h3v1h2v1h2V5h2V4h3v4h-2v2h-2v2H8v1H7v-1H6v-2H4V8H2z"/>',
+ heart:'<path fill="#111111" d="M1 3h5v1h4V3h5v6h-2v2h-2v2H9v2H7v-2H5v-2H3V9H1z"/><path fill="#B30016" d="M2 4h3v1h2v1h2V5h2V4h3v4h-2v2h-2v2H8v1H7v-1H6v-2H4V8H2z"/>',
  pin:'<path fill="#111111" d="M3 2h9v2h2v9h-2v2H3v-2H1V4h2z"/><path fill="#B30016" d="M4 4h7v1h1v7h-1v1H4v-1H3V5h1z"/><path fill="#FFFFFF" d="M7 5h2v2h2v2H9v2H7V9H5V7h2z"/>',
  bag:'<path fill="#111111" d="M5 1h6v2h1v3h2v9H2V6h2V3h1z"/><path fill="#b9954b" d="M6 3h4v3H9V4H7v2H6z M4 8h8v5H4z"/><path fill="#FFFFFF" d="M7 9h2v2H7z"/>',
  shirt:'<path fill="#111111" d="M5 1h6v1h2v2h2v5h-3v6H4V9H1V4h2V2h2z"/><path fill="#bdd9da" d="M3 5h2V3h1v2h4V3h1v2h2v2h-3v6H6V7H3z"/><path fill="#6f440f" d="M7 7h2v2H7z"/>',
@@ -342,7 +342,7 @@ async function comunita(){
   card('<span class="eyebrow">DECIDERE INSIEME</span><h3>Assemblea e decisioni</h3><p>Il prossimo incontro, l’ordine del giorno e le decisioni prese insieme.</p>'+link('Vai all’assemblea','assemblea')),
   card(`<span class="eyebrow">LE IDEE DEL GRUPPO</span><h3>Proposte e consultazioni</h3><p>${open} proposte aperte. Proponi un’attività o indica le idee che ti interessano.</p>${link('Proponi e vota','proposte')}`)
  ],'two'))+
- section('Il percorso della comunità',card(`<h3>U paisi crisci</h3><p>Come cresce il borgo con quello che facciamo insieme.</p>${link('Guarda il paese','paese')}`))+
+ villageCard(await getCommunity())+
  section('Ricompense e percorso personale',`<div class="support-links"><a href="#putia">A Putìa · ${tumazzi(S.totals.cheese)} →</a><a href="#trofei">Trofei · ${got}/${tr.trophies.length} →</a><a href="#presenze">Le mie statistiche →</a></div>`)+mu('home');
 }
 async function trofei(){
@@ -433,7 +433,7 @@ function firstVisit(st,details,upcoming){
 }
 function homeIntro(){
  const artLabel='Cammarata e San Giovanni Gemini ai piedi di Monte Cammarata, in pixel art';
- return `<header class="hero home-hero"><div class="hero-copy"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1>
+ return `<header class="hero home-hero ${S.me?'member-hero':''}"><div class="hero-copy"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1>
  <p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio gratuito per incontrarsi, studiare e far nascere idee insieme.</p>
  <div class="row">${link('Apri il calendario','calendario')} ${link(S.me?'Vai alle missioni':'Accedi o chiedi un invito',S.me?'missioni':'accedi')}</div>
  ${S.me?'':'<p class="entry-hint">Il calendario si apre senza account.</p>'}</div>
@@ -468,7 +468,7 @@ async function teamPanel(staff=false){
    return card(`<span class="eyebrow">IMPRESA DI SQUADRA</span><h3>${esc(q.title)}</h3><p>${badge(teamStates[q.status])} · ${q.joined}/${q.needed} persone</p><progress value="${q.joined}" max="${q.needed}" aria-label="Iscrizioni per ${esc(q.title)}"></progress><details class="disclosure"><summary>Obiettivo e ricompensa</summary><p>${esc(q.description)}</p><p>Bonus per persona: ${q.xp} XP e trofeo «${esc(q.badge)}», dopo convalida di un referente esterno alla squadra.</p></details>${q.status==='ready'?'<p>La squadra è completa: concordate lo svolgimento con il referente. L’iscrizione non assegna punti.</p>':''}${q.mine?'<p class="muted">Sei nella squadra.</p>':''}${action}`);
   });
   const create=staff?`<details class="disclosure"><summary>Crea un’impresa di squadra</summary>${form('team-create',field('title','Titolo','text','required maxlength="100" placeholder="Pulizia straordinaria del cortile"')+textArea('description','Lavoro, luogo e indicazioni pratiche',600,'',true)+field('needed','Persone necessarie','number','required min="2" max="20" value="4"')+field('xp','Bonus XP per persona','number','required min="0" max="100" value="40"')+field('badge','Nome del trofeo squadra','text','required maxlength="60" placeholder="Mastri d’Ascia"'),'Pubblica impresa',{cls:'plain'})}</details>`:'';
-  return section(staff?'Gestisci imprese di squadra':'Imprese di squadra',`<p>Si attivano quando tutti i posti sono occupati da iscrizioni attive. Prima della convalida, un ritiro riapre la squadra. Premi solo dopo il lavoro reale.</p>${create}${cards.length?grid(cards,'two'):card('<p>Nessuna impresa pubblicata. I referenti possono crearne una da Referenti → Missioni.</p>')}`);
+  return section(staff?'Gestisci imprese di squadra':'Imprese di squadra',`<p>Si attivano quando tutti i posti sono occupati da iscrizioni attive. Prima della convalida, un ritiro riapre la squadra. Premi solo dopo il lavoro reale.</p>${create}${cards.length?grid(cards,'two'):(staff?'':card('<p>Non ci sono imprese aperte.</p>'))}`);
  }catch{return card('<p>Le imprese non sono disponibili al momento. Riprova tra poco.</p>');}
 }
 async function teamTrophies(){
@@ -486,11 +486,16 @@ async function streakPanel(){
  if(!S.me)return '';
  try{
   const d=await api('/my/streaks');
-  return section('I tuoi giorni consecutivi',grid([
-   card(`<span class="eyebrow">WEBAPP</span><strong class="streak-number">${d.app.current}</strong><h3>Giorni di apertura dell’app</h3><p>Record: ${d.app.best} giorni. Una sola apertura al giorno, con account attivo.</p>`),
-   card(`<span class="eyebrow">VITA IN SEDE</span><strong class="streak-number">${d.sede.current}</strong><h3>Giorni di presenza in sede</h3><p>Record: ${d.sede.best} giorni. Contano gli ingressi registrati nei giorni di apertura; sabato e domenica non interrompono la serie.</p>`)
-  ],'two')+'<p class="muted">Le aperture dell’app non danno XP, Tumazzi o trofei. Nessuna penalità se interrompi una serie: esperienze e record restano tuoi. Le date seguono l’ora italiana.</p>');
- }catch{return card('<p>I contatori non sono disponibili al momento. I tuoi progressi restano salvati.</p>');}
+  return `<section class="streak-compact" aria-labelledby="streak-title"><h2 id="streak-title">Giorni consecutivi</h2><div class="streak-strip">
+  <div>${pixelIcon(navIcons.calendario)}<strong>${d.app.current}</strong><span>App<small>Record ${d.app.best}</small></span></div>
+  <div>${pixelIcon(navIcons.home)}<strong>${d.sede.current}</strong><span>In sede<small>Record ${d.sede.best}</small></span></div></div>
+  <details><summary>Come contano i giorni</summary><p>App: una visita al giorno con account attivo. In sede: ingressi registrati nei giorni di apertura; il weekend non interrompe la serie. Ora italiana. Nessuna penalità se interrompi la serie: XP e record restano tuoi. Le aperture non assegnano premi.</p></details></section>`;
+ }catch{return '<p class="muted">Contatori temporaneamente non disponibili.</p>';}
+}
+function presenceCta(pres,mission=false){
+ if(!pres)return card('<p>Presenza non disponibile. Riprova.</p>'+btn('Riprova','reload'));
+ if(pres.inside)return `<section class="presence-focus is-inside"><div><strong>✓ Sei in sede</strong><span class="muted"> dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</span></div>${mission?'':`<a class="btn presence-main" href="#missioni">Scegli una mansione →</a>`}${btn('Registra uscita','checkout','',{secondary:true})}</section>`;
+ return `<section class="presence-focus"><h2>Sei in sede?</h2>${btn('Fai il check-in in sede','checkin')}<p class="muted">Solo quando sei fisicamente in sede.</p></section>`;
 }
 async function achievementBoard(){
  try{
@@ -507,14 +512,14 @@ async function home(){
    card('<h3>Vieni in sede</h3><p>Ingresso e uscita vengono registrati dai referenti: così sappiamo quante ore lo spazio resta vivo.</p>'),
    card('<h3>Partecipa</h3><p>Prenota le attività del calendario e dai una mano con le missioni: ogni impegno verificato vale XP e Tumazzi.</p>'),
    card('<h3>Cresci</h3><p>Sali di livello, guarda le tue presenze e contribuisci a far crescere lo spazio.</p>')
-  ]))+villageCard(metrics)+mu('home');
+  ]))+mu('home');
 }
 function homeShortcuts(){
  const personal=[
   ['Prenota un’attività','calendario'],['Missioni','missioni'],['A Putìa','putia'],
   ['Banca del tempo','banca'],['Proposte e voti','proposte'],['Assemblea e decisioni','assemblea'],
   ['Trofei','trofei'],['Diario Youthpass','profilo/diario'],['Interessi e avatar','profilo'],
-  ['Statistiche personali','presenze'],['Orari e sede','spazio'],['U paisi crisci','paese']
+  ['Statistiche personali','presenze'],['Orari e sede','spazio']
  ];
  const staff=[
   ['Prenotazioni e presenze agli eventi','referenti/attivita'],
@@ -532,28 +537,22 @@ function homeShortcuts(){
 }
 
 async function homeMember(){
- const [acts,mine,chores,st,metrics,pres,details,progress]=await Promise.all([api('/activities'),api('/my/bookings'),api('/chores?status=pending&memberId='+encodeURIComponent(S.me.id)),getStatus(),getCommunity(),api('/checkin').catch(()=>null),visitInfo(),api('/my/progress').catch(()=>({firstVisitCompleted:false}))]);
- const presenceCard=pres?card('<span class="eyebrow">LA MIA PRESENZA</span>'+(pres.inside?`<h3>Sei in sede dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</h3><p>Quando esci registra l’uscita da qui, oppure inquadra il QR all’ingresso.</p>${btn('Registra la mia uscita','checkout')}`:`<h3>Non hai ancora registrato l’ingresso</h3><p>Se sei in sede, segna la tua presenza: basta un tocco, senza approvazione. Puoi anche inquadrare il QR all’ingresso.</p>${btn('Registra il mio ingresso','checkin')}`)):'';
+ const [acts,mine,st,pres,details,progress]=await Promise.all([api('/activities'),api('/my/bookings'),getStatus(),api('/checkin').catch(()=>null),visitInfo(),api('/my/progress').catch(()=>({firstVisitCompleted:false}))]);
  const booked=new Map(mine.bookings.map(b=>[b.activityId,b.status]));
  const upcoming=acts.activities.filter(a=>a.starts_at>Date.now()/1000-3600).slice(0,3);
  let extra='';
  if(isOrganizer()){
   const [inside,pending]=await Promise.all([api('/inside'),api('/chores?status=pending')]);
-  const mineAll=pending.chores.filter(c=>c.memberId!==S.me.id).length;
-  extra=section('Da gestire',grid([
-   card(`<span class="metric">${inside.presenti.length}</span><h3>In sede adesso</h3><p>${inside.presenti.length?esc(inside.presenti.map(p=>p.name).join(', ')):'Nessuno è registrato dentro.'}</p>${link('Registra ingressi','referenti/presenze')}`,'green'),
-   card(`<span class="metric">${mineAll}</span><h3>Missioni da verificare</h3><p>Le richieste in attesa aspettano una decisione.</p>${link('Verifica','referenti/missioni')}`)
-  ],'two'));
+  const waiting=pending.chores.filter(c=>c.memberId!==S.me.id).length;
+  extra=`<section class="admin-compact"><h2>Da gestire</h2><div class="admin-chips"><a href="#referenti/presenze">${pixelIcon(navIcons.comunita)}<strong>${inside.presenti.length}</strong><span>In sede →</span></a><a href="#referenti/missioni">${pixelIcon(navIcons.missioni)}<strong>${waiting}</strong><span>Da verificare →</span></a></div></section>`;
  }
- return homeIntro()+homeShortcuts()+await dailyWheelPanel()+await streakPanel()+await achievementBoard()+(progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
-  `<div class="grid stats home-stats" aria-label="Il mio personaggio, Tumazzi e orari">${card(profileChip(),'profile-stat')}
-   ${card(`<span class="eyebrow">TUMAZZI</span><div class="stat-figure">${pixelIcon(cheese)}<div><strong class="metric">${S.totals.cheese}</strong><span class="stat-label">${S.totals.cheese===1?'Tumuzzu disponibile':'Tumazzi disponibili'}</span></div></div>${link('A Putìa','putia')}`,'wallet')}
-   ${openingCard(st)}</div>`+
-  section('Scambia tempo e competenze',timeBankCard())+
-  section('Le mie richieste',card(`<p>${chores.chores.length} missioni in attesa di verifica.</p><div class="row">${link('Vai alle missioni','missioni')}${link('Le mie statistiche','presenze')}</div>`))+
-  (presenceCard?section('Presenza',presenceCard):'')+
-  extra+
-  section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p><p>${a.access_mode==='open'?'Puoi venire direttamente.':a.available>0?`${a.available} posti liberi su ${a.capacity}`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}${activityDescription(a)}`)),'three')+`<p>${link('Tutto il calendario','calendario')}</p>`:card('<p>Non ci sono ancora attività in calendario.</p>'))+villageCard(metrics)+mu('home');
+ return homeIntro()+presenceCta(pres)+
+ `<div class="grid stats home-stats" aria-label="Personaggio, Tumazzi e orari">${card(profileChip(),'profile-stat')}
+ ${card(`<span class="eyebrow">TUMAZZI</span><div class="stat-figure">${pixelIcon(cheese)}<strong class="metric">${S.totals.cheese}</strong></div>${link('A Putìa','putia')}`,'wallet')}${openingCard(st)}</div>`+
+ homeShortcuts()+extra+await dailyWheelPanel()+await streakPanel()+await achievementBoard()+
+ (progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
+ section('Scambia tempo e competenze',timeBankCard())+
+ section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p><p>${a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}${activityDescription(a)}`)),'three')+link('Tutto il calendario','calendario'):card('<p>Non ci sono attività in calendario.</p>'))+mu('home');
 }
 
 async function calendario(){
@@ -602,7 +601,7 @@ function privacy(){
  section('Su quale base usiamo i dati',card('<p>Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
  section('Chi può accedere ai dati',card('<p>I referenti autorizzati usano i dati di iscrizione e partecipazione per organizzare le attività. Il sito è ospitato su Cloudflare. Quando è configurato l’invio di email di servizio, i dati necessari alla consegna vengono trasmessi al fornitore di invio, Brevo o Resend. Le statistiche pubbliche sono aggregate.</p><p>Per informazioni sui fornitori, sui luoghi in cui trattano i dati e sulle garanzie applicate, contatta l’associazione.</p>'))+
  section('Per quanto tempo',card(`<p>La sessione dura fino a 30 giorni. Le notifiche in-app oltre 90 giorni vengono eliminate quando apri l’elenco. I dati di account e di attività sono conservati secondo il tempo necessario a gestire la partecipazione e gli eventuali obblighi di rendicontazione. Per conoscere i tempi applicati a un dato specifico o chiedere la cancellazione, scrivi a ${contact}.</p>`))+
- section('Imprese e ruota del giorno',card('<p>Conserviamo le iscrizioni alle imprese, la convalida del referente, i bonus XP e i trofei assegnati. Solo i referenti vedono l’elenco degli iscritti; gli altri soci vedono il numero di posti occupati. La ruota è facoltativa: salviamo un esito per account e giorno, il bonus e la sua eventuale scadenza. Nessun pagamento o strumento di profilazione; l’esito non dipende dai dati personali.</p>'))+
+ section('Imprese e ruota del giorno',card('<p>Per le mansioni personali conserviamo presa in carico, eventuale abbandono, dichiarazione di completamento e decisione del referente. L’invio del completamento richiede un check-in attivo. Conserviamo le iscrizioni alle imprese, la convalida del referente, i bonus XP e i trofei assegnati. Solo i referenti vedono l’elenco degli iscritti; gli altri soci vedono il numero di posti occupati. La ruota è facoltativa: salviamo un esito per account e giorno, il bonus e la sua eventuale scadenza. Nessun pagamento o strumento di profilazione; l’esito non dipende dai dati personali.</p>'))+
  section('Serie e bacheca pubblica',card('<p>Con account attivo salviamo una sola apertura della webapp per giorno, per mostrarti la tua serie personale senza attribuire premi. Le serie in sede derivano dagli ingressi registrati. La bacheca pubblica è disattivata inizialmente: puoi attivarla nel Profilo per condividere pseudonimo e nuovi trofei legati ad attività reali. Puoi ritirare la scelta in ogni momento; il tuo traguardo non sarà più esposto. Non pubblichiamo email, orari, storico delle presenze o dati del diario.</p>'))+
  section('Cookie e dati nel browser',card('<p>Dopo l’accesso, il cookie tecnico <code>__Host-cca_session</code> mantiene la sessione. Scade entro 30 giorni e viene rimosso all’uscita dall’account. Il browser conserva anche le tue preferenze locali, come tema, suono e avatar, e può ricordare temporaneamente la pagina a cui tornare dopo l’accesso. Puoi eliminare questi dati dalle impostazioni del browser. Il sito non usa strumenti di analisi o profilazione pubblicitaria.</p>'))+
  section('I tuoi diritti',card(`<p>Puoi scrivere a ${contact} per chiedere accesso, rettifica, cancellazione o limitazione del trattamento e, quando applicabili, portabilità e opposizione. Se sei minorenne, puoi farti aiutare da un adulto di fiducia. Puoi presentare reclamo al <a href="https://www.garanteprivacy.it/">Garante per la protezione dei dati personali</a>.</p>`));
@@ -625,15 +624,37 @@ async function impostaPassword(token){
 }
 
 /* ---- missioni (missioni) ---- */
+let missionCatalog=[],missionJobs=[],missionPresence=null,missionLegacyPending=[];
+let missionCategory='recommended',missionPage=0,missionSearch='';
+function availableMissions(){
+ const busy=new Set([...missionJobs.filter(j=>['in_progress','submitted'].includes(j.state)).map(j=>j.type_id),...missionLegacyPending]);
+ let choices=missionCatalog.filter(t=>t.active&&!busy.has(t.id));
+ if(missionCategory!=='recommended')choices=choices.filter(t=>t.path===missionCategory);
+ if(missionSearch)choices=choices.filter(t=>t.name.toLocaleLowerCase('it').includes(missionSearch.toLocaleLowerCase('it')));
+ const interests=S.me.interests||[];
+ choices.sort((a,b)=>Number(interests.includes(b.path))-Number(interests.includes(a.path))||a.name.localeCompare(b.name,'it'));
+ const pages=Math.max(1,Math.ceil(choices.length/3));missionPage=Math.min(missionPage,pages-1);
+ const cards=choices.slice(missionPage*3,missionPage*3+3).map(t=>`<article class="card mission-choice"><details><summary><h3>${esc(t.name)}</h3></summary><div class="mission-details">${art(pathInfo(t.path)[2])}<p>${esc(t.description||'Svolgi l’attività e chiedi la convalida in sede.')}</p><p class="muted">${esc(pathInfo(t.path)[1])} · ${t.xp} XP · ${tumazzi(t.cheese)}</p>${btn('Prendi in carico','assignment-take',t.id)}</div></details></article>`).join('');
+ return (cards||'<p class="muted">Nessuna mansione in questa categoria.</p>')+`<div class="mission-pager">${btn('←','mission-page','prev',{secondary:true,extra:missionPage===0?'disabled aria-label="Pagina precedente"':'aria-label="Pagina precedente"'})}<span>${missionPage+1}/${pages}</span>${btn('→','mission-page','next',{secondary:true,extra:missionPage>=pages-1?'disabled aria-label="Pagina successiva"':'aria-label="Pagina successiva"'})}</div>`;
+}
 async function missioni(){
  if(!S.me)return needLogin();
- const [types,logs]=await Promise.all([api('/chore-types'),api('/chores?limit=30&memberId='+encodeURIComponent(S.me.id))]);
- const active=types.types.filter(t=>t.active);
- const pending=logs.chores.filter(c=>c.status==='pending').length;
- return title('Missioni','Le missioni che tengono vivo lo spazio. Falla, chiedi la verifica a un referente e ricevi XP e Tumazzi.')+
- `<p class="muted">Le missioni ripetibili danno al massimo ${tumazzi(WEEKLY_CHEESE)} a settimana (da lunedì a domenica). Gli XP si contano sempre.</p>`+
- await teamPanel()+section('Missioni disponibili',active.length?grid(active.map(t=>card(`<div class="mission-heading">${art(pathInfo(t.path)[2])}<div><h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}${(S.me.interests||[]).includes(t.path)?' '+badge('Consigliata per te'):''}</p></div></div><div class="mission-reward"><strong>${t.xp} XP</strong><span>${tumazzi(t.cheese)}</span></div><details class="disclosure"><summary>Cosa fare</summary><p>${esc(t.description)||'Svolgi l’attività in sede e chiedi la verifica a un referente.'}</p></details>${form('chore','<details class="mission-note"><summary>Aggiungi una nota (facoltativa)</summary>'+field('note','La tua nota','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"')+'</details>','Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
- section(`Le mie richieste${pending?` · ${pending} in attesa`:''}`,logs.chores.length?card(`<ul class="list">${logs.chores.map(c=>`<li><strong>${esc(c.choreName)}</strong> · ${dateShort(c.requestedAt)} · ${badge(statusText[c.status])}${c.status==='verified'?` · ${c.xp} XP, ${tumazzi(c.cheese)}`:''}${c.note?`<br><span class="muted">${esc(c.note)}</span>`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora richiesto nessuna missione.</p>'))+mu('missioni',{pending});
+ const [types,logs,jobs,pres]=await Promise.all([api('/chore-types'),api('/chores?limit=100&memberId='+encodeURIComponent(S.me.id)),api('/my/assignments'),api('/checkin')]);
+ missionCatalog=types.types;missionJobs=jobs.assignments;missionPresence=pres;missionLegacyPending=logs.chores.filter(c=>c.status==='pending').map(c=>c.typeId);
+ const progress=missionJobs.filter(j=>j.state==='in_progress'),submitted=missionJobs.filter(j=>j.state==='submitted');
+ const linked=new Set(missionJobs.map(j=>j.log_id));
+ const legacy=logs.chores.filter(c=>c.status==='pending'&&!linked.has(c.id));
+ const doing=progress.map(j=>card(`<h3>${esc(j.name)}</h3><p class="muted">${j.xp} XP dopo convalida</p><details class="mission-note"><summary>Aggiungi una nota</summary><label>Nota per il referente<textarea id="assignment-note-${j.id}" maxlength="500"></textarea></label></details>${btn('✓ Mansione completata','assignment-finish',j.id,{extra:pres.inside?'':'disabled aria-describedby="mission-checkin-note"'})}${!pres.inside?'<p class="muted">Se sei in sede, fai il check-in prima di completare.</p>'+btn('Fai il check-in','checkin'):''}${btn('Abbandona mansione','assignment-abandon',j.id,{secondary:true})}`)).join('')||'<p class="muted">Prendi in carico una mansione per iniziare.</p>';
+ const waiting=[...submitted.map(j=>({name:j.name,note:j.note})),...legacy.map(j=>({name:j.choreName,note:j.note}))].map(j=>card(`${badge('✓ In attesa')}<h3>${esc(j.name)}</h3>${j.note?`<details><summary>La tua nota</summary><p>${esc(j.note)}</p></details>`:''}<p class="muted">Il referente verifica e assegna i premi.</p>`)).join('')||'<p class="muted">Nessuna richiesta in attesa.</p>';
+ return title('Missioni','Scegli, svolgi in sede, chiedi la convalida.')+presenceCta(pres,true)+
+ `<p class="muted" id="mission-checkin-note">Premi dopo verifica. Massimo ${tumazzi(WEEKLY_CHEESE)} a settimana dalle mansioni ripetibili; gli XP restano permanenti.</p>
+ <div class="mission-filters" aria-label="Categorie missioni">${[['recommended','Per te'],...PATHS.map(([id,name])=>[id,name.split(' ')[0]])].map(([id,name])=>`<button type="button" data-action="mission-category" data-id="${id}" aria-pressed="${missionCategory===id}">${name}</button>`).join('')}</div>
+ <label class="mission-search">Cerca una mansione<input type="search" id="mission-search" value="${esc(missionSearch)}" placeholder="Titolo…"></label>
+ <div class="mission-board"><section class="mission-column"><h2>1 · Disponibili</h2><p class="muted">Tre alla volta, dai tuoi interessi.</p><div id="mission-available">${availableMissions()}</div></section>
+ <section class="mission-column" id="mission-running" tabindex="-1"><h2>2 · Le tue, in corso</h2>${doing}</section>
+ <section class="mission-column" id="mission-waiting" tabindex="-1"><h2>3 · Da convalidare</h2>${waiting}</section></div>`+
+ `<details class="mission-history"><summary>Missioni già convalidate o respinte</summary>${logs.chores.filter(c=>c.status!=='pending').map(c=>`<p><strong>${esc(c.choreName)}</strong> · ${statusText[c.status]} · ${dateShort(c.requestedAt)} · ${c.xp} XP · ${tumazzi(c.cheese)}${c.note?`<br>${esc(c.note)}`:''}</p>`).join('')||'<p>Nessuna convalida ancora.</p>'}</details>`+
+ await teamPanel()+mu('missioni',{pending:submitted.length+legacy.length});
 }
 
 /* ---- presenze personali ---- */
@@ -699,8 +720,8 @@ async function profilo(){
  const species=Object.hasOwn(animals,savedSpecies)?savedSpecies:'mucca',color=pref.get('color','rosa');
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="swatch-name">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
- section('Il mio personaggio',card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div><div class="support-links"><a href="#presenze">Le mie statistiche →</a><a href="#trofei">I miei trofei →</a></div><details class="disclosure profile-sharing"><summary>Condividi il tuo percorso</summary>${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p></details>`,'profile-overview'))+
- await streakPanel()+section('Diario di apprendimento Youthpass',journal,'','learning-journal')+
+ section('Il mio personaggio',card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div><div class="support-links"><a href="#presenze">Le mie statistiche →</a></div><details class="disclosure profile-sharing"><summary>Condividi il tuo percorso</summary>${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p></details>`,'profile-overview'))+
+ await streakPanel()+section('Le mie missioni',card('<div class="support-links">'+link('Apri le mie mansioni','missioni')+link('I miei trofei','trofei')+'</div>'))+section('Diario di apprendimento Youthpass',journal,'','learning-journal')+
  recommend+skillTree(prog.counts,types.types.filter(t=>t.active))+
  section('Bacheca pubblica',card(form('achievement-sharing',`<label><input type="checkbox" name="enabled" ${sharing.sharing?'checked':''}> Voglio mostrare il mio pseudonimo e i prossimi trofei nella bacheca visibile a tutti.</label><p class="muted">Scelta facoltativa. Nessuna email, nome completo, orario o presenza pubblicati. Se disattivi la scelta e salvi, il tuo traguardo scompare dalla bacheca.</p>`,'Salva scelta bacheca',{cls:'plain'})))+
  section('Il mio account','<details class="disclosure account-settings"><summary>Gestisci nome, interessi e accesso</summary>'+grid([
@@ -1135,7 +1156,28 @@ async function shareProgress(trophy){
  }catch(e){say(e.message||'Impossibile creare la card.',true);}
 }
 
+function taskFeedback(title,message,offer=false){
+ const dialog=document.createElement('dialog');dialog.className='mu-task-dialog';
+ dialog.setAttribute('aria-labelledby','mu-task-title');dialog.innerHTML=`<h2 id="mu-task-title">${esc(title)}</h2>${cowMascot('felice',message)}${offer?'<a href="#missioni" class="btn">Scegli una missione →</a>':''}<form method="dialog"><button>${offer?'Non ora':'Va bene'}</button></form>`;
+ dialog.addEventListener('close',()=>{const next=dialog.dataset.focusTarget&&document.getElementById(dialog.dataset.focusTarget);dialog.remove();if(next){next.focus({preventScroll:true});next.scrollIntoView({block:'start'});}else main.focus({preventScroll:true});},{once:true});
+ dialog.querySelector('a')?.addEventListener('click',()=>dialog.close());document.body.append(dialog);dialog.showModal();return dialog;
+}
+function refreshMissionChoices(){const el=document.querySelector('#mission-available');if(el)el.innerHTML=availableMissions();main.querySelectorAll('[data-action="mission-category"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===missionCategory)));}
+main.addEventListener('input',event=>{if(event.target.id==='mission-search'){missionSearch=event.target.value;missionPage=0;refreshMissionChoices();}});
 const actions={
+ 'mission-category'(id){missionCategory=id;missionPage=0;refreshMissionChoices();},
+ 'mission-page'(id){missionPage=Math.max(0,missionPage+(id==='next'?1:-1));refreshMissionChoices();},
+ async 'assignment-take'(id){const ok=await run(()=>api('/my/assignments',{method:'POST',body:{typeId:id}}),'Mansione presa in carico.');if(ok){const next=document.getElementById('mission-running');next?.focus({preventScroll:true});next?.scrollIntoView({block:'start'});}},
+ async 'assignment-abandon'(id){await run(()=>api('/my/assignments/'+encodeURIComponent(id)+'/abandon',{method:'POST',body:{}}),'Mansione abbandonata. Nessuna penalità.');},
+ async 'assignment-finish'(id,el){
+  const original=el.innerHTML;el.innerHTML='✓ Invio in corso…';el.classList.add('completion-tapped');
+  const popup=taskFeedback('Hai finito!', 'Invio la richiesta al referente…');
+  let failure='';
+  const ok=await run(async()=>{try{await api('/my/assignments/'+encodeURIComponent(id)+'/finish',{method:'POST',body:{note:document.querySelector('#assignment-note-'+id)?.value||''}});}catch(e){failure=e.status===0?'Non ho ricevuto conferma dal server. Aggiorna la pagina prima di riprovare.':e.message;throw e;}},null,{rerender:false});
+  popup.querySelector('h2').textContent=ok?'✓ Richiesta inviata':'Controlla la richiesta';
+  popup.querySelector('.mascot p').textContent=ok?'Richiesta salvata. Ora il referente verifica il lavoro. XP e Tumazzi arrivano dopo la convalida.':failure||'Non ho ricevuto conferma. Aggiorna la pagina prima di riprovare.';
+  if(ok){await render();popup.dataset.focusTarget='mission-waiting';}else{el.innerHTML=original;el.classList.remove('completion-tapped');}
+ },
  async 'spin-wheel'(){
   main.querySelector('.wheel-stage')?.classList.add('wheel-spinning');
   let prize;
@@ -1156,7 +1198,7 @@ const actions={
  trophy(id){const t=(S.trophies||[]).find(x=>x.id===id);if(t)openTrophy(t);},
  theme(){document.querySelector('#theme-toggle').click();render();},
  tvzoom(id){const z=Math.min(1.6,Math.max(.6,Number(pref.get('tvzoom',1))+(id==='up'?.1:-.1)));pref.set('tvzoom',z.toFixed(2));const el=document.querySelector('.tv-screen');if(el)el.style.setProperty('--tvz',z);},
- async checkin(){await run(async()=>{const r=await api('/checkin',{method:'POST',body:{}});say(`Ingresso registrato. Benvenutə, ${S.me.pseudonym}!`);return r;},null);},
+ async checkin(){const ok=await run(()=>api('/checkin',{method:'POST',body:{direction:'IN'}}),'Check-in registrato.');if(ok)taskFeedback('✓ Sei in sede!', 'Ti va di dare una mano? Scegli una missione: i premi arrivano dopo la verifica.',true);},
  print:()=>window.print(),
  async checkout(){await run(()=>api('/checkout',{method:'POST',body:{}}),'Uscita registrata. A presto!');},
  async rotate(){if(!await confirmAction('Il vecchio QR smetterà di funzionare e dovrai ristampare il cartello. Continuare?'))return;await run(()=>api('/checkin-code/rotate',{method:'POST',body:{}}),'Codice cambiato: ristampa il cartello.');},
@@ -1210,6 +1252,7 @@ function confirmAction(message){
  });
 }
 const destructiveActions={
+ 'assignment-abandon':'Abbandonare questa mansione? Potrai riprenderla in seguito, senza penalità.',
  'team-leave':'Ritirare la tua iscrizione? La squadra potrebbe tornare in formazione.',
  'team-cancel':'Annullare questa impresa per tutta la squadra?',
  'assembly-clear':'Rimuovere la convocazione dell’assemblea?',
@@ -1369,7 +1412,7 @@ const themeControl=document.querySelector('#theme-toggle');
 function applyTheme(night){
  document.documentElement.dataset.theme=night?'night':'day';
  themeControl.setAttribute('aria-pressed',String(night));
- themeControl.textContent=night?'☀':'☾';
+ themeControl.innerHTML=night?'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 1v4m0 14v4M1 12h4m14 0h4M4 4l3 3m10 10l3 3M4 20l3-3M17 7l3-3" stroke="currentColor" stroke-width="2"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 16A9 9 0 0 1 8 4a9 9 0 1 0 12 12z"/></svg>';
  themeControl.setAttribute('aria-label',night?'Passa alla modalità giorno':'Passa alla modalità notte');
 }
 let night=false;

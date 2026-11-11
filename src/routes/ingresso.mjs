@@ -46,7 +46,8 @@ export async function checkin({request, env, db, member}) {
  const now = Math.floor(Date.now() / 1000);
  // Il codice del QR è facoltativo: chi registra da solo dal sito (senza QR) non lo manda.
  if (body.code !== undefined && !same(typeof body.code === 'string' ? body.code : '', await currentCode(db))) fail(403, 'Codice non valido o cambiato: scansiona il QR aggiornato all’ingresso.');
- const result = await recordAccess(db, {memberId: member.id, direction: undefined, at: now, source: 'pannello', recordedBy: member.id});
+ if(body.direction==='IN'){const state=await myState(db,member.id,now);if(state.inside)return json({access:{direction:'IN',at:state.since}});}
+ const result = await recordAccess(db, {memberId: member.id, direction: body.direction==='IN'?'IN':undefined, at: now, source: 'pannello', recordedBy: member.id});
  if (result.direction === 'IN') await checkTrophies(env, db, member.id);
  return json({access: result});
 }

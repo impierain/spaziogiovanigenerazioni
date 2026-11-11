@@ -92,12 +92,14 @@ async function decide(db, logId, organizerId, verdict, env = {}) {
   if (String(error).includes('chore_not_authorized')) fail(403, 'Non puoi decidere su una tua missione.');
   throw error;
  }
+ const boost = verdict === 'verified' ? await db.prepare("SELECT xp FROM bonus_xp WHERE member_id=? AND source='boost' AND ref=?").bind(log.member_id,String(logId)).first() : null;
+ const boostXp=boost?.xp||0;
  const cheeseCapped = verdict === 'verified' && cheese < log.cheese;
  await notify(db, log.member_id, verdict === 'verified'
-  ? {kind: 'faccenda', level: 'ok', title: `Missione confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${tumazzi(cheese)}.${cheeseCapped ? ' I Tumazzi sono ridotti per il limite settimanale.' : ''}`}
+  ? {kind: 'faccenda', level: 'ok', title: `Missione confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${tumazzi(cheese)}.${boostXp ? ` Bonus ruota: +${boostXp} XP.` : ''}${cheeseCapped ? ' I Tumazzi sono ridotti per il limite settimanale.' : ''}`}
   : {kind: 'faccenda', level: 'info', title: `Missione non confermata: ${log.name}`, body: 'Un referente non l’ha convalidata. Chiedi a lui il motivo.'});
  if (verdict === 'verified') await checkTrophies(env, db, log.member_id);
- return {id: logId, status: verdict, xp, cheese, cheeseCapped};
+ return {id: logId, status: verdict, xp, cheese, cheeseCapped, boostXp};
 }
 
 export async function createLog({request, env, db, member}) {

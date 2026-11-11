@@ -37,10 +37,12 @@ export async function board({db}) {
  // Only real-world achievements, voluntarily shared after consent. No location or account IDs.
  const eligible=TROPHIES.filter(t=>!['votes','proposals'].includes(t.metric));
  const ids=eligible.map(t=>t.id);
- const row=await db.prepare(`SELECT m.pseudonym, t.trophy_id FROM trophies_awarded t
+ const row=await db.prepare(`SELECT m.pseudonym, t.trophy_id, t.awarded_at FROM trophies_awarded t
  JOIN achievement_sharing s ON s.member_id=t.member_id
  JOIN members m ON m.id=t.member_id
  WHERE m.status='approved' AND t.awarded_at>=s.enabled_at AND t.trophy_id IN (${ids.map(()=>'?').join(',')})
  ORDER BY t.awarded_at DESC, t.rowid DESC LIMIT 1`).bind(...ids).first();
+ const team=await db.prepare(`SELECT m.pseudonym,t.name,t.awarded_at FROM team_badges t JOIN achievement_sharing s ON s.member_id=t.member_id JOIN members m ON m.id=t.member_id WHERE m.status='approved' AND t.awarded_at>=s.enabled_at ORDER BY t.awarded_at DESC,t.rowid DESC LIMIT 1`).first();
+ if(team&&(!row||team.awarded_at>=row.awarded_at))return json({latest:{pseudonym:team.pseudonym,trophy:team.name}});
  return json({latest:row?{pseudonym:row.pseudonym,trophy:eligible.find(t=>t.id===row.trophy_id).name}:null});
 }

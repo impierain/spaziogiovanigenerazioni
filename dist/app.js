@@ -351,7 +351,7 @@ async function trofei(){
  const groups=[...new Set(trophies.map(t=>t.group))];
  const got=trophies.filter(t=>t.earned).length;
  return title('Trofei',`${got} su ${trophies.length} conquistati. Arrivano da soli quando i dati verificati raggiungono la soglia, e ti avvisiamo anche per email.`)+
- (S.trophies=trophies,groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`<div class="${t.earned?'':'locked'}">${art(t.icon)}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<p>${badge('Bloccato')}</p><progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}${btn(t.earned?'Apri il trofeo':'Come si sblocca','trophy',t.id,{secondary:true})}${t.earned?btn('Condividi trofeo','share-trophy',t.id):''}`,t.earned?'green':'')),'three'))).join(''));
+ await teamTrophies()+(S.trophies=trophies,groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`<div class="${t.earned?'':'locked'}">${art(t.icon)}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<p>${badge('Bloccato')}</p><progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}${btn(t.earned?'Apri il trofeo':'Come si sblocca','trophy',t.id,{secondary:true})}${t.earned?btn('Condividi trofeo','share-trophy',t.id):''}`,t.earned?'green':'')),'three'))).join(''));
 }
 async function putia(){
  if(!S.me)return needLogin();
@@ -441,6 +441,40 @@ function homeIntro(){
  ${!S.me?`<section class="space-signpost"><div><span class="eyebrow">LO SPAZIO GIOVANI</span><h2>Un posto da usare, uno spazio da fare insieme</h2>
  <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Vieni per la prima volta?','spazio')}</section>`:''}`;
 }
+const wheelArt=`<div class="wheel-stage" aria-hidden="true"><svg class="wheel-disc" viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#111" d="M20 0h24v4h8v8h8v8h4v24h-4v8h-8v8h-8v4H20v-4h-8v-8H4v-8H0V20h4v-8h8V4h8z"/><path fill="#FFD400" d="M20 6h24v6h8v8h6v24h-6v8h-8v6H20v-6h-8v-8H6V20h6v-8h8z"/><path fill="#B30016" d="M30 6h4v24h24v4H34v24h-4V34H6v-4h24zM14 12l38 38-4 4-38-38zM48 10l6 6-38 38-6-6z"/><path fill="#111" d="M24 24h16v16H24z"/><path fill="#FFF" d="M28 28h8v8h-8z"/></svg><span class="wheel-pointer">▼</span></div>`;
+const dailyText=p=>p.kind==='xp'?'Hai trovato 5 XP!':p.kind==='boost'?'Moltiplicatore XP ×2 attivo fino a mezzanotte.':'Una curiosità dai Sicani';
+async function dailyWheelPanel(){
+ if(!S.me)return '';
+ try{
+  const {prize}=await api('/my/daily-wheel');
+  return section('Ruota del giorno',card(wheelArt+(prize?`<h3>${dailyText(prize)}</h3>${prize.curiosity?`<p>${esc(prize.curiosity.text)}</p><a href="${esc(prize.curiosity.source)}" target="_blank" rel="noopener">Leggi la fonte · Italia.it ↗</a>`:''}<p class="muted">Il risultato di oggi è salvato nel tuo account. Riaprire l’app non lo cambia.</p>`:`<h3>Una sorpresa, se ti va</h3><p>Un solo giro al giorno per account, gratuito. Nessun tentativo extra e nessuna penalità se salti un giorno.</p>${btn('Gira la ruota del giorno','spin-wheel')}`)+`<details class="disclosure"><summary>Premi e probabilità</summary><p>Tre esiti equiprobabili (1 su 3): 5 XP, una curiosità storica, oppure XP ×2 sulle missioni individuali convalidate oggi. Il moltiplicatore aggiunge al massimo 50 XP al giorno; non raddoppia Tumazzi, premi della ruota, imprese o altre ricompense. Scade a mezzanotte, ora italiana.</p><p>Gli XP delle attività restano disponibili anche senza girare. Nessun acquisto, premio in denaro o classifica.</p></details>`,'daily-wheel'));
+ }catch{return '';}
+}
+const teamStates={forming:'Squadra in formazione',ready:'Impresa attiva',completed:'Impresa completata',cancelled:'Impresa annullata'};
+async function teamPanel(staff=false){
+ try{
+  const {quests,roster}=await api('/team-quests');
+  const cards=quests.map(q=>{
+   const people=roster.filter(r=>r.quest_id===q.id);
+   let action='';
+   if(staff){
+    if(q.status==='ready'&&!people.some(r=>r.member_id===S.me.id))action=form('team-complete',`<p>Iscritti: ${people.map(r=>esc(r.pseudonym)).join(', ')}.</p><label><input type="checkbox" name="verified" required> Ho verificato dal vivo la partecipazione di tutta la squadra e il completamento del lavoro.</label>`,'Convalida impresa e assegna bonus',{id:q.id,cls:'plain'});
+    if(q.status==='ready'&&people.some(r=>r.member_id===S.me.id))action+='<p class="muted">Fai parte della squadra: la convalida spetta a un altro referente.</p>';
+    if(['forming','ready'].includes(q.status))action+=btn('Annulla impresa','team-cancel',q.id,{secondary:true});
+   }else{
+    if(q.status==='forming'&&!q.mine)action=btn('Unisciti alla squadra','team-join',q.id);
+    if(q.mine&&['forming','ready'].includes(q.status))action+=btn('Ritira iscrizione','team-leave',q.id,{secondary:true});
+   }
+   return card(`<span class="eyebrow">IMPRESA DI SQUADRA</span><h3>${esc(q.title)}</h3><p>${badge(teamStates[q.status])} · ${q.joined}/${q.needed} persone</p><progress value="${q.joined}" max="${q.needed}" aria-label="Iscrizioni per ${esc(q.title)}"></progress><details class="disclosure"><summary>Obiettivo e ricompensa</summary><p>${esc(q.description)}</p><p>Bonus per persona: ${q.xp} XP e trofeo «${esc(q.badge)}», dopo convalida di un referente esterno alla squadra.</p></details>${q.status==='ready'?'<p>La squadra è completa: concordate lo svolgimento con il referente. L’iscrizione non assegna punti.</p>':''}${q.mine?'<p class="muted">Sei nella squadra.</p>':''}${action}`);
+  });
+  const create=staff?`<details class="disclosure"><summary>Crea un’impresa di squadra</summary>${form('team-create',field('title','Titolo','text','required maxlength="100" placeholder="Pulizia straordinaria del cortile"')+textArea('description','Lavoro, luogo e indicazioni pratiche',600,'',true)+field('needed','Persone necessarie','number','required min="2" max="20" value="4"')+field('xp','Bonus XP per persona','number','required min="0" max="100" value="40"')+field('badge','Nome del trofeo squadra','text','required maxlength="60" placeholder="Mastri d’Ascia"'),'Pubblica impresa',{cls:'plain'})}</details>`:'';
+  return section(staff?'Gestisci imprese di squadra':'Imprese di squadra',`<p>Si attivano quando tutti i posti sono occupati da iscrizioni attive. Prima della convalida, un ritiro riapre la squadra. Premi solo dopo il lavoro reale.</p>${create}${cards.length?grid(cards,'two'):card('<p>Nessuna impresa pubblicata. I referenti possono crearne una da Referenti → Missioni.</p>')}`);
+ }catch{return card('<p>Le imprese non sono disponibili al momento. Riprova tra poco.</p>');}
+}
+async function teamTrophies(){
+ const {badges}=await api('/team-quests');
+ return section('Trofei di squadra',badges.length?grid(badges.map(b=>card(`${art('star')}<h3>${esc(b.name)}</h3><p>Conquistato con la tua squadra, dopo la verifica del referente.</p><p class="muted">${dayLong(b.awarded_at)}</p>`)),'two'):card('<p>I trofei delle imprese completate compariranno qui.</p>'));
+}
 let loggedAppDay='';
 async function recordAppDay(){
  if(!S.me||document.visibilityState==='hidden')return;
@@ -511,7 +545,7 @@ async function homeMember(){
    card(`<span class="metric">${mineAll}</span><h3>Missioni da verificare</h3><p>Le richieste in attesa aspettano una decisione.</p>${link('Verifica','referenti/missioni')}`)
   ],'two'));
  }
- return homeShortcuts()+await streakPanel()+await achievementBoard()+homeIntro()+(progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
+ return homeIntro()+homeShortcuts()+await dailyWheelPanel()+await streakPanel()+await achievementBoard()+(progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
   `<div class="grid stats home-stats" aria-label="Il mio personaggio, Tumazzi e orari">${card(profileChip(),'profile-stat')}
    ${card(`<span class="eyebrow">TUMAZZI</span><div class="stat-figure">${pixelIcon(cheese)}<div><strong class="metric">${S.totals.cheese}</strong><span class="stat-label">${S.totals.cheese===1?'Tumuzzu disponibile':'Tumazzi disponibili'}</span></div></div>${link('A Putìa','putia')}`,'wallet')}
    ${openingCard(st)}</div>`+
@@ -568,6 +602,7 @@ function privacy(){
  section('Su quale base usiamo i dati',card('<p>Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
  section('Chi può accedere ai dati',card('<p>I referenti autorizzati usano i dati di iscrizione e partecipazione per organizzare le attività. Il sito è ospitato su Cloudflare. Quando è configurato l’invio di email di servizio, i dati necessari alla consegna vengono trasmessi al fornitore di invio, Brevo o Resend. Le statistiche pubbliche sono aggregate.</p><p>Per informazioni sui fornitori, sui luoghi in cui trattano i dati e sulle garanzie applicate, contatta l’associazione.</p>'))+
  section('Per quanto tempo',card(`<p>La sessione dura fino a 30 giorni. Le notifiche in-app oltre 90 giorni vengono eliminate quando apri l’elenco. I dati di account e di attività sono conservati secondo il tempo necessario a gestire la partecipazione e gli eventuali obblighi di rendicontazione. Per conoscere i tempi applicati a un dato specifico o chiedere la cancellazione, scrivi a ${contact}.</p>`))+
+ section('Imprese e ruota del giorno',card('<p>Conserviamo le iscrizioni alle imprese, la convalida del referente, i bonus XP e i trofei assegnati. Solo i referenti vedono l’elenco degli iscritti; gli altri soci vedono il numero di posti occupati. La ruota è facoltativa: salviamo un esito per account e giorno, il bonus e la sua eventuale scadenza. Nessun pagamento o strumento di profilazione; l’esito non dipende dai dati personali.</p>'))+
  section('Serie e bacheca pubblica',card('<p>Con account attivo salviamo una sola apertura della webapp per giorno, per mostrarti la tua serie personale senza attribuire premi. Le serie in sede derivano dagli ingressi registrati. La bacheca pubblica è disattivata inizialmente: puoi attivarla nel Profilo per condividere pseudonimo e nuovi trofei legati ad attività reali. Puoi ritirare la scelta in ogni momento; il tuo traguardo non sarà più esposto. Non pubblichiamo email, orari, storico delle presenze o dati del diario.</p>'))+
  section('Cookie e dati nel browser',card('<p>Dopo l’accesso, il cookie tecnico <code>__Host-cca_session</code> mantiene la sessione. Scade entro 30 giorni e viene rimosso all’uscita dall’account. Il browser conserva anche le tue preferenze locali, come tema, suono e avatar, e può ricordare temporaneamente la pagina a cui tornare dopo l’accesso. Puoi eliminare questi dati dalle impostazioni del browser. Il sito non usa strumenti di analisi o profilazione pubblicitaria.</p>'))+
  section('I tuoi diritti',card(`<p>Puoi scrivere a ${contact} per chiedere accesso, rettifica, cancellazione o limitazione del trattamento e, quando applicabili, portabilità e opposizione. Se sei minorenne, puoi farti aiutare da un adulto di fiducia. Puoi presentare reclamo al <a href="https://www.garanteprivacy.it/">Garante per la protezione dei dati personali</a>.</p>`));
@@ -597,7 +632,7 @@ async function missioni(){
  const pending=logs.chores.filter(c=>c.status==='pending').length;
  return title('Missioni','Le missioni che tengono vivo lo spazio. Falla, chiedi la verifica a un referente e ricevi XP e Tumazzi.')+
  `<p class="muted">Le missioni ripetibili danno al massimo ${tumazzi(WEEKLY_CHEESE)} a settimana (da lunedì a domenica). Gli XP si contano sempre.</p>`+
- section('Missioni disponibili',active.length?grid(active.map(t=>card(`<div class="mission-heading">${art(pathInfo(t.path)[2])}<div><h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}${(S.me.interests||[]).includes(t.path)?' '+badge('Consigliata per te'):''}</p></div></div><div class="mission-reward"><strong>${t.xp} XP</strong><span>${tumazzi(t.cheese)}</span></div><details class="disclosure"><summary>Cosa fare</summary><p>${esc(t.description)||'Svolgi l’attività in sede e chiedi la verifica a un referente.'}</p></details>${form('chore','<details class="mission-note"><summary>Aggiungi una nota (facoltativa)</summary>'+field('note','La tua nota','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"')+'</details>','Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
+ await teamPanel()+section('Missioni disponibili',active.length?grid(active.map(t=>card(`<div class="mission-heading">${art(pathInfo(t.path)[2])}<div><h3>${esc(t.name)}</h3><p>${badge(pathInfo(t.path)[1])}${(S.me.interests||[]).includes(t.path)?' '+badge('Consigliata per te'):''}</p></div></div><div class="mission-reward"><strong>${t.xp} XP</strong><span>${tumazzi(t.cheese)}</span></div><details class="disclosure"><summary>Cosa fare</summary><p>${esc(t.description)||'Svolgi l’attività in sede e chiedi la verifica a un referente.'}</p></details>${form('chore','<details class="mission-note"><summary>Aggiungi una nota (facoltativa)</summary>'+field('note','La tua nota','text','maxlength="200" placeholder="Es. ho sistemato lo scaffale"')+'</details>','Chiedi la verifica',{id:t.id,cls:'inline-form'})}`)),'two'):card('<p>I referenti non hanno ancora pubblicato missioni.</p>'))+
  section(`Le mie richieste${pending?` · ${pending} in attesa`:''}`,logs.chores.length?card(`<ul class="list">${logs.chores.map(c=>`<li><strong>${esc(c.choreName)}</strong> · ${dateShort(c.requestedAt)} · ${badge(statusText[c.status])}${c.status==='verified'?` · ${c.xp} XP, ${tumazzi(c.cheese)}`:''}${c.note?`<br><span class="muted">${esc(c.note)}</span>`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora richiesto nessuna missione.</p>'))+mu('missioni',{pending});
 }
 
@@ -734,7 +769,7 @@ const pathSelect=cur=>`<label>Percorso<select name="path">${PATHS.map(([id,name]
 async function panFaccende(){
  const [pending,types,members]=await Promise.all([api('/chores?status=pending'),api('/chore-types'),api('/members')]);
  const active=members.members.filter(m=>m.status==='approved'&&m.id!==S.me.id);
- return section(`Da verificare (${pending.chores.length})`,pending.chores.length?grid(pending.chores.map(c=>card(`<h3>${esc(c.choreName)}</h3><p>${esc(c.memberName)} · ${dateShort(c.requestedAt)}</p>${c.note?`<p class="muted">${esc(c.note)}</p>`:''}<p>${c.xp||''}</p>${c.memberId===S.me.id?'<p class="muted">È una tua missione: la verifica un altro referente.</p>':`<div class="row">${btn('Conferma','verify',c.id)}${btn('Respingi','reject',c.id,{secondary:true})}</div>`}`.replace('<p></p>',''))),'two'):card('<p>Nessuna missione in attesa.</p>'))+
+ return await teamPanel(true)+section(`Da verificare (${pending.chores.length})`,pending.chores.length?grid(pending.chores.map(c=>card(`<h3>${esc(c.choreName)}</h3><p>${esc(c.memberName)} · ${dateShort(c.requestedAt)}</p>${c.note?`<p class="muted">${esc(c.note)}</p>`:''}<p>${c.xp||''}</p>${c.memberId===S.me.id?'<p class="muted">È una tua missione: la verifica un altro referente.</p>':`<div class="row">${btn('Conferma','verify',c.id)}${btn('Respingi','reject',c.id,{secondary:true})}</div>`}`.replace('<p></p>',''))),'two'):card('<p>Nessuna missione in attesa.</p>'))+
  section('Registra una missione fatta',types.types.some(t=>t.active)?form('logchore',`<label>Socio<select name="memberId" required>${active.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}</option>`).join('')}</select></label><label>Missione<select name="typeId" required>${types.types.filter(t=>t.active).map(t=>`<option value="${esc(t.id)}">${esc(t.name)} (${t.xp} XP, ${t.cheese} F.)</option>`).join('')}</select></label>${field('note','Nota (facoltativa)','text','maxlength="200"').replace(' required','')}<p class="muted">Registrata da un referente, viene convalidata subito. Le tue missioni le richiedi dalla pagina Missioni e le verifica un altro referente.</p>`,'Registra e convalida'):card('<p>Crea prima una missione nel catalogo.</p>'))+
  section('Catalogo missioni',grid(types.types.map(t=>card(`<h3>${esc(t.name)}</h3><p>${esc(t.description)}</p><p>${t.xp} XP · ${tumazzi(t.cheese)} ${t.active?'':badge('Non attiva')}</p>${form('chorepath',pathSelect(t.path),'Salva',{id:t.id,cls:'inline-form'})}${btn(t.active?'Disattiva':'Riattiva','choreActive',t.id,{secondary:true,extra:`data-active="${t.active?0:1}"`})}`)),'two'))+
  section('Nuova missione nel catalogo',form('choretype','<h3>Aggiungi una missione</h3>'+field('name','Nome','text','required maxlength="80"')+field('description','Descrizione','text','maxlength="400"').replace(' required','')+field('xp','XP','number','required min="0" max="500" value="10"')+field('cheese','Tumazzi','number','required min="0" max="200" value="2"')+pathSelect('solidarieta'),'Aggiungi'));
@@ -1101,6 +1136,15 @@ async function shareProgress(trophy){
 }
 
 const actions={
+ async 'spin-wheel'(){
+  main.querySelector('.wheel-stage')?.classList.add('wheel-spinning');
+  let prize;
+  await run(async()=>{const [d]=await Promise.all([api('/my/daily-wheel',{method:'POST',body:{}}),new Promise(r=>setTimeout(r,matchMedia('(prefers-reduced-motion: reduce)').matches?0:900))]);prize=d.prize;},null);
+  if(prize)say(dailyText(prize));
+ },
+ async 'team-join'(id){await run(()=>api('/team-quests/'+encodeURIComponent(id)+'/join',{method:'POST',body:{}}),'Iscrizione alla squadra salvata.');},
+ async 'team-leave'(id){await run(()=>api('/team-quests/'+encodeURIComponent(id)+'/leave',{method:'POST',body:{}}),'Iscrizione ritirata. Nessuna penalità.');},
+ async 'team-cancel'(id){await run(()=>api('/team-quests/'+encodeURIComponent(id)+'/cancel',{method:'POST',body:{}}),'Impresa annullata.');},
  back(){if(routeTrail.length>1){routeTrail.pop();goingBack=true;location.hash=routeTrail.at(-1);}else location.hash='#home';},
  'share-progress':()=>shareProgress(),
  'share-trophy'(id){
@@ -1166,6 +1210,8 @@ function confirmAction(message){
  });
 }
 const destructiveActions={
+ 'team-leave':'Ritirare la tua iscrizione? La squadra potrebbe tornare in formazione.',
+ 'team-cancel':'Annullare questa impresa per tutta la squadra?',
  'assembly-clear':'Rimuovere la convocazione dell’assemblea?',
  cancel:'Annullare la prenotazione? Potresti perdere il posto.',
  redeemCancel:'Annullare il riscatto e restituire i Tumazzi?',
@@ -1198,6 +1244,11 @@ main.addEventListener('click',async event=>{
 });
 
 const submits={
+ async 'team-create'(f,v){await run(()=>api('/team-quests',{method:'POST',body:{title:v('title'),description:v('description'),needed:Number(v('needed')),xp:Number(v('xp')),badge:v('badge')}}),'Impresa pubblicata.');},
+ async 'team-complete'(f,v,id){
+  if(!await confirmAction('Convalidare il lavoro di tutta la squadra? XP e trofeo saranno assegnati a tutti gli iscritti.'))return;
+  await run(()=>api('/team-quests/'+encodeURIComponent(id)+'/complete',{method:'POST',body:{verified:f.elements.verified.checked}}),'Impresa completata: bonus e trofei assegnati alla squadra.');
+ },
  async 'achievement-sharing'(f){await run(()=>api('/my/achievement-sharing',{method:'PUT',body:{enabled:f.elements.enabled.checked}}),'Scelta bacheca salvata.');},
  async visit(_f,v){
   await run(()=>api('/space/visit',{method:'PUT',body:{address:v('address'),access:v('access'),accessibility:v('accessibility')}}),'Informazioni della sede aggiornate.');

@@ -13,6 +13,7 @@ import * as space from './routes/space.mjs';
 import * as stats from './routes/stats.mjs';
 import * as trophies from './routes/trophies.mjs';
 import * as engagement from './routes/engagement.mjs';
+import * as adventures from './routes/adventures.mjs';
 import * as putia from './routes/putia.mjs';
 import * as banca from './routes/banca.mjs';
 import * as proposte from './routes/proposte.mjs';
@@ -20,6 +21,14 @@ import {runDaily} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
 const routes = [
+ ['GET','/api/my/daily-wheel','member',adventures.daily],
+ ['POST','/api/my/daily-wheel','member',adventures.spin],
+ ['GET','/api/team-quests','member',adventures.teams],
+ ['POST','/api/team-quests','organizer',adventures.createTeam],
+ ['POST','/api/team-quests/:id/join','member',adventures.join],
+ ['POST','/api/team-quests/:id/leave','member',adventures.leave],
+ ['POST','/api/team-quests/:id/complete','organizer',adventures.complete],
+ ['POST','/api/team-quests/:id/cancel','organizer',adventures.cancel],
  ['POST','/api/my/app-visit','member',engagement.visit],
  ['GET','/api/my/streaks','member',engagement.streaks],
  ['PUT','/api/my/achievement-sharing','member',engagement.share],

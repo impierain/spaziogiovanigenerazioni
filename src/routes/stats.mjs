@@ -61,7 +61,7 @@ function previousOpenDay(ms) {
  while (isWeekend(cursor)) cursor -= DAY;
  return cursor;
 }
-function streakDays(daySet, nowMs) {
+export function streakDays(daySet, nowMs) {
  const days = [...daySet].map(day => Date.parse(day)).filter(ms => !isWeekend(ms)).sort((a, b) => a - b);
  const have = new Set(days);
  let best = 0;

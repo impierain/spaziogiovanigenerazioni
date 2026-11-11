@@ -14,6 +14,7 @@ import * as stats from './routes/stats.mjs';
 import * as trophies from './routes/trophies.mjs';
 import * as engagement from './routes/engagement.mjs';
 import * as adventures from './routes/adventures.mjs';
+import * as assignments from './routes/assignments.mjs';
 import * as putia from './routes/putia.mjs';
 import * as banca from './routes/banca.mjs';
 import * as proposte from './routes/proposte.mjs';
@@ -21,6 +22,10 @@ import {runDaily} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
 const routes = [
+ ['GET','/api/my/assignments','member',assignments.list],
+ ['POST','/api/my/assignments','member',assignments.take],
+ ['POST','/api/my/assignments/:id/finish','member',assignments.finish],
+ ['POST','/api/my/assignments/:id/abandon','member',assignments.abandon],
  ['GET','/api/my/daily-wheel','member',adventures.daily],
  ['POST','/api/my/daily-wheel','member',adventures.spin],
  ['GET','/api/team-quests','member',adventures.teams],

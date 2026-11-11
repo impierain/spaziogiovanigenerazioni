@@ -1,4 +1,5 @@
 import {tumazzi, fail, json, readJson, integer, text} from '../lib/http.mjs';
+import {lastAccess} from './accessi.mjs';
 import {romeWeekStart} from '../lib/time.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
 import {checkTrophies} from '../lib/trophies.mjs';
@@ -108,10 +109,14 @@ export async function createLog({request, env, db, member}) {
  if (!choreType) fail(404, 'Missione non trovata.');
  const onBehalf = member.role === 'organizer' && body.memberId && body.memberId !== member.id;
  const memberId = onBehalf ? text(body.memberId, 'Socio', {max: 64}) : member.id;
+ if(!onBehalf){const last=await lastAccess(db,memberId);if(last?.direction!=='IN'||Math.floor(Date.now()/1000)-last.at>=57600)fail(409,'Prima di dichiarare il completamento devi fare il check-in in sede.');}
  const target = await db.prepare(`SELECT id FROM members WHERE id = ? AND status = 'approved'`).bind(memberId).first();
  if (!target) fail(404, 'Socio non trovato o non attivo.');
  const note = text(body.note, 'Nota', {max: 500, optional: true}) ?? '';
- const inserted = await db.prepare('INSERT INTO chore_logs (chore_type_id, member_id, note) VALUES (?, ?, ?)').bind(choreType.id, memberId, note).run();
+ if(!onBehalf&&await db.prepare("SELECT 1 FROM chore_assignments WHERE member_id=? AND type_id=? AND state IN ('in_progress','submitted')").bind(memberId,choreType.id).first())fail(409,'Usa il pulsante Mansione completata nella tua mansione in corso.');
+ const sql=onBehalf?'INSERT INTO chore_logs (chore_type_id, member_id, note) VALUES (?, ?, ?)':`INSERT INTO chore_logs (chore_type_id,member_id,note) SELECT ?,?,? WHERE EXISTS(SELECT 1 FROM accessi WHERE id=(SELECT id FROM accessi WHERE member_id=? ORDER BY at DESC,id DESC LIMIT 1) AND direction='IN' AND at>unixepoch()-57600 AND at<=unixepoch()) AND NOT EXISTS(SELECT 1 FROM chore_logs WHERE member_id=? AND chore_type_id=? AND status='pending') AND NOT EXISTS(SELECT 1 FROM chore_assignments WHERE member_id=? AND type_id=? AND state IN ('in_progress','submitted'))`;
+ const inserted=await db.prepare(sql).bind(choreType.id,memberId,note,...(onBehalf?[]:[memberId,memberId,choreType.id,memberId,choreType.id])).run();
+ if(!inserted.meta.changes)fail(409,'La richiesta è già in attesa oppure il check-in non è più attivo. Aggiorna la pagina.');
  const id = inserted.meta.last_row_id;
  if (!onBehalf) {
   const name = await db.prepare('SELECT pseudonym FROM members WHERE id = ?').bind(memberId).first();

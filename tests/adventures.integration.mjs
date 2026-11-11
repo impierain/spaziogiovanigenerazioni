@@ -90,6 +90,7 @@ const {romeDay,romeDayStart}=await import(pathToFileURL(join(root,'src/lib/time.
 const today=romeDay(Date.now()),end=romeDayStart(Date.parse(today+'T12:00:00Z')+86400000);
 query("INSERT INTO daily_wheel(member_id,day,kind,expires_at) VALUES(?,?,'boost',?)",['a',today,end]);
 query("INSERT INTO chore_types(id,name,xp,cheese,path) VALUES('boost-test','Prova 40 XP',40,0,'solidarieta')");
+query("INSERT INTO accessi(member_id,direction,at,source,recorded_by) VALUES('a','IN',unixepoch()-10,'pannello','b')");
 for(let i=0;i<3;i++){
  const r=await request('/chores','a','POST',{typeId:'boost-test'});const d=await r.json();assert.equal(r.status,201);
  assert.equal((await request('/chores/'+d.chore.id+'/verify','b','POST',{})).status,200);

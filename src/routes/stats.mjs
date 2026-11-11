@@ -1,5 +1,5 @@
 import {fail, json, integer} from '../lib/http.mjs';
-import {romeDay, romeDayStart, romeHour, romeMonth, romeWeekday, romeWeekStart} from '../lib/time.mjs';
+import {romeDay, romeHour, romeOffset, romeMonth, romeWeekday, romeWeekStart} from '../lib/time.mjs';
 
 const STALE_SECONDS = 16 * 3600;
 const DAY_NAMES = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
@@ -197,7 +197,7 @@ export async function socio({db, member, params}) {
 }
 
 // Numeri pubblici del paese: nessun dato personale.
-export async function community({db}) {
+export async function community({db, env = {}}) {
  const now = Math.floor(Date.now() / 1000);
  const weekStart = romeWeekStart(now * 1000);
  const rows = await loadRows(db, weekStart);
@@ -205,12 +205,29 @@ export async function community({db}) {
  const merged = mergeIntervals(sessions);
  const hoursWeek = merged.reduce((sum, [a, b]) => sum + (b - a), 0) / 3600;
  const one = async sql => (await db.prepare(sql).first())?.n ?? 0;
- const [youngs, activities, chores] = await Promise.all([
+ const month = romeMonth(now * 1000);
+ const midnight = Date.parse(month + '-01');
+ const monthStart = (midnight - romeOffset(midnight)) / 1000;
+ const [youngs, activities, chores, presence] = await Promise.all([
   one("SELECT COUNT(*) AS n FROM members WHERE status = 'approved'"),
   one('SELECT COUNT(DISTINCT activity_id) AS n FROM attendance'),
-  one("SELECT COUNT(*) AS n FROM chore_logs WHERE status = 'verified'")
+  one("SELECT COUNT(*) AS n FROM chore_logs WHERE status = 'verified'"),
+  db.prepare(`SELECT COALESCE(SUM(o.at - MAX(i.at, ?)), 0) AS seconds
+   FROM accessi o
+   JOIN accessi i ON i.id = (
+    SELECT p.id FROM accessi p WHERE p.member_id = o.member_id AND (p.at, p.id) < (o.at, o.id)
+    ORDER BY p.at DESC, p.id DESC LIMIT 1
+   )
+   WHERE o.direction = 'OUT' AND o.at > ? AND o.at <= ? AND i.direction = 'IN' AND i.at < o.at`)
+   .bind(monthStart, monthStart, now).first()
  ]);
- return json({metrics: [
+ const targetHours = Number(env.COMMUNITY_GOAL_HOURS);
+ const target = Number.isFinite(targetHours) && targetHours >= 1 ? Math.round(targetHours * 3600) : 360000;
+ const seconds = presence.seconds;
+ return json({monthlyGoal: {
+  month, seconds, target, reached: seconds >= target,
+  benefit: env.COMMUNITY_GOAL_BENEFIT?.trim() || null
+ }, metrics: [
   {key: 'giovani', label: 'Giovani coinvolti', value: youngs, target: 120, note: 'Obiettivo del primo anno', icon: 'heart'},
   {key: 'apertura', label: 'Ore di apertura questa settimana', value: round(hoursWeek), target: 20, note: 'Obiettivo settimanale', icon: 'book'},
   {key: 'attivita', label: 'Attività svolte', value: activities, target: 18, note: 'Obiettivo del primo anno', icon: 'star'},
@@ -218,7 +235,7 @@ export async function community({db}) {
  ]});
 }
 
-// Albero delle competenze: esperienze verificate per percorso. Le attività
+// Percorso delle competenze: esperienze verificate per percorso. Le attività
 // a cui hai partecipato contano per «Socialità e comunità».
 export async function progress({db, member}) {
  const {results} = await db.prepare(`SELECT c.path AS path, COUNT(*) AS n FROM chore_logs l

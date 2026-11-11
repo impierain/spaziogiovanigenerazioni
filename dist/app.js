@@ -8,6 +8,9 @@ const navIcons = {
  profilo:'<path d="M2 1h12v1h1v12h-1v1H2v-1H1V2h1z"/><path fill="#FFFFFF" d="M3 3h10v10H3z"/><path d="M6 4h4v4H6z M5 9h6v1h1v2H4v-2h1z"/><path fill="#b9954b" d="M7 5h2v2H7z"/><path fill="#B30016" d="M6 10h4v1H6z"/>'
 };
 const shapes = {
+ sun:'<path fill="#6d3519" d="M7 0h2v3H7z M7 13h2v3H7z M0 7h3v2H0z M13 7h3v2h-3z M2 2h2v2H2z M12 2h2v2h-2z M2 12h2v2H2z M12 12h2v2h-2z M6 4h4v1h1v1h1v4h-1v1h-1v1H6v-1H5v-1H4V6h1V5h1z"/><path fill="#ffb32f" d="M6 5h4v1h1v4h-1v1H6v-1H5V6h1z"/><path fill="#fff1aa" d="M6 6h3v1H7v2H6z"/>',
+ moon:'<path fill="#292039" d="M7 1h3v2H8v2H7v4h1v2h2v1h3v-1h2v2h-2v2H6v-1H4v-2H3V9H2V6h1V4h2V2h2z"/><path fill="#e7ad42" d="M6 3h1v2H6v4h1v2h1v1h2v1h3v1H6v-1H5v-2H4V6h1V4h1z"/><path fill="#fff0ae" d="M5 6h1v5H5z M6 11h1v2H6z"/><path fill="#bd7a33" d="M11 3h1v1h1v1h-1v1h-1V5h-1V4h1z"/>',
+ crown:'<path fill="#382332" d="M1 3h3v2h2V3h1V1h2v2h1v2h2V3h3v4h-1v5h-1v2H3v-2H2V7H1z"/><path fill="#eaa334" d="M2 4h1v2h3V5h1V3h2v2h1v1h3V4h1v3h-1v5H3V7H2z"/><path fill="#fff1a1" d="M4 8h1v2H4z M7 5h1v2H7z M4 11h8v1H4z"/><path fill="#bb3148" d="M7 8h2v2H7z M11 8h1v2h-1z"/>',
  book:'<path fill="#111111" d="M1 3h6v1h2V3h6v10H9v1H7v-1H1z"/><path fill="#eee7d9" d="M2 4h4v1h1v7H6v-1H2z M9 5h1V4h4v7h-4v1H9z"/><path fill="#5876df" d="M3 6h3v1H3z M3 8h3v1H3z M10 6h3v1h-3z M10 8h3v1h-3z"/>',
  camera:'<path fill="#111111" d="M1 5h3V3h7v2h4v9H1z"/><path fill="#eee7d9" d="M2 6h12v6H2z"/><path fill="#73528f" d="M6 6h5v1h1v4h-1v1H6v-1H5V7h1z"/><path fill="#9de2ff" d="M7 7h3v3H7z"/>',
  plant:'<path fill="#111111" d="M1 2h5v2h2v2h1V4h2V2h4v6h-2v2h-3v2h3v3H3v-3h4v-2H4V8H1z"/><path fill="#a8ef69" d="M2 3h3v2h2v4H5V7H2z M11 5h1V3h2v4h-2v2h-2V6h1z"/><path fill="#d37c4a" d="M4 13h8v1H4z"/>',
@@ -17,7 +20,17 @@ const shapes = {
  shirt:'<path fill="#111111" d="M5 1h6v1h2v2h2v5h-3v6H4V9H1V4h2V2h2z"/><path fill="#bdd9da" d="M3 5h2V3h1v2h4V3h1v2h2v2h-3v6H6V7H3z"/><path fill="#6f440f" d="M7 7h2v2H7z"/>',
  star:'<path fill="#111111" d="M7 1h2v3h2v2h4v3h-3v3h1v3h-3v-2H6v2H3v-3h1V9H1V6h4V4h2z"/><path fill="#FFD400" d="M7 3h2v3h2v1h3v1h-3v4H9v-1H7v1H5V8H2V7h3V6h2z"/>'
 };
-const art = name=>`<div class="sprite-box"><svg class="sprite" viewBox="-2 -2 20 20" shape-rendering="crispEdges" aria-hidden="true"><path fill="#b9a88d" d="M2 15h12v1H2z"/>${shapes[name]}<path fill="#FFFFFF" opacity=".6" d="M-1 0h1v1h-1z M16 3h1v1h-1z"/></svg></div>`;
+const spriteDetails={
+ book:'<path fill="#d7bba3" d="M2 10h4v1H2z M10 10h4v1h-4z"/><path fill="#d0a053" d="M7 5h1v8H7z"/>',
+ camera:'<path fill="#e8faff" d="M7 7h2v1H8v1H7z"/><path fill="#594268" d="M3 10h2v1H3z"/>',
+ plant:'<path fill="#579554" d="M3 6h2v1H3z M11 7h2v1h-2z"/><path fill="#f6a45d" d="M4 13h5v1H4z"/>',
+ heart:'<path fill="#ff827c" d="M3 5h2v1H4v1H3z"/><path fill="#780c31" d="M11 7h2v1h-2v2H9v1H8v1H7v-1h1v-1h1V9h2z"/>',
+ star:'<path fill="#fff2a2" d="M7 4h1v3H7z M4 7h3v1H4z"/>',
+ bag:'<path fill="#805737" d="M11 8h1v5H4v-1h7z"/>',
+ shirt:'<path fill="#5983a5" d="M10 8h1v5H6v-1h4z"/>',
+ pin:'<path fill="#f78072" d="M4 5h2v1H5v1H4z"/>'
+};
+const art = name=>`<div class="sprite-box"><svg class="sprite" viewBox="-2 -2 20 20" shape-rendering="crispEdges" aria-hidden="true"><path fill="#b9a88d" d="M2 15h12v1H2z"/>${shapes[name]}${spriteDetails[name]||''}<path fill="#FFFFFF" opacity=".6" d="M-1 0h1v1h-1z M16 3h1v1h-1z"/></svg></div>`;
 const avatarColors = {
  rosa:['Rosa fichidindia','#FFD400'],verde:['Verde salvia','#9abe7f'],blu:['Blu cielo','#699cff'],
  sole:['Giallo ginestra','#ffce39'],terracotta:['Terracotta','#dc7046'],viola:['Viola tramonto','#ad82ed'],
@@ -41,10 +54,17 @@ const animals = {
  leone:{name:'Leone rampante',art:'<path fill="#111111" d="M3 3h3V1h1v1h2V1h1v2h3v2h2v5h-2v2h-2v1H5v-1H3v-2H1V5h2z"/><path fill="#b96535" d="M4 4h8v1h2v4h-2v2h-2v1H6v-1H4V9H2V6h2z"/><path fill="#c6a55b" d="M6 5h4v1h2v3h-1v2H5V9H4V6h2z M6 3h4v1H6z"/><path fill="#111111" d="M5 7h2v1H5z M9 7h2v1H9z M7 9h2v1H7z"/><path fill="#ffe5aa" d="M6 10h4v1H6z"/>'}
 };
 const cheese='<path fill="#111111" d="M10 1h2v1h2v2h1v10H1V7h2V6h2V5h2V4h2V2h1z"/><path fill="#f4bf57" d="M10 3h2v1h1v2H5V5h2V4h3z"/><path fill="#ffd782" d="M3 8h10v4H3z"/><path fill="#a96a32" d="M5 9h2v2H5z M10 10h2v1h-2z"/>';
+function cowSprite(mood){
+ const faces={
+  felice:'<path fill="#fff9ed" d="M5 6h7v3H5z"/><path fill="#2e2132" d="M5 8V7h1V6h1v1h1v1H7V7H6v1z M9 8V7h1V6h1v1h1v1h-1V7h-1v1z"/><path fill="#e7758e" d="M5 8h1v1H5z M11 8h1v1h-1z"/>',
+  triste:'<path fill="#fff9ed" d="M5 6h7v3H5z"/><path fill="#2e2132" d="M5 7h1V6h2v1H6v1H5z M9 6h2v1h1v1h-1V7H9z M7 11h2v1H7z"/><path fill="#739bc4" d="M11 8h1v2h-1z"/>',
+  festoso:'<path fill="#fff9ed" d="M5 6h7v3H5z"/><path fill="#99611d" d="M6 6h1v1h1v1H7v1H6V8H5V7h1z M10 6h1v1h1v1h-1v1h-1V8H9V7h1z"/>'
+ };
+ return animals.mucca.art+(faces[mood]||chibiFace('mucca'));
+}
 function cowMascot(mood,text,tips=[]){
- const eyes={normale:'M6 6h1v2H6z M10 6h1v2h-1z',felice:'M5 7h1V6h2v1H5z M9 7h1V6h2v1H9z',curioso:'M6 6h1v2H6z M10 7h1v1h-1z',festoso:'M5 6h2v1H5z M10 6h2v1h-2z'};
  const all=[text,...tips.filter(t=>t&&t!==text)];
- return `<div class="mascot ${all.length>1?'talk':''}" ${all.length>1?`data-tips="${esc(JSON.stringify(all))}" data-i="0" tabindex="0" role="button" aria-label="Mù: tocca per un altro consiglio"`:''}>${pixelIcon(animals.mucca.art+(mood==='normale'||mood==='curioso'?chibiFace('mucca'):`<path fill="#111111" d="${eyes[mood]}"/>`),'mu-sprite')}<div><strong>Mù</strong><p aria-live="polite">${esc(text)}</p></div></div>`;
+ return `<div class="mascot ${all.length>1?'talk':''}" ${all.length>1?`data-tips="${esc(JSON.stringify(all))}" data-i="0" tabindex="0" role="button" aria-label="Mù: tocca per un altro consiglio"`:''}>${pixelIcon(cowSprite(mood),'mu-sprite')}<div><strong>Mù</strong><p aria-live="polite">${esc(text)}</p></div></div>`;
 }
 const pixelIcon = (path,kind='')=>`<svg class="pixel-icon ${kind}" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${path}</svg>`;
 
@@ -100,6 +120,22 @@ const bar=(value,max,label,suffix='')=>`<div class="bar-row"><span class="bar-la
 const empty=text=>`<p class="muted">${text}</p>`;
 const fmt=(sec,opts)=>new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',...opts}).format(new Date(sec*1000));
 const dateLong=sec=>fmt(sec,{weekday:'short',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+const romeDate=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'});
+const romeClock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',weekday:'short',hour:'2-digit',hourCycle:'h23'});
+const romeNow=()=>{
+ const parts=Object.fromEntries(romeClock.formatToParts(new Date()).map(p=>[p.type,p.value]));
+ return {weekday:parts.weekday,hour:Number(parts.hour)};
+};
+function daysLabel(start, now=Date.now()){
+ if(start*1000<=now)return '';
+ const days=Math.round((Date.parse(romeDate.format(start*1000))-Date.parse(romeDate.format(now)))/86400000);
+ return days===0?'Oggi':days===1?'Domani':`Tra ${days} giorni`;
+}
+function countdown(start){
+ const label=daysLabel(start);
+ return `<span class="activity-countdown" data-start="${Number(start)}"${label?'':' hidden'}>${label}</span>`;
+}
+const activityDate=start=>Number.isFinite(Number(start))&&Number(start)>0?`<time datetime="${new Date(start*1000).toISOString()}">${dateLong(start)}</time> ${countdown(start)}`:'Data da definire';
 const dateShort=sec=>fmt(sec,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const duration=min=>min>=60?`${Math.floor(min/60)} h ${min%60?String(min%60).padStart(2,'0')+' min':''}`.trim():`${min} min`;
 const statusText={pending:'In attesa',verified:'Verificata',rejected:'Respinta',confirmed:'Confermata',declined:'Rifiutata',cancelled:'Annullata',draft:'Bozza',published:'Pubblicata',approved:'Attivo',disabled:'Disattivato'};
@@ -140,7 +176,9 @@ const avatar=(species=pref.get('species','mucca'),color=pref.get('color','rosa')
   ?colors.map((fill,i)=>`<path fill="${fill}" d="M${1+i*5} 1h5v30h-5z"/>`).join('')
   :`<path fill="${accent}" d="M1 1h30v30H1z"/>`;
  return `<svg class="avatar" viewBox="0 0 32 32" shape-rendering="crispEdges" role="img" aria-label="Avatar pixel · ${animal.name}">
-  ${backdrop}<path fill="#FFFFFF" opacity=".68" d="M9 3h14v2h4v4h2v12h-2v4H5v-4H3V9h2V5h4z"/>
+  ${backdrop}<path fill="#38283b" opacity=".25" d="M1 28h30v3H1z M28 3h3v28h-3z"/><path fill="#fff2cf" opacity=".82" d="M9 3h14v2h4v4h2v12h-2v4H5v-4H3V9h2V5h4z"/>
+  <path fill="#937a8e" opacity=".45" d="M27 9h2v12h-2v3H6v-2h19v-2h2z"/>
+  <path fill="#fff9e8" d="M7 4h4v1H7z M5 6h2v2H5z M4 10h1v4H4z"/>
   <path fill="#FFFFFF" d="M3 4h2v2H3z M27 5h2v2h-2z M3 21h1v1H3z M28 19h1v1h-1z"/>
   <g transform="translate(0 1) scale(2)">${animal.art}${chibiFace(key)}</g><path fill="${highlight}" d="${detail}"/>
   <path fill="#111111" d="M7 24h18v1h1v6H6v-6h1z"/><path fill="#FFFFFF" d="M8 25h16v5H8z"/>
@@ -189,20 +227,70 @@ function liveLine(st){
  return `<span class="live ${st.open?'live-on':'live-off'}"><span class="live-dot" aria-hidden="true"></span>${label}</span>`;
 }
 const openingDetails=st=>`<p><strong>${esc(st?.days||'Da lunedì a venerdì')} · ${esc(st?.hours||'16:00–20:00')}</strong></p>`;
-const openingCard=st=>card(`<span class="eyebrow">ORARI DELLA SEDE</span><div class="stat-figure">${clockIcon()}<div><strong class="metric">${esc(st?.hours||'16:00–20:00')}</strong><span class="stat-label">${esc(st?.days||'Da lunedì a venerdì')}</span></div></div>
- ${!st?.days||st.days==='Da lunedì a venerdì'?'<div class="week" aria-hidden="true"><span>LU</span><span>MA</span><span>ME</span><span>GI</span><span>VE</span></div>':''}
+const openDays=[['Mon','LU','Lunedì'],['Tue','MA','Martedì'],['Wed','ME','Mercoledì'],['Thu','GI','Giovedì'],['Fri','VE','Venerdì']];
+const openingCard=st=>card(`<span class="eyebrow">ORARI DELLA SEDE</span><div class="stat-figure opening-time" data-opening-time>${clockIcon()}<div><strong class="metric">${esc(st?.hours||'16:00–20:00')}</strong><span class="stat-label">${esc(st?.days||'Da lunedì a venerdì')}</span></div><small class="opening-now" hidden>In orario di apertura</small></div>
+ <div class="week" aria-label="Giorni di apertura">${openDays.map(([key,short,name])=>`<span data-opening-day="${key}" aria-label="${name}">${short}</span>`).join('')}</div>
  <div id="live" role="status" aria-live="polite">${liveLine(st)}</div>`,'opening');
-setInterval(async()=>{const el=document.querySelector('#live');if(!el||document.hidden)return;const st=await getStatus();const again=document.querySelector('#live');if(st&&again)again.innerHTML=liveLine(st);},60000);
+function updateDateIndicators(){
+ const {weekday,hour}=romeNow();
+ const scheduled=openDays.some(([day])=>day===weekday)&&hour>=16&&hour<20;
+ main.querySelectorAll('[data-opening-day]').forEach(el=>{
+  if(el.dataset.openingDay===weekday)el.setAttribute('aria-current','date');
+  else el.removeAttribute('aria-current');
+ });
+ main.querySelectorAll('[data-opening-time]').forEach(el=>{
+  el.classList.toggle('is-scheduled',scheduled);
+  el.querySelector('.opening-now').hidden=!scheduled;
+ });
+ main.querySelectorAll('[data-start].activity-countdown').forEach(el=>{
+  const label=daysLabel(Number(el.dataset.start));
+  el.textContent=label;
+  el.hidden=!label;
+ });
+}
+setInterval(async()=>{
+ if(document.hidden)return;
+ updateDateIndicators();
+ if(!main.querySelector('#live'))return;
+ const st=await getStatus(),again=main.querySelector('#live');
+ if(st&&again&&again.innerHTML!==liveLine(st))again.innerHTML=liveLine(st);
+},30000);
+function streakMood(streak){
+ if(!streak)return null;
+ const {weekday,hour}=romeNow();
+ if(openDays.some(([day])=>day===weekday)&&hour>=18&&hour<20&&streak.sede.current>=2&&!streak.sede.today)
+  return ['triste','Mi manca vederti in sede. Se oggi non riesci, ci vediamo un’altra volta!'];
+ if(streak.sede.today&&streak.sede.current>=2)
+  return ['felice',`Che bello rivederti! ${streak.sede.current} giorni di apertura di fila in sede.`];
+ if(streak.app.today&&streak.app.current>=2)
+  return ['felice',`Bentornato! Hai aperto l’app per ${streak.app.current} giorni di fila.`];
+ return null;
+}
+function monthlyGoal(goal){
+ if(!goal)return '';
+ const month=new Intl.DateTimeFormat('it-IT',{month:'long',year:'numeric',timeZone:'Europe/Rome'}).format(new Date(goal.month+'-01T12:00:00Z'));
+ const number=new Intl.NumberFormat('it-IT',{maximumFractionDigits:1});
+ const hours=seconds=>number.format(Math.floor(seconds/360)/10);
+ return `<section class="card global-goal" aria-labelledby="global-goal-title">
+ <div class="goal-heading">${pixelIcon(shapes.crown)}<div><span class="eyebrow">OBIETTIVO COMUNE · ${esc(month)}</span><h2 id="global-goal-title">${hours(goal.target)} ore insieme in sede</h2></div></div>
+ <p><strong>${hours(goal.seconds)} / ${hours(goal.target)} ore</strong>${goal.reached?' · ✓ Obiettivo raggiunto!':''}</p>
+ <progress value="${Math.min(goal.seconds,goal.target)}" max="${goal.target}" aria-labelledby="global-goal-title"></progress>
+ <p>${goal.benefit?`<strong>${goal.reached?'Beneficio sbloccato':'Beneficio per tutti'}</strong> · ${esc(goal.benefit)}`:'Il beneficio per tutti è da concordare con l’associazione.'}</p>
+ <small class="muted">Si sommano le ore di ciascun socio dopo l’uscita registrata.</small>
+ </section>`;
+}
 
 function muSays(page,extra={}){
  const l=S.me?level(S.totals.xp):null;
+ const mood=streakMood(extra.streak);
+ if(mood)return mood;
  if(page==='home'){
   if(!l)return ['normale','E boni siemmu!'];
-  if(l.top)return ['festoso','Sei Leggenda di cca! Dai una mano a chi sale.'];
+  if(l.top)return ['festoso','Sei Gran riserva! Dai una mano a chi sale.'];
   if(l.left<=20)return ['curioso',`Ci sei quasi: ${l.left} XP e arrivi al livello ${l.number+1}!`];
   return ['normale',`Ciao ${S.me.pseudonym}! Oggi che si fa?`];
  }
- if(page==='missioni')return extra.pending?['curioso',`${extra.pending} ${extra.pending===1?'richiesta aspetta':'richieste aspettano'} un referente. Pazienza!`]:['normale','Una missione fatta bene vale più di mille parole.'];
+ if(page==='missioni')return extra.pending?['curioso',`${extra.pending} ${extra.pending===1?'richiesta aspetta':'richieste aspettano'} un referente. Pazienza!`]:['normale','Apri una missione per vedere i dettagli.'];
  if(page==='calendario')return ['curioso','Prenota un posto: ti aspettiamo!'];
  if(page==='profilo')return ['felice',l?`Livello ${l.number}: ${l.name}. Bella strada!`:'Bella strada!'];
  if(page==='paese')return ['felice',extra.reached?`Il paese cresce: ${extra.reached} ${extra.reached===1?"traguardo":"traguardi"} su ${extra.total}!`:'Il paese è appena nato. Ogni presenza lo fa crescere.'];
@@ -212,13 +300,13 @@ const MU_TIPS={
  home:['Hai già visto le missioni di oggi?','Hai un’idea per lo spazio? Scrivila nelle Proposte.','Controlla la Putìa: forse hai abbastanza Tumazzi!','Hai un’ora libera? La Banca del tempo ti aspetta.','Quando arrivi, inquadra il QR all’ingresso.'],
  missioni:['Ogni missione verificata ti avvicina al prossimo livello.','Le missioni ripetibili danno al massimo 12 Tumazzi a settimana.','Chiedi la verifica a un referente: non puoi verificare le tue.'],
  calendario:['Prenota presto: i posti volano!','Le attività consigliate per te hanno il bollino verde.','Non puoi più venire? Annulla, così il posto va a un altro.'],
- profilo:['Scegli i tuoi interessi: ti consiglio le attività giuste.','Puoi cambiare il tuo nome utente quando vuoi.','Guarda l’albero: ogni ramo cresce con le tue esperienze.'],
+ profilo:['Scegli i tuoi interessi: ti consiglio le attività giuste.','Puoi cambiare il tuo nome utente quando vuoi.','Guarda il Percorso: ogni esperienza verificata ti avvicina alla prossima corona.'],
  paese:['Ogni presenza fa crescere il paese.','Il paese è di tutte e tutti: grazie di esserci!'],
  generic:['E boni siemmu!','Un passo alla volta si arriva lontano.','Cca si sta bene insieme.']
 };
 function mu(page,extra){
  const [m,t]=muSays(page,extra);
- return `<button type="button" class="mu-launch" popovertarget="mu-popover" aria-label="Apri i consigli di Mù">${pixelIcon(animals.mucca.art+chibiFace('mucca'))}<span>Mù</span></button>
+ return `<button type="button" class="mu-launch" popovertarget="mu-popover" aria-label="Apri i consigli di Mù">${pixelIcon(cowSprite(m))}<span>Mù</span></button>
  <aside id="mu-popover" class="mu-popover" popover aria-label="I consigli di Mù">
   <button type="button" class="secondary mu-close" popovertarget="mu-popover" popovertargetaction="hide" aria-label="Chiudi i consigli">×</button>
   <div class="mu-advice" role="button" tabindex="0" aria-label="Mù: prossimo consiglio" data-tips="${esc(JSON.stringify([t,...(MU_TIPS[page]||[]),...MU_TIPS.generic]))}" data-i="0">
@@ -276,31 +364,17 @@ async function paese(){
 
 const PATHS=[['studio','Studio e conoscenza','book'],['creativita','Creatività e cultura','camera'],['socialita','Socialità e comunità','heart'],['cittadinanza','Cittadinanza e partecipazione','star'],['solidarieta','Solidarietà e cura','plant']];
 const pathInfo=id=>PATHS.find(p=>p[0]===id)||PATHS[4];
-function treeGraphic(counts){
- const xs=[15,37,60,83,105],cols=['#bdd9da','#FFD400','#ffb56b','#c8a8ff','#B30016'];
- let svg=`<path class="tree-sky" d="M0 0h120v78H0z"/><path fill="#FFFFFF" opacity=".65" d="M7 13h9v2H7z M97 7h15v2H97z"/>
- <path class="tree-leaves" d="M3 27h5V16h9v-5h13V7h14v5h8V4h16v8h11V8h13v5h11v7h10v9h4v24h-9v7H12v-6H3z"/>
- <path fill="#1d473c" d="M0 72h120v6H0z"/><path fill="#8ab66b" d="M4 72h8v2H4z M25 72h6v2h-6z M94 72h8v2h-8z M108 72h8v2h-8z"/>
- <path fill="#231b25" d="M55 49h10v20h8v3H45v-3h10z"/><path fill="#a16639" d="M57 49h6v22H52v-2h5z"/><path fill="#e1ad6d" d="M60 55h2v12h-2z"/>`;
- PATHS.forEach(([id,name,icon],i)=>{
-  const x=xs[i],n=counts[id]||0,y=[20,15,12,15,20][i];
-  svg+=`<path fill="none" stroke="#262031" stroke-width="4" d="M60 58V${y+37}H${x}V${y+9}"/><path fill="none" stroke="#b67b49" stroke-width="2" d="M60 58V${y+37}H${x}V${y+9}"/>
-   <g transform="translate(${x-6} ${y-7}) scale(.75)">${shapes[icon]}</g>`;
-  [5,3,1].forEach((need,step)=>{
-   const node=y+8+step*10,on=n>=need;
-   svg+=`<rect x="${x-4}" y="${node-4}" width="8" height="8" fill="#111111"/><rect x="${x-3}" y="${node-3}" width="6" height="6" fill="${on?cols[i]:'#344653'}"/>
-   <text x="${x}" y="${node+1.65}" text-anchor="middle" font-size="4.5" font-weight="800" fill="${on?'#111111':'#FFFFFF'}">${need}</text>`;
-  });
- });
- return `<div class="tree-box"><svg viewBox="0 0 120 78" role="img" aria-label="Albero delle competenze: cinque rami, tre tappe ciascuno">${svg}</svg></div>`;
-}
-function skillTree(counts,types){
- return section('Albero delle competenze',`<p class="section-intro">Le tappe raccontano le esperienze verificate in sede. Prima tappa a 1 esperienza, poi 3 e 5.</p>`+card(treeGraphic(counts))+grid(PATHS.map(([id,name,icon])=>{
-  const n=counts[id]||0,next=[1,3,5].find(x=>x>n);
-  const dots=[1,3,5].map(x=>`<span class="stage ${n>=x?'done':''}" title="Tappa ${x}">${x}</span>`).join('');
+function skillPath(counts,types){
+ const milestones=[1,3,5];
+ return section('Percorso delle competenze',`<p class="section-intro">Ogni unità ha tre corone, a 1, 3 e 5 esperienze verificate.</p>
+ <ol class="skill-path">${PATHS.map(([id,name,icon],index)=>{
+  const n=counts[id]||0,next=milestones.find(x=>x>n);
+  const crowns=milestones.map(x=>`<li class="skill-crown ${n>=x?'earned':x===next?'next':''}">${pixelIcon(shapes.crown)}<span>${x} <small>${n>=x?'Ottenuta':x===next?'Prossima':'Da ottenere'}</small></span></li>`).join('');
   const linked=types.filter(t=>t.path===id);
-  return card(`${art(icon)}<h3>${esc(name)}</h3><div class="stages" aria-hidden="true">${dots}</div><p><strong>${n}</strong> ${n===1?'esperienza verificata':'esperienze verificate'} · ${next?'Prossima tappa '+next:'Tutte le tappe raggiunte'}</p><progress value="${next?n:5}" max="${next||5}" aria-label="Progresso in ${esc(name)}"></progress>${id==='socialita'?'<p class="muted">Conta anche la partecipazione alle attività.</p>':''}${linked.length?`<ul class="list">${linked.map(t=>`<li><a href="#missioni">${esc(t.name)}</a></li>`).join('')}</ul>`:''}`);
- })));
+  return `<li class="skill-unit">${pixelIcon(shapes[icon],'skill-marker')}${card(`<span class="eyebrow">UNITÀ ${index+1}</span><h3>${esc(name)}</h3><p><strong>${n} ${n===1?'esperienza verificata':'esperienze verificate'}</strong> · ${next?`Ne ${next-n===1?'manca 1':'mancano '+(next-n)} alla prossima corona`:'Tutte le corone ottenute'}</p><ol class="skill-crowns" aria-label="Corone di ${esc(name)}">${crowns}</ol>
+  ${id==='socialita'?'<p class="muted">Contano anche le presenze verificate alle attività.</p>':''}
+  ${linked.length?`<details class="disclosure"><summary>Missioni dell’unità</summary><ul>${linked.map(t=>`<li>${esc(t.name)}</li>`).join('')}</ul>${link('Vai alle missioni','missioni')}</details>`:''}`,'skill-card')}</li>`;
+ }).join('')}</ol>`);
 }
 
 function checkLevelUp(){
@@ -425,7 +499,7 @@ function firstVisit(st,details,upcoming){
  return section('Vieni per la prima volta',card(`
   <div class="grid two">
    <div><h3>Dove e quando</h3><p>${esc(details?.address||venueAddress)}</p><p class="muted">alla partenza del Carro</p>${openingDetails(st)}</div>
-   <div><h3>Prossima attività</h3>${upcoming?`<p><strong>${esc(upcoming.name)}</strong><br>${dateLong(upcoming.starts_at)}</p><p>${activityBadges(upcoming)}</p>${activityDescription(upcoming)}`:'<p>Consulta il calendario per i prossimi appuntamenti.</p>'}</div>
+   <div><h3>Prossima attività</h3>${upcoming?`<p><strong>${esc(upcoming.name)}</strong><br>${activityDate(upcoming.starts_at)}</p><p>${activityBadges(upcoming)}</p>${activityDescription(upcoming)}`:'<p>Consulta il calendario per i prossimi appuntamenti.</p>'}</div>
    <div><h3>Come si entra</h3><p class="meeting-notes">${esc(details?.access||'Lo spazio è gratuito. Il calendario indica se puoi presentarti direttamente o se serve prenotare.')}</p></div>
    <div><h3>Accessibilità</h3><p class="meeting-notes">${details?.accessibility?esc(details.accessibility)+' ':''}Per informazioni sull’accesso alla sede, <a href="mailto:spaziogiovanigenerazioni@gmail.com">scrivici</a> prima di venire.</p></div>
   </div>
@@ -482,19 +556,16 @@ async function recordAppDay(){
  if(loggedAppDay===key)return;
  try{await api('/my/app-visit',{method:'POST',body:{}});loggedAppDay=key;}catch{}
 }
-async function streakPanel(){
- if(!S.me)return '';
- try{
-  const d=await api('/my/streaks');
-  return `<section class="streak-compact" aria-labelledby="streak-title"><h2 id="streak-title">Giorni consecutivi</h2><div class="streak-strip">
+function getStreaks(){return api('/my/streaks').catch(()=>null);}
+function streakPanel(d){
+ return `<section class="card streak-compact" aria-labelledby="streak-title"><h2 id="streak-title">Giorni consecutivi</h2>${d?`<div class="streak-strip">
   <div>${pixelIcon(navIcons.calendario)}<strong>${d.app.current}</strong><span>App<small>Record ${d.app.best}</small></span></div>
   <div>${pixelIcon(navIcons.home)}<strong>${d.sede.current}</strong><span>In sede<small>Record ${d.sede.best}</small></span></div></div>
-  <details><summary>Come contano i giorni</summary><p>App: una visita al giorno con account attivo. In sede: ingressi registrati nei giorni di apertura; il weekend non interrompe la serie. Ora italiana. Nessuna penalità se interrompi la serie: XP e record restano tuoi. Le aperture non assegnano premi.</p></details></section>`;
- }catch{return '<p class="muted">Contatori temporaneamente non disponibili.</p>';}
+  <details><summary>Come contano i giorni</summary><p>Conta una visita all’app al giorno. Per la sede contano gli ingressi da lunedì a venerdì. Se salti un giorno, XP e record restano tuoi.</p></details>`:'<p class="muted">Contatori temporaneamente non disponibili.</p>'}</section>`;
 }
 function presenceCta(pres,mission=false){
  if(!pres)return card('<p>Presenza non disponibile. Riprova.</p>'+btn('Riprova','reload'));
- if(pres.inside)return `<section class="presence-focus is-inside"><div><strong>✓ Sei in sede</strong><span class="muted"> dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</span></div>${mission?'':`<a class="btn presence-main" href="#missioni">Scegli una mansione →</a>`}${btn('Registra uscita','checkout','',{secondary:true})}</section>`;
+ if(pres.inside)return `<section class="presence-focus is-inside"><div><strong>✓ Sei in sede</strong><span class="muted"> dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</span></div>${mission?'':`<a class="btn presence-main" href="#missioni">Scegli una missione →</a>`}${btn('Registra uscita','checkout','',{secondary:true})}</section>`;
  return `<section class="presence-focus"><h2>Sei in sede?</h2>${btn('Fai il check-in in sede','checkin')}<p class="muted">Solo quando sei fisicamente in sede.</p></section>`;
 }
 async function achievementBoard(){
@@ -504,8 +575,8 @@ async function achievementBoard(){
  }catch{return '';}
 }
 async function home(){
- const [st,metrics,details,acts]=await Promise.all([getStatus(),getCommunity(),visitInfo(),api('/activities').catch(()=>({activities:[]}))]);
- return homeIntro()+await achievementBoard()+firstVisit(st,details,nextActivity(acts.activities))+
+ const [st,community,details,acts]=await Promise.all([getStatus(),api('/community').catch(()=>null),visitInfo(),api('/activities').catch(()=>({activities:[]}))]);
+ return homeIntro()+monthlyGoal(community?.monthlyGoal)+await achievementBoard()+firstVisit(st,details,nextActivity(acts.activities))+
   section('Quando siamo aperti',openingCard(st))+
   section('Scambia tempo e competenze',timeBankCard())+
   section('Come funziona',grid([
@@ -537,7 +608,7 @@ function homeShortcuts(){
 }
 
 async function homeMember(){
- const [acts,mine,st,pres,details,progress]=await Promise.all([api('/activities'),api('/my/bookings'),getStatus(),api('/checkin').catch(()=>null),visitInfo(),api('/my/progress').catch(()=>({firstVisitCompleted:false}))]);
+ const [acts,mine,st,pres,details,progress,streak,community]=await Promise.all([api('/activities'),api('/my/bookings'),getStatus(),api('/checkin').catch(()=>null),visitInfo(),api('/my/progress').catch(()=>({firstVisitCompleted:false})),getStreaks(),api('/community').catch(()=>null)]);
  const booked=new Map(mine.bookings.map(b=>[b.activityId,b.status]));
  const upcoming=acts.activities.filter(a=>a.starts_at>Date.now()/1000-3600).slice(0,3);
  let extra='';
@@ -547,12 +618,12 @@ async function homeMember(){
   extra=`<section class="admin-compact"><h2>Da gestire</h2><div class="admin-chips"><a href="#referenti/presenze">${pixelIcon(navIcons.comunita)}<strong>${inside.presenti.length}</strong><span>In sede →</span></a><a href="#referenti/missioni">${pixelIcon(navIcons.missioni)}<strong>${waiting}</strong><span>Da verificare →</span></a></div></section>`;
  }
  return homeIntro()+presenceCta(pres)+
- `<div class="grid stats home-stats" aria-label="Personaggio, Tumazzi e orari">${card(profileChip(),'profile-stat')}
- ${card(`<span class="eyebrow">TUMAZZI</span><div class="stat-figure">${pixelIcon(cheese)}<strong class="metric">${S.totals.cheese}</strong></div>${link('A Putìa','putia')}`,'wallet')}${openingCard(st)}</div>`+
- homeShortcuts()+extra+await dailyWheelPanel()+await streakPanel()+await achievementBoard()+
+ `<div class="grid stats home-stats" aria-label="Personaggio, Tumazzi, orari e giorni consecutivi">${card(profileChip()+`<a class="profile-wallet" href="#putia" aria-label="${tumazzi(S.totals.cheese)} · apri A Putìa">${pixelIcon(cheese)}<span>Tumazzi</span><strong>${S.totals.cheese}</strong></a>`,'profile-stat')}
+ ${openingCard(st)}${streakPanel(streak)}</div>`+
+ monthlyGoal(community?.monthlyGoal)+homeShortcuts()+extra+await dailyWheelPanel()+await achievementBoard()+
  (progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
  section('Scambia tempo e competenze',timeBankCard())+
- section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p><p>${a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}${activityDescription(a)}`)),'three')+link('Tutto il calendario','calendario'):card('<p>Non ci sono attività in calendario.</p>'))+mu('home');
+ section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${activityDate(a.starts_at)}</p><p>${a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}${activityDescription(a)}`)),'three')+link('Tutto il calendario','calendario'):card('<p>Non ci sono attività in calendario.</p>'))+mu('home',{streak});
 }
 
 async function calendario(){
@@ -568,7 +639,7 @@ async function calendario(){
   else if(a.available<=0)action=badge('Posti esauriti');
   else action=btn('Prenota un posto','reserve',a.id)+(b&&b.status==='declined'?`<p class="muted">La richiesta precedente è stata rifiutata.</p>`:'');
   const rec=S.me&&a.path&&(S.me.interests||[]).includes(a.path);
-  return card(`${rec?`<p>${badge('Consigliata per te')}</p>`:''}<h3>${esc(a.name)}</h3><p><strong>${dateLong(a.starts_at)}</strong></p><p>${activityBadges(a)}</p>${a.access_mode==='open'?'':`<p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p>`}${activityDescription(a)}<p class="muted">${esc(a.verification_rule)}</p>${action}`);
+  return card(`${rec?`<p>${badge('Consigliata per te')}</p>`:''}<h3>${esc(a.name)}</h3><p><strong>${activityDate(a.starts_at)}</strong></p><p>${activityBadges(a)}</p>${a.access_mode==='open'?'':`<p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p>`}${activityDescription(a)}<p class="muted">${esc(a.verification_rule)}</p>${action}`);
  }),'two'):card('<h3>Ancora nulla in calendario</h3><p>I referenti pubblicheranno qui le prossime attività.</p>');
  return title('Calendario','Per le attività ad accesso libero puoi presentarti direttamente. Dove serve una prenotazione, un referente conferma il posto.')+section('Prossime attività',body)+
   (S.me?section('Come funziona',card('<p>Quando prenoti, il posto resta riservato finché un referente decide. Alla fine il referente verifica di persona la tua presenza e ti assegna XP e Tumazzi.</p>')):'')+mu('calendario');
@@ -601,7 +672,7 @@ function privacy(){
  section('Su quale base usiamo i dati',card('<p>Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
  section('Chi può accedere ai dati',card('<p>I referenti autorizzati usano i dati di iscrizione e partecipazione per organizzare le attività. Il sito è ospitato su Cloudflare. Quando è configurato l’invio di email di servizio, i dati necessari alla consegna vengono trasmessi al fornitore di invio, Brevo o Resend. Le statistiche pubbliche sono aggregate.</p><p>Per informazioni sui fornitori, sui luoghi in cui trattano i dati e sulle garanzie applicate, contatta l’associazione.</p>'))+
  section('Per quanto tempo',card(`<p>La sessione dura fino a 30 giorni. Le notifiche in-app oltre 90 giorni vengono eliminate quando apri l’elenco. I dati di account e di attività sono conservati secondo il tempo necessario a gestire la partecipazione e gli eventuali obblighi di rendicontazione. Per conoscere i tempi applicati a un dato specifico o chiedere la cancellazione, scrivi a ${contact}.</p>`))+
- section('Imprese e ruota del giorno',card('<p>Per le mansioni personali conserviamo presa in carico, eventuale abbandono, dichiarazione di completamento e decisione del referente. L’invio del completamento richiede un check-in attivo. Conserviamo le iscrizioni alle imprese, la convalida del referente, i bonus XP e i trofei assegnati. Solo i referenti vedono l’elenco degli iscritti; gli altri soci vedono il numero di posti occupati. La ruota è facoltativa: salviamo un esito per account e giorno, il bonus e la sua eventuale scadenza. Nessun pagamento o strumento di profilazione; l’esito non dipende dai dati personali.</p>'))+
+ section('Imprese e ruota del giorno',card('<p>Per le missioni personali conserviamo presa in carico, eventuale abbandono, dichiarazione di completamento e decisione del referente. L’invio del completamento richiede un check-in attivo. Conserviamo le iscrizioni alle imprese, la convalida del referente, i bonus XP e i trofei assegnati. Solo i referenti vedono l’elenco degli iscritti; gli altri soci vedono il numero di posti occupati. La ruota è facoltativa: salviamo un esito per account e giorno, il bonus e la sua eventuale scadenza. Nessun pagamento o strumento di profilazione; l’esito non dipende dai dati personali.</p>'))+
  section('Serie e bacheca pubblica',card('<p>Con account attivo salviamo una sola apertura della webapp per giorno, per mostrarti la tua serie personale senza attribuire premi. Le serie in sede derivano dagli ingressi registrati. La bacheca pubblica è disattivata inizialmente: puoi attivarla nel Profilo per condividere pseudonimo e nuovi trofei legati ad attività reali. Puoi ritirare la scelta in ogni momento; il tuo traguardo non sarà più esposto. Non pubblichiamo email, orari, storico delle presenze o dati del diario.</p>'))+
  section('Cookie e dati nel browser',card('<p>Dopo l’accesso, il cookie tecnico <code>__Host-cca_session</code> mantiene la sessione. Scade entro 30 giorni e viene rimosso all’uscita dall’account. Il browser conserva anche le tue preferenze locali, come tema, suono e avatar, e può ricordare temporaneamente la pagina a cui tornare dopo l’accesso. Puoi eliminare questi dati dalle impostazioni del browser. Il sito non usa strumenti di analisi o profilazione pubblicitaria.</p>'))+
  section('I tuoi diritti',card(`<p>Puoi scrivere a ${contact} per chiedere accesso, rettifica, cancellazione o limitazione del trattamento e, quando applicabili, portabilità e opposizione. Se sei minorenne, puoi farti aiutare da un adulto di fiducia. Puoi presentare reclamo al <a href="https://www.garanteprivacy.it/">Garante per la protezione dei dati personali</a>.</p>`));
@@ -623,7 +694,7 @@ async function impostaPassword(token){
  form('setpw',`<input type="hidden" name="token" value="${esc(token)}">`+field('password','Password (almeno 10 caratteri)','password','required minlength="10" autocomplete="new-password"')+field('again','Ripeti la password','password','required minlength="10" autocomplete="new-password"'),'Salva e accedi');
 }
 
-/* ---- missioni (missioni) ---- */
+/* ---- missioni ---- */
 let missionCatalog=[],missionJobs=[],missionPresence=null,missionLegacyPending=[];
 let missionCategory='recommended',missionPage=0,missionSearch='';
 function availableMissions(){
@@ -635,7 +706,7 @@ function availableMissions(){
  choices.sort((a,b)=>Number(interests.includes(b.path))-Number(interests.includes(a.path))||a.name.localeCompare(b.name,'it'));
  const pages=Math.max(1,Math.ceil(choices.length/3));missionPage=Math.min(missionPage,pages-1);
  const cards=choices.slice(missionPage*3,missionPage*3+3).map(t=>`<article class="card mission-choice"><details><summary><h3>${esc(t.name)}</h3></summary><div class="mission-details">${art(pathInfo(t.path)[2])}<p>${esc(t.description||'Svolgi l’attività e chiedi la convalida in sede.')}</p><p class="muted">${esc(pathInfo(t.path)[1])} · ${t.xp} XP · ${tumazzi(t.cheese)}</p>${btn('Prendi in carico','assignment-take',t.id)}</div></details></article>`).join('');
- return (cards||'<p class="muted">Nessuna mansione in questa categoria.</p>')+`<div class="mission-pager">${btn('←','mission-page','prev',{secondary:true,extra:missionPage===0?'disabled aria-label="Pagina precedente"':'aria-label="Pagina precedente"'})}<span>${missionPage+1}/${pages}</span>${btn('→','mission-page','next',{secondary:true,extra:missionPage>=pages-1?'disabled aria-label="Pagina successiva"':'aria-label="Pagina successiva"'})}</div>`;
+ return (cards||'<p class="muted">Nessuna missione in questa categoria.</p>')+`<div class="mission-pager">${btn('←','mission-page','prev',{secondary:true,extra:missionPage===0?'disabled aria-label="Pagina precedente"':'aria-label="Pagina precedente"'})}<span>${missionPage+1}/${pages}</span>${btn('→','mission-page','next',{secondary:true,extra:missionPage>=pages-1?'disabled aria-label="Pagina successiva"':'aria-label="Pagina successiva"'})}</div>`;
 }
 async function missioni(){
  if(!S.me)return needLogin();
@@ -644,12 +715,12 @@ async function missioni(){
  const progress=missionJobs.filter(j=>j.state==='in_progress'),submitted=missionJobs.filter(j=>j.state==='submitted');
  const linked=new Set(missionJobs.map(j=>j.log_id));
  const legacy=logs.chores.filter(c=>c.status==='pending'&&!linked.has(c.id));
- const doing=progress.map(j=>card(`<h3>${esc(j.name)}</h3><p class="muted">${j.xp} XP dopo convalida</p><details class="mission-note"><summary>Aggiungi una nota</summary><label>Nota per il referente<textarea id="assignment-note-${j.id}" maxlength="500"></textarea></label></details>${btn('✓ Mansione completata','assignment-finish',j.id,{extra:pres.inside?'':'disabled aria-describedby="mission-checkin-note"'})}${!pres.inside?'<p class="muted">Se sei in sede, fai il check-in prima di completare.</p>'+btn('Fai il check-in','checkin'):''}${btn('Abbandona mansione','assignment-abandon',j.id,{secondary:true})}`)).join('')||'<p class="muted">Prendi in carico una mansione per iniziare.</p>';
+ const doing=progress.map(j=>card(`<h3>${esc(j.name)}</h3><p class="muted">${j.xp} XP dopo convalida</p><details class="mission-note"><summary>Aggiungi una nota</summary><label>Nota per il referente<textarea id="assignment-note-${j.id}" maxlength="500"></textarea></label></details>${btn('✓ Missione completata','assignment-finish',j.id,{extra:pres.inside?'':'disabled aria-describedby="mission-checkin-note"'})}${!pres.inside?'<p class="muted">Se sei in sede, fai il check-in prima di completare.</p>'+btn('Fai il check-in','checkin'):''}${btn('Abbandona missione','assignment-abandon',j.id,{secondary:true})}`)).join('')||'<p class="muted">Prendi in carico una missione per iniziare.</p>';
  const waiting=[...submitted.map(j=>({name:j.name,note:j.note})),...legacy.map(j=>({name:j.choreName,note:j.note}))].map(j=>card(`${badge('✓ In attesa')}<h3>${esc(j.name)}</h3>${j.note?`<details><summary>La tua nota</summary><p>${esc(j.note)}</p></details>`:''}<p class="muted">Il referente verifica e assegna i premi.</p>`)).join('')||'<p class="muted">Nessuna richiesta in attesa.</p>';
  return title('Missioni','Scegli, svolgi in sede, chiedi la convalida.')+presenceCta(pres,true)+
- `<p class="muted" id="mission-checkin-note">Premi dopo verifica. Massimo ${tumazzi(WEEKLY_CHEESE)} a settimana dalle mansioni ripetibili; gli XP restano permanenti.</p>
+ `<p class="muted" id="mission-checkin-note">Premi dopo verifica. Massimo ${tumazzi(WEEKLY_CHEESE)} a settimana dalle missioni ripetibili; gli XP restano permanenti.</p>
  <div class="mission-filters" aria-label="Categorie missioni">${[['recommended','Per te'],...PATHS.map(([id,name])=>[id,name.split(' ')[0]])].map(([id,name])=>`<button type="button" data-action="mission-category" data-id="${id}" aria-pressed="${missionCategory===id}">${name}</button>`).join('')}</div>
- <label class="mission-search">Cerca una mansione<input type="search" id="mission-search" value="${esc(missionSearch)}" placeholder="Titolo…"></label>
+ <label class="mission-search">Cerca una missione<input type="search" id="mission-search" value="${esc(missionSearch)}" placeholder="Titolo…"></label>
  <div class="mission-board"><section class="mission-column"><h2>1 · Disponibili</h2><p class="muted">Tre alla volta, dai tuoi interessi.</p><div id="mission-available">${availableMissions()}</div></section>
  <section class="mission-column" id="mission-running" tabindex="-1"><h2>2 · Le tue, in corso</h2>${doing}</section>
  <section class="mission-column" id="mission-waiting" tabindex="-1"><h2>3 · Da convalidare</h2>${waiting}</section></div>`+
@@ -678,7 +749,7 @@ async function presenze(){
  ],'two'))+
  section('Ore in sede per mese',stats.months.length?card(stats.months.map(m=>bar(m.hours,monthMax,m.month.slice(2),' h')).join('')):card('<p>Ancora nessun dato.</p>'))+
  section('Quando vieni',card(weekdayBars(stats.weekdays,'visits')))+
- skillTree(prog.counts,ctypes.types.filter(t=>t.active))+
+ skillPath(prog.counts,ctypes.types.filter(t=>t.active))+
  section('Ultime visite',stats.recent.length?card(`<ul class="list">${stats.recent.map(r=>`<li>${dateLong(r.start)} · ${duration(r.minutes)}</li>`).join('')}</ul>`):card('<p>Nessuna visita registrata.</p>'))+
  section('Registro ingressi e uscite',acc.accessi.length?card(`<ul class="list">${acc.accessi.map(a=>`<li>${a.direction==='IN'?'Ingresso':'Uscita'} · ${dateShort(a.at)}</li>`).join('')}</ul>`):card('<p>Ancora nessun movimento negli ultimi 30 giorni.</p>'));
 }
@@ -706,24 +777,17 @@ async function journalCard(){
 }
 async function profilo(){
  if(!S.me)return needLogin();
- const [prog,types,acts,journal]=await Promise.all([api('/my/progress').catch(()=>({counts:{}})),api('/chore-types').catch(()=>({types:[]})),api('/activities').catch(()=>({activities:[]})),journalCard()]);
+ const [prog,types,journal,streak]=await Promise.all([api('/my/progress').catch(()=>({counts:{}})),api('/chore-types').catch(()=>({types:[]})),journalCard(),getStreaks()]);
  const mine=S.me.interests||[];
- const recMissions=types.types.filter(t=>t.active&&mine.includes(t.path)).slice(0,4);
- const recActs=acts.activities.filter(a=>a.path&&mine.includes(a.path)&&a.starts_at>Date.now()/1000-3600).slice(0,3);
  const interestsForm=`<h3>I miei interessi</h3><p class="muted">Scegli cosa ti piace: ti consigliamo missioni e attività.</p><fieldset><legend>Percorsi</legend>${PATHS.map(([id,name])=>`<label><input type="checkbox" name="interest" value="${id}" ${mine.includes(id)?'checked':''}> ${esc(name)}</label>`).join('')}</fieldset>`;
- const recommend=section('Consigliato per te',mine.length?(recMissions.length||recActs.length?grid([
-   ...recActs.map(a=>card(`<span class="eyebrow">ATTIVITÀ</span><h3>${esc(a.name)}</h3><p>${dateLong(a.starts_at)}</p>${activityDescription(a)}${link('Apri il calendario','calendario')}`)),
-   ...recMissions.map(t=>card(`<span class="eyebrow">MISSIONE</span><h3>${esc(t.name)}</h3><p>${esc(t.description)}</p>${link('Vai alle missioni','missioni')}`))
-  ],'two'):card('<p>Per ora non ci sono attività o missioni nei tuoi percorsi. Controlla più avanti!</p>')):card('<p>Scegli i tuoi interessi qui sotto e ti consigliamo missioni e attività su misura.</p>'));
- const sharing=await api('/my/streaks').catch(()=>({sharing:false}));
  const savedSpecies=pref.get('species','mucca');
  const species=Object.hasOwn(animals,savedSpecies)?savedSpecies:'mucca',color=pref.get('color','rosa');
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="swatch-name">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
  section('Il mio personaggio',card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div><div class="support-links"><a href="#presenze">Le mie statistiche →</a></div><details class="disclosure profile-sharing"><summary>Condividi il tuo percorso</summary>${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p></details>`,'profile-overview'))+
- await streakPanel()+section('Le mie missioni',card('<div class="support-links">'+link('Apri le mie mansioni','missioni')+link('I miei trofei','trofei')+'</div>'))+section('Diario di apprendimento Youthpass',journal,'','learning-journal')+
- recommend+skillTree(prog.counts,types.types.filter(t=>t.active))+
- section('Bacheca pubblica',card(form('achievement-sharing',`<label><input type="checkbox" name="enabled" ${sharing.sharing?'checked':''}> Voglio mostrare il mio pseudonimo e i prossimi trofei nella bacheca visibile a tutti.</label><p class="muted">Scelta facoltativa. Nessuna email, nome completo, orario o presenza pubblicati. Se disattivi la scelta e salvi, il tuo traguardo scompare dalla bacheca.</p>`,'Salva scelta bacheca',{cls:'plain'})))+
+ streakPanel(streak)+section('Le mie missioni',card('<div class="support-links">'+link('Apri le mie missioni','missioni')+link('I miei trofei','trofei')+'</div>'))+section('Diario di apprendimento Youthpass',journal,'','learning-journal')+
+ skillPath(prog.counts,types.types.filter(t=>t.active))+
+ section('Bacheca pubblica',card(form('achievement-sharing',`<label><input type="checkbox" name="enabled" ${streak?.sharing?'checked':''}> Voglio mostrare il mio pseudonimo e i prossimi trofei nella bacheca visibile a tutti.</label><p class="muted">Scelta facoltativa. Nessuna email, nome completo, orario o presenza pubblicati. Se disattivi la scelta e salvi, il tuo traguardo scompare dalla bacheca.</p>`,'Salva scelta bacheca',{cls:'plain'})))+
  section('Il mio account','<details class="disclosure account-settings"><summary>Gestisci nome, interessi e accesso</summary>'+grid([
   form('nick','<h3>Nome utente</h3><p class="muted">È il nome che vedono gli altri soci.</p>'+field('pseudonym','Il tuo nome utente','text',`required maxlength="28" value="${esc(S.me.pseudonym)}"`),'Salva nome utente'),
   form('interests',interestsForm,'Salva interessi'),
@@ -732,7 +796,7 @@ async function profilo(){
  ],'two')+'</details>')+
  section('Personalizza il profilo',card(`<details class="disclosure"><summary>Cambia avatar e colore</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`))+
  section('Preferenze',card(`<label class="sound-setting"><input type="checkbox" id="sound-toggle" ${pref.get('sound','off')==='on'?'checked':''}> Suoni dei pulsanti</label><p class="muted">Breve suono pixel quando usi un pulsante o un link. La scelta vale su questo browser.</p>`))+
- mu('profilo');
+ mu('profilo',{streak});
 }
 
 /* ---- pannello referenti ---- */
@@ -769,13 +833,14 @@ async function panSoci(){
  const {members}=await api('/members');
  const newForm=form('member','<h3>Registra un nuovo socio</h3>'+field('fullName','Nome e cognome','text','required maxlength="80"')+field('email','Email','email','required')+field('pseudonym','Nome da mostrare (facoltativo)','text','maxlength="28"').replace(' required','')+field('phone','Telefono (facoltativo)','tel','maxlength="30"')+`<label>Ruolo<select name="role"><option value="participant">Socio</option><option value="organizer">Referente</option></select></label>`,'Registra e crea il link d’invito');
  const cards=members.map(m=>{
+  const search=esc([m.fullName,m.pseudonym,m.email].filter(Boolean).join(' '));
   const self=m.id===S.me.id;
   return card(`<h3>${esc(m.fullName||m.pseudonym)}</h3><p>${esc(m.email)}</p><p>${badge(m.role==='organizer'?'Referente':'Socio')} ${badge(statusText[m.status])} ${m.hasPassword?badge('Profilo completo'):badge('Password da impostare')}</p><p class="muted">${m.xp} XP · ${tumazzi(m.cheese)}${m.phone?' · '+esc(m.phone):''}</p>
   <p class="muted">Tessera: ${m.uidTessera?`<code>${esc(m.uidTessera)}</code>`:'nessuna'}</p>
   <div class="row">${btn(m.hasPassword?'Link reset password':'Nuovo link d’invito','invite',m.id,{secondary:true,extra:`data-phone="${esc(m.phone||'')}"`})}${m.uidTessera?btn('Togli tessera','cardRemove',m.id,{secondary:true}):''}${!self?btn(m.role==='organizer'?'Rendi socio':'Rendi referente','role',m.id,{secondary:true,extra:`data-role="${m.role==='organizer'?'participant':'organizer'}"`}):''}${!self?btn(m.status==='disabled'?'Riattiva':'Disattiva','status',m.id,{secondary:true,extra:`data-status="${m.status==='disabled'?'approved':'disabled'}"`}):''}</div>
-  ${form('card',field('uid','Codice tessera NFC','text','required maxlength="40" placeholder="Es. 04A1B2C3"'),m.uidTessera?'Cambia tessera':'Assegna tessera',{id:m.id,cls:'inline-form'})}`,m.status==='disabled'?'muted-card':'');
+  ${form('card',field('uid','Codice tessera NFC','text','required maxlength="40" placeholder="Es. 04A1B2C3"'),m.uidTessera?'Cambia tessera':'Assegna tessera',{id:m.id,cls:'inline-form'})}`,m.status==='disabled'?'muted-card':'').replace('<article ',`<article data-member-search="${search}" `);
  });
- return (S.invite?section('Invito',inviteCard(S.invite)):'')+section('Nuovo socio',newForm)+section(`Soci (${members.length})`,grid(cards,'two'));
+ return (S.invite?section('Invito',inviteCard(S.invite)):'')+section(`Soci (${members.length})`,`<label>Cerca tra i soci<input type="search" id="member-search" placeholder="Nome, pseudonimo o email" autocomplete="off"></label><p id="member-search-status" class="muted" role="status" hidden></p>`+grid(cards,'two'))+section('Nuovo socio',newForm);
 }
 async function panPresenze(){
  const [inside,members,acc,codeInfo]=await Promise.all([api('/inside'),api('/members'),api('/access?from='+(Math.floor(Date.now()/1000)-3*86400)+'&limit=60'),api('/checkin-code'),loadQr().catch(()=>{})]);
@@ -850,14 +915,14 @@ async function panAttivita(id){
      <label>Partecipante<select name="memberId" required><option value="">Seleziona</option>${eligible.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}</option>`).join('')}</select></label>`,
     'Registra presenza',{id:a.id}));
   }
-  return section(esc(a.name),card(`<p>${dateLong(a.startsAt)} · ${statusText[a.status]} · ${a.capacity} posti</p><p class="muted">${esc(a.verificationRule)}</p><p>${a.xp} XP · ${tumazzi(a.cheese)} a chi partecipa</p>${activityDescription(a)}`)+`<p>${link('Tutte le attività','referenti/attivita')}</p>`)+
+  return section(esc(a.name),card(`<p>${activityDate(a.startsAt)} · ${statusText[a.status]} · ${a.capacity} posti</p><p class="muted">${esc(a.verificationRule)}</p><p>${a.xp} XP · ${tumazzi(a.cheese)} a chi partecipa</p>${activityDescription(a)}`)+`<p>${link('Tutte le attività','referenti/attivita')}</p>`)+
   section('Dettagli dell’attività',form('activity-access',textArea('description','Descrizione visibile nel calendario',1600,a.description)+activityAccessFields(a),'Salva dettagli',{id:a.id}))+walkIn+
   (a.accessMode==='open'?'':section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended&&b.memberId!==S.me.id?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>')));
  }
  const {activities}=await api('/activities/manage');
  const create=form('activity','<h3>Nuova attività</h3>'+field('name','Titolo','text','required maxlength="120"')+field('startsAt','Data e ora','datetime-local','required')+field('capacity','Posti','number','required min="1" max="500" value="25"')+textArea('description','Descrizione visibile nel calendario',1600)+activityAccessFields()+field('verificationRule','Come verifichi la presenza','text','required maxlength="300" value="Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata."')+field('xp','XP','number','required min="0" max="500" value="30"')+field('cheese','Tumazzi','number','required min="0" max="200" value="5"')+`<label>Percorso (facoltativo, per i consigli)<select name="path"><option value="">Nessuno</option>${PATHS.map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('')}</select></label><label>Stato<select name="status"><option value="draft">Bozza (non visibile)</option><option value="published">Pubblicata</option></select></label>`,'Crea attività');
  const prefill=`<p><button type="button" class="secondary" data-action="prefill">Precompila con la prima attività reale</button></p>`;
- return section('Nuova attività',prefill+create)+section(`Attività (${activities.length})`,activities.length?grid(activities.map(a=>card(`<h3>${esc(a.name)}</h3><p>${dateLong(a.startsAt)} · ${badge(statusText[a.status])}</p>${activityDescription(a)}<p>${a.pending} in attesa · ${a.confirmed} confermate · ${a.attended} presenze · ${a.capacity} posti</p><div class="row">${a.status!=='published'&&a.status!=='cancelled'?btn('Pubblica','act-status',a.id,{extra:'data-status="published"'}):''}${a.status==='published'?btn('Torna a bozza','act-status',a.id,{secondary:true,extra:'data-status="draft"'}):''}${a.status!=='cancelled'?btn('Annulla','act-status',a.id,{secondary:true,extra:'data-status="cancelled"'}):''}<a class="btn" href="#referenti/attivita/${esc(a.id)}">Gestisci attività →</a></div>`)),'two'):card('<p>Nessuna attività creata.</p>'));
+ return section('Nuova attività',prefill+create)+section(`Attività (${activities.length})`,activities.length?grid(activities.map(a=>card(`<h3>${esc(a.name)}</h3><p>${activityDate(a.startsAt)} · ${badge(statusText[a.status])}</p>${activityDescription(a)}<p>${a.pending} in attesa · ${a.confirmed} confermate · ${a.attended} presenze · ${a.capacity} posti</p><div class="row">${a.status!=='published'&&a.status!=='cancelled'?btn('Pubblica','act-status',a.id,{extra:'data-status="published"'}):''}${a.status==='published'?btn('Torna a bozza','act-status',a.id,{secondary:true,extra:'data-status="draft"'}):''}${a.status!=='cancelled'?btn('Annulla','act-status',a.id,{secondary:true,extra:'data-status="cancelled"'}):''}<a class="btn" href="#referenti/attivita/${esc(a.id)}">Gestisci attività →</a></div>`)),'two'):card('<p>Nessuna attività creata.</p>'));
 }
 async function panStatistiche(){
  const s=await api('/stats/sede?days=90').catch(()=>api('/stats/sede'));
@@ -880,13 +945,14 @@ async function panStatistiche(){
 
 
 /* ---- bacheca notifiche ---- */
+const missionWording=text=>String(text??'').replace(/\bmansioni?\b/gi,word=>word[0]+(word.endsWith('i')?'issioni':'issione'));
 const levelIcon={ok:'✓',error:'✕',info:'ℹ'};
 async function notifiche(){
  if(!S.me)return needLogin();
  const d=await api('/notifications');
  const items=d.notifications;
  const html=title('Notifiche','Esiti delle operazioni e avvisi che ti riguardano.')+
-  section('Bacheca',items.length?`<div class="notice-list">${items.map(n=>`<article class="card notice-item notice-${n.level} ${n.read?'':'notice-unread'}"><span class="notice-icon" aria-hidden="true">${levelIcon[n.level]||'ℹ'}</span><div><h3>${esc(n.title)}${n.read?'':' '+badge('Nuova')}</h3>${n.body?`<p>${esc(n.body)}</p>`:''}<p class="muted">${dateShort(n.createdAt)}</p></div></article>`).join('')}</div>`:card('<p>Nessuna notifica per ora. Qui compariranno gli esiti degli invii email e gli avvisi su prenotazioni e missioni.</p>'));
+  section('Bacheca',items.length?`<div class="notice-list">${items.map(n=>`<article class="card notice-item notice-${n.level} ${n.read?'':'notice-unread'}"><span class="notice-icon" aria-hidden="true">${levelIcon[n.level]||'ℹ'}</span><div><h3>${esc(missionWording(n.title))}${n.read?'':' '+badge('Nuova')}</h3>${n.body?`<p>${esc(missionWording(n.body))}</p>`:''}<p class="muted">${dateShort(n.createdAt)}</p></div></article>`).join('')}</div>`:card('<p>Nessuna notifica per ora. Qui compariranno gli esiti degli invii email e gli avvisi su prenotazioni e missioni.</p>'));
  if(d.unread){api('/notifications/read',{method:'POST',body:{all:true}}).then(r=>{S.unread=r.unread??0;renderChrome('');}).catch(()=>{});}
  return html;
 }
@@ -917,7 +983,7 @@ async function cartello(){
  const [{code}]=[await api('/checkin-code'),await loadQr()];
  return `<div class="poster"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1><p class="poster-lead">Sei entratə o uscitə? Inquadra il QR.</p>${qrSvg(checkinUrl(code),'QR code per registrare ingresso e uscita')}<ol><li>Apri la fotocamera del telefono e inquadra il QR.</li><li>Accedi, se non l’hai già fatto.</li><li>Il sito segna il tuo ingresso. Quando esci, inquadralo di nuovo.</li></ol><p>E boni siemmu · Spazio Giovani Generazioni</p></div><p class="no-print">${btn('Stampa','print')} ${link('Torna alle presenze','referenti/presenze')}</p>`;
 }
-const tvTips=['Prenota un posto dal calendario: ti aspettiamo!','Una missione fatta bene vale più di mille parole.','Hai un’idea per lo spazio? Scrivila nelle Proposte e fai votare il gruppo.','Un’ora del tuo tempo vale un’ora di un altro socio: guarda la Banca del tempo.','Inquadra il QR all’ingresso per segnare la tua presenza.','Ogni presenza fa crescere il paese. Grazie di esserci!'];
+const tvTips=['Prenota un posto dal calendario: ti aspettiamo!','Apri una missione per vedere i dettagli.','Hai un’idea per lo spazio? Scrivila nelle Proposte e fai votare il gruppo.','Un’ora del tuo tempo vale un’ora di un altro socio: guarda la Banca del tempo.','Inquadra il QR all’ingresso per segnare la tua presenza.','Ogni presenza fa crescere il paese. Grazie di esserci!'];
 const tvTime=()=>new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit'}).format(new Date());
 const tvDate=()=>new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',weekday:'long',day:'numeric',month:'long'}).format(new Date());
 async function tvPage(){
@@ -929,7 +995,7 @@ async function tvPage(){
  const z=Number(pref.get('tvzoom',1))||1;
  return `<div class="tv-frame"><div class="tv-screen" style="--tvz:${z}"><div class="tv-tools no-print">${btn('A−','tvzoom','down',{secondary:true})}${btn('A+','tvzoom','up',{secondary:true})}${btn('Tema','theme','',{secondary:true})}</div><div class="tv-top"><div class="tv-brand">CCA SIEMMU<small>e boni siemmu</small></div><div class="tv-clock"><strong id="tv-time">${tvTime()}</strong><span id="tv-date">${esc(tvDate())}</span></div></div>
  <div class="tv-main"><div class="tv-left"><div class="tv-live ${st?.open?'live-on':'live-off'}"><span class="live-dot" aria-hidden="true"></span>${st?.open?'Aperto ora':'Chiuso al momento'}</div><p class="tv-hours">${esc(st?.days||'Da lunedì a venerdì')} · ${esc(st?.hours||'16:00–20:00')}</p>
- <h2>Prossime attività</h2>${next.length?`<ul class="tv-acts">${next.map(a=>`<li><strong>${esc(a.name)}</strong><span>${dateLong(a.starts_at)}</span>${activityDescription(a)}<span>${a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</span></li>`).join('')}</ul>`:'<p class="tv-empty">Presto altre attività in calendario.</p>'}</div>
+ <h2>Prossime attività</h2>${next.length?`<ul class="tv-acts">${next.map(a=>`<li><strong>${esc(a.name)}</strong><span>${activityDate(a.starts_at)}</span>${activityDescription(a)}<span>${a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</span></li>`).join('')}</ul>`:'<p class="tv-empty">Presto altre attività in calendario.</p>'}</div>
  <div class="tv-right">${villageScene(metrics)}<p class="tv-village">${reached} ${reached===1?'traguardo':'traguardi'} su ${(metrics||[]).length}: il paese cresce con le presenze, le attività e le missioni.</p></div></div>
  <div class="tv-foot">${cowMascot('curioso',tip,tvTips)}${window.qrcode?`<div class="tv-qr">${qrSvg(location.origin+'/#home','QR code del sito')}<span>Il sito dello spazio</span></div>`:''}</div></div></div>`;
 }
@@ -987,6 +1053,7 @@ async function render(focus=false){
  }
  if(id!==renderId)return;
  main.innerHTML=(!['home','tv','cartello'].includes(page)?'<div class="back-row"><button type="button" class="secondary" data-action="back">← Indietro</button></div>':'')+html;
+ updateDateIndicators();
  if(!['tv','cartello'].includes(page))main.insertAdjacentHTML('beforeend',`<footer class="foot site-foot">${document.querySelector('#project-logos').innerHTML}${privacyLink}</footer>`);
  if(!['tv','cartello'].includes(page)&&!main.querySelector('#mu-popover'))main.insertAdjacentHTML('beforeend',mu(page));
  main.removeAttribute('aria-busy');
@@ -1163,12 +1230,26 @@ function taskFeedback(title,message,offer=false){
  dialog.querySelector('a')?.addEventListener('click',()=>dialog.close());document.body.append(dialog);dialog.showModal();return dialog;
 }
 function refreshMissionChoices(){const el=document.querySelector('#mission-available');if(el)el.innerHTML=availableMissions();main.querySelectorAll('[data-action="mission-category"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===missionCategory)));}
-main.addEventListener('input',event=>{if(event.target.id==='mission-search'){missionSearch=event.target.value;missionPage=0;refreshMissionChoices();}});
+main.addEventListener('input',event=>{
+ if(event.target.id==='mission-search'){missionSearch=event.target.value;missionPage=0;refreshMissionChoices();}
+ if(event.target.id!=='member-search')return;
+ const normalize=value=>value.normalize('NFD').replace(/\p{M}/gu,'').toLocaleLowerCase('it').trim();
+ const query=normalize(event.target.value).split(/\s+/);
+ let shown=0;
+ main.querySelectorAll('[data-member-search]').forEach(el=>{
+  const haystack=normalize(el.dataset.memberSearch);
+  el.hidden=!query.every(word=>haystack.includes(word));
+  if(!el.hidden)shown++;
+ });
+ const status=main.querySelector('#member-search-status');
+ status.hidden=!event.target.value.trim();
+ status.textContent=shown===0?'Nessun socio trovato.':shown===1?'1 socio trovato.':`${shown} soci trovati.`;
+});
 const actions={
  'mission-category'(id){missionCategory=id;missionPage=0;refreshMissionChoices();},
  'mission-page'(id){missionPage=Math.max(0,missionPage+(id==='next'?1:-1));refreshMissionChoices();},
- async 'assignment-take'(id){const ok=await run(()=>api('/my/assignments',{method:'POST',body:{typeId:id}}),'Mansione presa in carico.');if(ok){const next=document.getElementById('mission-running');next?.focus({preventScroll:true});next?.scrollIntoView({block:'start'});}},
- async 'assignment-abandon'(id){await run(()=>api('/my/assignments/'+encodeURIComponent(id)+'/abandon',{method:'POST',body:{}}),'Mansione abbandonata. Nessuna penalità.');},
+ async 'assignment-take'(id){const ok=await run(()=>api('/my/assignments',{method:'POST',body:{typeId:id}}),'Missione presa in carico.');if(ok){const next=document.getElementById('mission-running');next?.focus({preventScroll:true});next?.scrollIntoView({block:'start'});}},
+ async 'assignment-abandon'(id){await run(()=>api('/my/assignments/'+encodeURIComponent(id)+'/abandon',{method:'POST',body:{}}),'Missione abbandonata. Nessuna penalità.');},
  async 'assignment-finish'(id,el){
   const original=el.innerHTML;el.innerHTML='✓ Invio in corso…';el.classList.add('completion-tapped');
   const popup=taskFeedback('Hai finito!', 'Invio la richiesta al referente…');
@@ -1252,7 +1333,7 @@ function confirmAction(message){
  });
 }
 const destructiveActions={
- 'assignment-abandon':'Abbandonare questa mansione? Potrai riprenderla in seguito, senza penalità.',
+ 'assignment-abandon':'Abbandonare questa missione? Potrai riprenderla in seguito, senza penalità.',
  'team-leave':'Ritirare la tua iscrizione? La squadra potrebbe tornare in formazione.',
  'team-cancel':'Annullare questa impresa per tutta la squadra?',
  'assembly-clear':'Rimuovere la convocazione dell’assemblea?',
@@ -1404,7 +1485,7 @@ main.addEventListener('change',event=>{
  if(event.target.checked)playClick();
 });
 
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.me)recordAppDay();});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){updateDateIndicators();if(S.me)recordAppDay();}});
 window.addEventListener('hashchange',()=>{if(location.hash==='#main')return;if(goingBack)goingBack=false;else if(routeTrail.at(-1)!==location.hash)routeTrail.push(location.hash||'#home');render(true);});
 render();
 
@@ -1412,7 +1493,7 @@ const themeControl=document.querySelector('#theme-toggle');
 function applyTheme(night){
  document.documentElement.dataset.theme=night?'night':'day';
  themeControl.setAttribute('aria-pressed',String(night));
- themeControl.innerHTML=night?'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 1v4m0 14v4M1 12h4m14 0h4M4 4l3 3m10 10l3 3M4 20l3-3M17 7l3-3" stroke="currentColor" stroke-width="2"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 16A9 9 0 0 1 8 4a9 9 0 1 0 12 12z"/></svg>';
+ themeControl.innerHTML=pixelIcon(night?shapes.sun:shapes.moon);
  themeControl.setAttribute('aria-label',night?'Passa alla modalità giorno':'Passa alla modalità notte');
 }
 let night=false;

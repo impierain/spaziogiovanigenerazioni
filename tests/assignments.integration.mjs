@@ -91,3 +91,29 @@ assert.equal((await request('/my/assignments/'+old.id+'/finish','b','POST',{})).
 query("INSERT INTO chore_logs(chore_type_id,member_id) VALUES('flow-4','a')");
 assert.equal((await request('/my/assignments','a','POST',{typeId:'flow-4'})).status,409);
 console.log('OK: presa in carico unica, isolamento account, check-in obbligatorio anche su API precedente, ingresso non alternato, invio unico, premi solo dopo convalida, uscita e ingresso scaduto bloccano invio, abbandono senza penalità.');
+
+// Two overlapping visits count separately; the previous month's time and open visits do not.
+const realNow = Date.now;
+Date.now = () => Date.parse('2030-07-01T08:00:00Z');
+try {
+ const addAccess = (member, direction, iso) => query(
+  "INSERT INTO accessi(member_id,direction,at,source,recorded_by) VALUES(?,?,?,'pannello','b')",
+  [member,direction,Date.parse(iso)/1000]
+ );
+ addAccess('a','IN','2030-06-30T21:30:00Z');
+ addAccess('a','OUT','2030-06-30T22:30:00Z');
+ addAccess('b','IN','2030-06-30T22:15:00Z');
+ addAccess('b','OUT','2030-06-30T23:00:00Z');
+ addAccess('a','IN','2030-07-01T07:00:00Z');
+ const response = await request('/community');
+ assert.equal(response.status,200);
+ const {monthlyGoal} = await response.json();
+ assert.deepEqual(monthlyGoal,{month:'2030-07',seconds:4500,target:360000,reached:false,benefit:null});
+ env.COMMUNITY_GOAL_HOURS = '1';
+ env.COMMUNITY_GOAL_BENEFIT = 'Festa sociale';
+ const reached = (await (await request('/community')).json()).monthlyGoal;
+ assert.equal(reached.reached,true);
+ assert.equal(reached.benefit,'Festa sociale');
+} finally {
+ Date.now = realNow;
+}

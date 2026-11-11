@@ -12,6 +12,7 @@ import * as notifications from './routes/notifications.mjs';
 import * as space from './routes/space.mjs';
 import * as stats from './routes/stats.mjs';
 import * as trophies from './routes/trophies.mjs';
+import * as engagement from './routes/engagement.mjs';
 import * as putia from './routes/putia.mjs';
 import * as banca from './routes/banca.mjs';
 import * as proposte from './routes/proposte.mjs';
@@ -19,6 +20,10 @@ import {runDaily} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
 const routes = [
+ ['POST','/api/my/app-visit','member',engagement.visit],
+ ['GET','/api/my/streaks','member',engagement.streaks],
+ ['PUT','/api/my/achievement-sharing','member',engagement.share],
+ ['GET','/api/achievement-board','public',engagement.board],
  ['POST', '/api/auth/login', 'public', auth.login],
  ['POST', '/api/auth/logout', 'public', auth.logout],
  ['GET', '/api/auth/me', 'public', auth.me],

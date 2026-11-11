@@ -24,7 +24,14 @@ export async function streaks({db, member}) {
   db.prepare("SELECT at FROM accessi WHERE member_id = ? AND direction = 'IN' ORDER BY at").bind(member.id).all(),
   db.prepare('SELECT enabled_at FROM achievement_sharing WHERE member_id = ?').bind(member.id).first()
  ]);
- return json({app:calendarStreak(opens.results.map(r=>r.day),romeDay(Date.now())),sede:streakDays(new Set(visits.results.map(r=>romeDay(r.at*1000))),Date.now()),sharing:!!sharing});
+ const now=Date.now(),today=romeDay(now);
+ const appDays=opens.results.map(r=>r.day);
+ const sedeDays=new Set(visits.results.map(r=>romeDay(r.at*1000)));
+ return json({
+  app:{...calendarStreak(appDays,today),today:appDays.includes(today)},
+  sede:{...streakDays(sedeDays,now),today:sedeDays.has(today)},
+  sharing:!!sharing
+ });
 }
 export async function share({db, member, request}) {
  const body=await readJson(request);

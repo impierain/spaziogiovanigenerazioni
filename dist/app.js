@@ -847,7 +847,9 @@ async function panPresenze(){
  const qrCard=window.qrcode?card(`${qrSvg(checkinUrl(codeInfo.code),'QR code d’ingresso')}<p>Stampalo e attaccalo all’ingresso: i soci lo inquadrano per registrare ingresso e uscita.</p><p class="muted">Se il codice finisce in mani sbagliate, cambialo: il vecchio QR smette subito di funzionare e va ristampato.</p><div class="row">${link('Stampa il cartello','cartello')}${btn('Cambia il codice','rotate','',{secondary:true})}</div>`):card('<p>Non riesco a creare il QR in questo momento.</p>');
  const active=members.members.filter(m=>m.status==='approved');
  const insideIds=new Set(inside.presenti.map(p=>p.id));
- return section('QR d’ingresso',qrCard)+section('In sede adesso',inside.presenti.length?grid(inside.presenti.map(p=>card(`<h3>${esc(p.name)}</h3><p>Dentro dalle ${fmt(p.since,{hour:'2-digit',minute:'2-digit'})}</p>${btn('Registra uscita','out',p.id)}`)),'three'):card('<p>Nessuno è registrato dentro.</p>'))+
+const siteUrl=location.origin+'/#home';
+ const siteCard=window.qrcode?card(`${qrSvg(siteUrl,'QR code del sito')}<p>Per chiunque: apre il sito senza account e mostra calendario, spazio, orari e attività. Chi ha un account può accedere da lì.</p><p class="muted">${esc(siteUrl)}</p><div class="row">${link('Stampa il cartello','cartello/sito')}${btn('Copia il link','copy',siteUrl,{secondary:true})}</div>`):card('<p>Non riesco a creare il QR in questo momento.</p>');
+ return section('QR d’ingresso',qrCard)+section('QR del sito, per tutti',siteCard)+section('In sede adesso',inside.presenti.length?grid(inside.presenti.map(p=>card(`<h3>${esc(p.name)}</h3><p>Dentro dalle ${fmt(p.since,{hour:'2-digit',minute:'2-digit'})}</p>${btn('Registra uscita','out',p.id)}`)),'three'):card('<p>Nessuno è registrato dentro.</p>'))+
  section('Registra un movimento',form('access',`<label>Socio<select name="memberId" required>${active.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}${insideIds.has(m.id)?' (dentro)':''}</option>`).join('')}</select></label><p class="muted">Il sistema alterna da solo ingresso e uscita.</p><label>Orario (vuoto = adesso)<input name="at" type="datetime-local" max="${datetimeLocal(Math.floor(Date.now()/1000))}"></label>`,'Registra'))+
  section('Ultimi tre giorni',acc.accessi.length?card(`<ul class="list">${acc.accessi.map(a=>`<li>${esc(a.name)} · ${a.direction==='IN'?'ingresso':'uscita'} · ${dateShort(a.at)}${a.source==='dispositivo'?' · lettore':''}</li>`).join('')}</ul>`):card('<p>Nessun movimento recente.</p>'));
 }
@@ -978,8 +980,12 @@ async function ingressoPage(code){
  await refreshTotals();renderChrome('home');say(msg);
  return await homeMember();
 }
-async function cartello(){
+async function cartello(kind){
  if(!isOrganizer())return needLogin();
+ if(kind==='sito'){
+  await loadQr();
+  return `<div class="poster"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1><p class="poster-lead">Scopri cosa facciamo: inquadra il QR.</p>${qrSvg(location.origin+'/#home','QR code del sito')}<ol><li>Apri la fotocamera del telefono e inquadra il QR.</li><li>Guarda calendario, attività, orari e spazio, senza account.</li><li>Sei socio? Accedi per prenotare, giocare e segnare la presenza.</li></ol><p>E boni siemmu · Spazio Giovani Generazioni</p></div><p class="no-print">${btn('Stampa','print')} ${link('Torna alle presenze','referenti/presenze')}</p>`;
+ }
  const [{code}]=[await api('/checkin-code'),await loadQr()];
  return `<div class="poster"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1><p class="poster-lead">Sei entratə o uscitə? Inquadra il QR.</p>${qrSvg(checkinUrl(code),'QR code per registrare ingresso e uscita')}<ol><li>Apri la fotocamera del telefono e inquadra il QR.</li><li>Accedi, se non l’hai già fatto.</li><li>Il sito segna il tuo ingresso. Quando esci, inquadralo di nuovo.</li></ol><p>E boni siemmu · Spazio Giovani Generazioni</p></div><p class="no-print">${btn('Stampa','print')} ${link('Torna alle presenze','referenti/presenze')}</p>`;
 }
@@ -1039,7 +1045,7 @@ async function render(focus=false){
   else if(page==='privacy')html=privacy();
   else if(page==='tv')html=await tvPage();
   else if(page==='ingresso')html=await ingressoPage(detail);
-  else if(page==='cartello')html=await cartello();
+  else if(page==='cartello')html=await cartello(detail);
   else if(page==='accedi')html=accedi(detail);
   else if(page==='imposta-password')html=await impostaPassword(detail);
   else if(page==='missioni')html=await missioni();
@@ -1281,6 +1287,7 @@ const actions={
  tvzoom(id){const z=Math.min(1.6,Math.max(.6,Number(pref.get('tvzoom',1))+(id==='up'?.1:-.1)));pref.set('tvzoom',z.toFixed(2));const el=document.querySelector('.tv-screen');if(el)el.style.setProperty('--tvz',z);},
  async checkin(){const ok=await run(()=>api('/checkin',{method:'POST',body:{direction:'IN'}}),'Check-in registrato.');if(ok)taskFeedback('✓ Sei in sede!', 'Ti va di dare una mano? Scegli una missione: i premi arrivano dopo la verifica.',true);},
  print:()=>window.print(),
+ async copy(id){try{await navigator.clipboard.writeText(id);say('Link copiato.');}catch{window.prompt('Copia il link:',id);}},
  async checkout(){await run(()=>api('/checkout',{method:'POST',body:{}}),'Uscita registrata. A presto!');},
  async rotate(){if(!await confirmAction('Il vecchio QR smetterà di funzionare e dovrai ristampare il cartello. Continuare?'))return;await run(()=>api('/checkin-code/rotate',{method:'POST',body:{}}),'Codice cambiato: ristampa il cartello.');},
  async redeem(id){let r;await run(async()=>{r=await api(`/rewards/${encodeURIComponent(id)}/redeem`,{method:'POST',body:{}});},null,{rerender:false})&&(say(`Premio riscattato! ${r.emailSent?'Ti abbiamo scritto una email con le istruzioni.':'Passa in sede per ritirarlo.'}`),await render());},

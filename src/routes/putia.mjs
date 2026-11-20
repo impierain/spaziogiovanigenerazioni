@@ -47,10 +47,15 @@ export async function update({request, db, params}) {
  return json({reward: await db.prepare(`${rewardSql} WHERE r.id = ?`).bind(params.id).first()});
 }
 
+const MAX_REDEEMS_PER_DAY = 5;
+
 // Riscatto atomico: un solo comando controlla premio attivo, scorte e saldo.
 export async function redeem({env, db, member, params}) {
  const reward = await db.prepare('SELECT id, name, cost FROM rewards WHERE id = ? AND active = 1').bind(params.id).first();
  if (!reward) fail(404, 'Premio non disponibile.');
+ // Anche i riscatti annullati contano: ogni riscatto avvisa i referenti e scrive una email.
+ const today = await db.prepare('SELECT COUNT(*) AS n FROM redemptions WHERE member_id = ? AND created_at > unixepoch() - 86400').bind(member.id).first();
+ if (today.n >= MAX_REDEEMS_PER_DAY) fail(429, `Puoi fare al massimo ${MAX_REDEEMS_PER_DAY} riscatti al giorno. Riprova domani.`);
  const res = await db.prepare(`INSERT INTO redemptions (reward_id, member_id, cost)
   SELECT r.id, ?1, r.cost FROM rewards r
   WHERE r.id = ?2 AND r.active = 1

@@ -208,19 +208,19 @@ export async function community({db, env = {}}) {
  const month = romeMonth(now * 1000);
  const midnight = Date.parse(month + '-01');
  const monthStart = (midnight - romeOffset(midnight)) / 1000;
- const [youngs, activities, chores, presence] = await Promise.all([
+ const [youngs, activities, chores, monthRows] = await Promise.all([
   one("SELECT COUNT(*) AS n FROM members WHERE status = 'approved'"),
   one('SELECT COUNT(DISTINCT activity_id) AS n FROM attendance'),
   one("SELECT COUNT(*) AS n FROM chore_logs WHERE status = 'verified'"),
-  db.prepare(`SELECT COALESCE(SUM(o.at - MAX(i.at, ?)), 0) AS seconds
-   FROM accessi o
-   JOIN accessi i ON i.id = (
-    SELECT p.id FROM accessi p WHERE p.member_id = o.member_id AND (p.at, p.id) < (o.at, o.id)
-    ORDER BY p.at DESC, p.id DESC LIMIT 1
-   )
-   WHERE o.direction = 'OUT' AND o.at > ? AND o.at <= ? AND i.direction = 'IN' AND i.at < o.at`)
-   .bind(monthStart, monthStart, now).first()
+  // Stesse regole del resto delle statistiche: ingressi e uscite abbinati per socio, tempo del mese corrente.
+  loadRows(db, monthStart - STALE_SECONDS)
  ]);
+ // Una visita non può durare più di 16 ore: un'uscita dimenticata non gonfia l'obiettivo.
+ const presence = {seconds: buildSessions(monthRows, now).sessions.reduce((sum, s) => {
+  const start = Math.max(s.start, monthStart);
+  const end = Math.min(s.end, s.start + STALE_SECONDS, now);
+  return sum + Math.max(0, end - start);
+ }, 0)};
  const targetHours = Number(env.COMMUNITY_GOAL_HOURS);
  const target = Number.isFinite(targetHours) && targetHours >= 1 ? Math.round(targetHours * 3600) : 360000;
  const seconds = presence.seconds;

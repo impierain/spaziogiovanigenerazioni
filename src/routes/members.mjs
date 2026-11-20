@@ -101,7 +101,13 @@ export async function update({request, db, member, params}) {
  if (('status' in body && body.status !== 'approved') || ('role' in body && body.role !== target.role)) {
   statements.push(db.prepare('DELETE FROM sessions WHERE member_id = ?').bind(target.id));
  }
- await db.batch(statements);
+ try {
+  await db.batch(statements);
+ } catch (error) {
+  // Il database impedisce di lasciare l'associazione senza referenti anche con richieste contemporanee.
+  if (String(error).includes('ultimo_organizzatore')) fail(409, 'Deve restare almeno un referente attivo.');
+  throw error;
+ }
  return json({member: shape(await db.prepare(`${listSql} WHERE m.id = ?`).bind(target.id).first())});
 }
 

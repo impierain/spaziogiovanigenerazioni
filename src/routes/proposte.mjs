@@ -47,15 +47,24 @@ export async function schedule({request, env, db, member, params}) {
  const body = await readJson(request);
  const p = await db.prepare(`SELECT id, title, description, member_id FROM proposals WHERE id = ? AND status = 'open'`).bind(Number(params.id)).first();
  if (!p) fail(404, 'Proposta non trovata o già chiusa.');
+ if (p.member_id === member.id) fail(409, 'Una proposta tua la porta in calendario un altro referente.');
  const now = Math.floor(Date.now() / 1000);
  const startsAt = integer(body.startsAt, 'Data', {min: now, max: now + 365 * 86400});
  const activityId = crypto.randomUUID();
- await db.batch([
+ const results = await db.batch([
   db.prepare(`INSERT INTO activities (id, name, starts_at, capacity, status, verification_rule, xp, cheese, description) VALUES (?, ?, ?, 20, 'draft', ?, 30, 3, ?)`).bind(
    activityId, p.title.slice(0, 120), startsAt, 'Il referente verifica di persona la presenza durante l’evento e la registra nella stessa giornata.', p.description),
   db.prepare(`UPDATE proposals SET status = 'scheduled', activity_id = ? WHERE id = ? AND status = 'open'`).bind(activityId, p.id),
-  db.prepare(`INSERT INTO awards (member_id, source, ref, title, xp, cheese) VALUES (?, 'proposta', ?, ?, ?, ?)`).bind(p.member_id, String(p.id), `Proposta accolta: ${p.title}`.slice(0, 120), PROPOSAL_XP, PROPOSAL_CHEESE)
+  // Il premio nasce solo se questa richiesta ha davvero spostato la proposta in calendario.
+  db.prepare(`INSERT INTO awards (member_id, source, ref, title, xp, cheese)
+   SELECT ?, 'proposta', ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM proposals WHERE id = ? AND activity_id = ? AND status = 'scheduled')`).bind(
+   p.member_id, String(p.id), `Proposta accolta: ${p.title}`.slice(0, 120), PROPOSAL_XP, PROPOSAL_CHEESE, p.id, activityId)
  ]);
+ if (!results[1].meta.changes) {
+  // Un'altra richiesta contemporanea ha già portato in calendario questa proposta: tolgo la bozza in più.
+  await db.prepare('DELETE FROM activities WHERE id = ?').bind(activityId).run();
+  fail(409, 'Questa proposta è già stata portata in calendario.');
+ }
  await notify(db, p.member_id, {kind: 'proposta', level: 'ok', title: `La tua proposta va in calendario: ${p.title}`, body: `+${PROPOSAL_XP} XP e +${tumazzi(PROPOSAL_CHEESE)}.`});
  const when = new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(startsAt * 1000));
  await mailMember(env, db, p.member_id, name => proposalEmail(name, {proposal: p.title, when}));

@@ -19,13 +19,16 @@ jobs:
           node --check dist/app.js
       - name: Migrazioni su database di prova
         run: |
-          npm install --no-save wrangler@4
+          npm install --no-save wrangler@4.159.0
           npx wrangler d1 migrations apply DB --local
+      - name: Prove di integrazione
+        run: |
+          for t in tests/*.integration.mjs; do node "$t"; done
 
   # Se il controllo passa, unisce da solo le PR aperte da Piero su rami di questo repository.
   unione-automatica:
     needs: controllo
-    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'impierain'
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'impierain' && github.actor == 'impierain'
     runs-on: ubuntu-latest
     permissions:
       contents: write

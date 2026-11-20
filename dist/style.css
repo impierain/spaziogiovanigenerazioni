@@ -645,3 +645,18 @@ html[data-theme="night"] .week span { background: #333; color: #fff; border-colo
 .skill-crown.earned { background: #fff1b2; color: #211806; border-color: #946413; }
 .skill-crown.next { border-color: #b30016; }
 html[data-theme="night"] .skill-crown.next { border-color: #FFD400; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.stars { border: 0; padding: 0; margin: 0 0 1rem; }
+.stars legend { font-weight: 700; margin-bottom: .5rem; }
+.stars label { display: inline-flex; align-items: center; gap: .3rem; margin-right: .9rem; min-height: 44px; }
+.feedback-prompt { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; max-height: 90vh; overflow: auto; padding: 1rem; background: var(--paper, #fff); color: inherit; border-top: 4px solid #b30016; box-shadow: 0 -8px 24px rgba(0, 0, 0, .25); }
+.feedback-prompt form { max-width: 34rem; margin: 0 auto; }
+.feedback-prompt textarea { width: 100%; min-height: 5rem; }
+.feedback-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: .75rem; }
+@media (min-width: 720px) { .feedback-prompt { left: auto; right: 1.5rem; bottom: 1.5rem; width: 26rem; border: 4px solid #b30016; } }
+.stars { display: flex; flex-wrap: wrap; gap: .25rem .6rem; }
+.stars legend { flex: 0 0 100%; float: left; }
+.stars label { display: inline-flex; margin-right: 0; padding: 0 .3rem; }
+.feedback-prompt h2 { font-size: 1.3rem; margin-bottom: .4rem; }
+.feedback-prompt form { display: grid; gap: .6rem; }

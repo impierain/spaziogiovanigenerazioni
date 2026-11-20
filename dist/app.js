@@ -658,6 +658,38 @@ async function spazio(){
  section('Il progetto',card('<p>Cca Siemmu è promosso da Spazio Giovani Generazioni ed è finanziato dal Corpo europeo di solidarietà. Contatti: <a href="mailto:spaziogiovanigenerazioni@gmail.com">spaziogiovanigenerazioni@gmail.com</a>.</p>'));
 }
 
+/* ---- valutazione e suggerimenti ---- */
+const feedbackLink='<a href="#suggerimenti">Suggerisci una modifica</a>';
+const stars=name=>`<fieldset class="stars"><legend>Quanto ti piace Cca Siemmu?</legend>${[1,2,3,4,5].map(n=>`<label><input type="radio" name="${name}" value="${n}" required> ${n}<span class="sr-only"> su 5</span></label>`).join('')}</fieldset>`;
+async function suggerimenti(){
+ if(!S.me)return needLogin();
+ return title('Suggerisci una modifica','Hai notato qualcosa che non va o ti viene un’idea? Scrivilo qui: arriva nella bacheca dei referenti.')+
+ section('Il tuo suggerimento',form('feedbacksuggest',
+  `<label>Di che cosa si tratta?<select name="category" required><option value="">Scegli…</option><option value="modifica">Una modifica</option><option value="problema">Un problema</option><option value="idea">Un’idea</option><option value="critica">Una critica</option></select></label>`+
+  textArea('message','Scrivi qui (da 10 a 400 caratteri)',400,'',true)+
+  `<label class="check"><input type="checkbox" name="anonymous"> Invia in modo anonimo (i referenti non vedono il tuo pseudonimo)</label>`,'Invia ai referenti'))+
+ section('Valuta la webapp',form('feedbackrate',stars('rating')+textArea('message','Vuoi aggiungere qualcosa? (facoltativo)',400),'Invia la valutazione')+card('<p class="muted">La valutazione è anonima per i referenti: vedono voto e commento, non chi li ha scritti.</p>'));
+}
+let feedbackChecked='';
+async function feedbackPrompt(){
+ if(!S.me||feedbackChecked===S.me.id||location.hash.startsWith('#suggerimenti'))return;
+ feedbackChecked=S.me.id;
+ let due=false;
+ try{due=(await api('/feedback/prompt')).due;}catch{return;}
+ if(!due||document.querySelector('#feedback-box'))return;
+ const box=document.createElement('div');
+ box.id='feedback-box';box.className='feedback-prompt';box.setAttribute('role','dialog');box.setAttribute('aria-label','Valutazione di Cca Siemmu');
+ box.innerHTML=`<form><h2>Come ti trovi con Cca Siemmu?</h2><p class="muted">Ci vuole un minuto e ci aiuta a migliorare. La risposta è anonima per i referenti.</p>${stars('rating')}${textArea('message','Un commento, un suggerimento, una critica (facoltativo)',400)}<div class="feedback-actions"><button>Invia</button><button type="button" class="secondary" data-later>Più tardi</button></div></form>`;
+ document.body.append(box);
+ box.querySelector('[data-later]').addEventListener('click',async()=>{box.remove();try{await api('/feedback/snooze',{method:'POST',body:{}});}catch{}});
+ box.querySelector('form').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const f=event.target;
+  const ok=await run(()=>api('/feedback/rating',{method:'POST',body:{rating:Number(f.elements.rating.value),message:f.elements.message.value.trim()}}),'Grazie! La tua valutazione è arrivata.',{rerender:false});
+  if(ok)box.remove();
+ });
+}
+
 const privacyLink='<a href="#privacy">Privacy e cookie</a>';
 function privacy(){
  const mail='spaziogiovanigenerazioni@gmail.com',contact=`<a href="mailto:${mail}">${mail}</a>`;
@@ -666,7 +698,8 @@ function privacy(){
  section('Quali dati usiamo e perché',grid([
   card('<h3>Accesso e partecipazione</h3><p>Puoi consultare le pagine pubbliche e il calendario senza account. Per attivare il profilo e gestire prenotazioni, presenze, missioni e ricompense, trattiamo i dati necessari al servizio che richiedi. Usiamo nome, email, pseudonimo, ruolo e stato dell’account, oltre ai registri delle attività che svolgi. Telefono, interessi e tessera sono facoltativi. Le password sono conservate come impronte crittografiche.</p>'),
   card('<h3>Comunità e Youthpass</h3><p>Se usi la Banca del tempo o pubblichi una proposta, gli altri soci vedono lo pseudonimo e ciò che pubblichi. Le note di uno scambio sono visibili alle persone coinvolte. Il diario Youthpass è accessibile dal tuo account e resta fuori dal pannello referenti. Puoi svuotarlo e salvare per cancellare il testo.</p>'),
-  card('<h3>Sicurezza</h3><p>Per proteggere gli account e limitare tentativi di accesso abusivi trattiamo le informazioni tecniche necessarie, compresa l’email usata nei tentativi falliti. La finestra usata per limitare i tentativi è di 15 minuti.</p>'),
+  card('<h3>Sicurezza</h3><p>Per proteggere gli account e limitare tentativi di accesso abusivi trattiamo le informazioni tecniche necessarie, compresi l’email e l’indirizzo IP usati nei tentativi di accesso falliti e nei tentativi di cambio password. I tentativi contano per 15 minuti; quelli più vecchi non vengono più considerati e si eliminano alla successiva operazione di accesso. Cloudflare, che ospita il sito, tratta l’indirizzo IP anche per erogare e proteggere il servizio.</p>'),
+  card('<h3>Valutazioni e suggerimenti</h3><p>Dopo alcuni giorni d’uso ti chiediamo, in modo facoltativo, una valutazione da 1 a 5 con un commento. I referenti vedono voto e commento senza il tuo nome. Nella pagina «Suggerisci una modifica» puoi scrivere un suggerimento, una critica o un’idea: arriva nella bacheca dei referenti con il tuo pseudonimo, a meno che tu scelga l’invio anonimo. Anche i suggerimenti anonimi restano collegati al tuo account nel database, solo per limitarne l’abuso; i referenti non lo vedono. Non scrivere dati personali tuoi o di altri nel testo. Conserviamo valutazioni e suggerimenti per un anno, poi vengono cancellati; le copie in bacheca si eliminano dopo 90 giorni.</p>'),
   card('<h3>Condivisione facoltativa</h3><p>La card dei progressi o dei trofei si crea sul tuo dispositivo. Contiene il traguardo scelto o il tuo livello e gli XP, con l’avatar selezionato. È priva di nome, email, diario e storico delle presenze. Sei tu a scegliere dove inviarla. Quando usi un’app esterna si applica l’informativa di quell’app.</p>')
  ],'two'))+
  section('Su quale base usiamo i dati',card('<p>Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
@@ -953,7 +986,9 @@ async function notifiche(){
  if(!S.me)return needLogin();
  const d=await api('/notifications');
  const items=d.notifications;
- const html=title('Notifiche','Esiti delle operazioni e avvisi che ti riguardano.')+
+ const fb=isOrganizer()?await api('/feedback/summary').catch(()=>null):null;
+ const fbCard=fb&&fb.count?section('Valutazioni della webapp',card(`<p><strong>${String(fb.average).replace('.',',')}</strong> su 5 · ${fb.count} ${fb.count===1?'valutazione':'valutazioni'} (anonime)</p>${[5,4,3,2,1].map(n=>bar(fb.spread[n]||0,Math.max(...Object.values(fb.spread)),n+' stelle')).join('')}${fb.comments.length?`<h3>Ultimi commenti</h3><ul>${fb.comments.map(c=>`<li>${c.rating}/5 · ${esc(c.message)} <span class="muted">${dateShort(c.createdAt)}</span></li>`).join('')}</ul>`:''}`)):'';
+ const html=title('Notifiche','Esiti delle operazioni e avvisi che ti riguardano.')+fbCard+
   section('Bacheca',items.length?`<div class="notice-list">${items.map(n=>`<article class="card notice-item notice-${n.level} ${n.read?'':'notice-unread'}"><span class="notice-icon" aria-hidden="true">${levelIcon[n.level]||'ℹ'}</span><div><h3>${esc(missionWording(n.title))}${n.read?'':' '+badge('Nuova')}</h3>${n.body?`<p>${esc(missionWording(n.body))}</p>`:''}<p class="muted">${dateShort(n.createdAt)}</p></div></article>`).join('')}</div>`:card('<p>Nessuna notifica per ora. Qui compariranno gli esiti degli invii email e gli avvisi su prenotazioni e missioni.</p>'));
  if(d.unread){api('/notifications/read',{method:'POST',body:{all:true}}).then(r=>{S.unread=r.unread??0;renderChrome('');}).catch(()=>{});}
  return html;
@@ -1024,7 +1059,7 @@ async function render(focus=false){
  if(!S.loaded)await loadSession();
  else if(S.me){await refreshTotals();checkLevelUp();}
  document.body.classList.toggle('tv',page==='tv');
- const known=['comunita','assemblea','trofei','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','imposta-password'];
+ const known=['comunita','assemblea','trofei','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','suggerimenti','imposta-password'];
  const active=known.includes(page)?page:'';
  renderChrome(active);
  await recordAppDay();
@@ -1043,6 +1078,7 @@ async function render(focus=false){
   else if(page==='banca')html=await banca();
   else if(page==='proposte')html=await proposte();
   else if(page==='privacy')html=privacy();
+  else if(page==='suggerimenti')html=await suggerimenti();
   else if(page==='tv')html=await tvPage();
   else if(page==='ingresso')html=await ingressoPage(detail);
   else if(page==='cartello')html=await cartello(detail);
@@ -1060,9 +1096,10 @@ async function render(focus=false){
  if(id!==renderId)return;
  main.innerHTML=(!['home','tv','cartello'].includes(page)?'<div class="back-row"><button type="button" class="secondary" data-action="back">← Indietro</button></div>':'')+html;
  updateDateIndicators();
- if(!['tv','cartello'].includes(page))main.insertAdjacentHTML('beforeend',`<footer class="foot site-foot">${document.querySelector('#project-logos').innerHTML}${privacyLink}</footer>`);
+ if(!['tv','cartello'].includes(page))main.insertAdjacentHTML('beforeend',`<footer class="foot site-foot">${document.querySelector('#project-logos').innerHTML}${S.me?feedbackLink+' · ':''}${privacyLink}</footer>`);
  if(!['tv','cartello'].includes(page)&&!main.querySelector('#mu-popover'))main.insertAdjacentHTML('beforeend',mu(page));
  main.removeAttribute('aria-busy');
+ if(!['tv','cartello','ingresso','imposta-password'].includes(page))feedbackPrompt();
  if(page==='tv')fitTv();
  if(focus){
   const target=page==='profilo'&&detail==='diario'?'learning-journal':page==='banca'&&(detail==='offri'?'time-offer':detail==='scambi'?'time-exchanges':null);
@@ -1402,6 +1439,8 @@ const submits={
  },
  async request(f,v){await run(()=>api(`/time-offers/${encodeURIComponent(f.dataset.id)}/request`,{method:'POST',body:{note:v('note')}}),'Richiesta inviata: chi offre l’ora riceve un avviso.');},
  async offer(f,v){await run(()=>api('/time-offers',{method:'POST',body:{title:v('title'),description:v('description')}}),'Offerta pubblicata.');},
+ async feedbacksuggest(f,v){const ok=await run(()=>api('/feedback/suggestions',{method:'POST',body:{category:v('category'),message:v('message'),anonymous:f.elements.anonymous.checked}}),'Grazie! Il suggerimento è arrivato ai referenti.',{rerender:false});if(ok)f.reset();},
+ async feedbackrate(f,v){const rating=f.elements.rating.value;const ok=await run(()=>api('/feedback/rating',{method:'POST',body:{rating:Number(rating),message:v('message')}}),'Grazie! La tua valutazione è arrivata.',{rerender:false});if(ok)f.reset();},
  async proposal(f,v){await run(()=>api('/proposals',{method:'POST',body:{title:v('title'),description:v('description')}}),'Proposta pubblicata: ora il gruppo può votarla.');},
  async schedule(f,v){await run(()=>api(`/proposals/${encodeURIComponent(f.dataset.id)}/schedule`,{method:'POST',body:{startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000)}}),'Proposta in calendario (bozza): completala in Referenti → Attività. Chi l’ha proposta è stato avvisato.');},
  async reward(f,v){await run(()=>api('/rewards',{method:'POST',body:{name:v('name'),description:v('description'),cost:Number(v('cost')),quantity:v('quantity')===''?null:Number(v('quantity')),art:v('art')}}),'Premio aggiunto alla vetrina.');},

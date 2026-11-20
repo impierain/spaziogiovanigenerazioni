@@ -122,3 +122,31 @@ assert.equal(query("SELECT COUNT(*) AS n FROM awards WHERE member_id='a' AND sou
 // 7. Riscatto contemporaneo dell'ultima scorta e intestazioni.
 assert.equal((await call('/auth/me')).headers.get('X-Content-Type-Options'),'nosniff');
 console.log('OK: blocco login per email e indirizzo, cambio password chiude le altre sessioni, proposte senza auto-premio e con premio unico, tetto riscatti, ultimo referente protetto dal database, tetto settimanale della banca.');
+
+// 8. Valutazioni e suggerimenti.
+query("DELETE FROM notifications");
+assert.equal((await call('/feedback/prompt',{actor:'a'})).status,200);
+assert.equal((await (await call('/feedback/prompt',{actor:'a'})).json()).due,false);
+for(let i=0;i<7;i++)query("INSERT INTO app_visit_days(member_id,day) VALUES('a',?)",['2030-01-0'+(i+1)]);
+assert.equal((await (await call('/feedback/prompt',{actor:'a'})).json()).due,true);
+await call('/feedback/snooze',{actor:'a',method:'POST',body:{}});
+assert.equal((await (await call('/feedback/prompt',{actor:'a'})).json()).due,false);
+query("DELETE FROM feedback WHERE kind='snooze'");
+assert.equal((await call('/feedback/rating',{actor:'a',method:'POST',body:{rating:6}})).status,400);
+assert.equal((await call('/feedback/rating',{actor:'a',method:'POST',body:{rating:4,message:'Bella ma lenta'}})).status,201);
+assert.equal((await call('/feedback/rating',{actor:'a',method:'POST',body:{rating:5}})).status,429);
+assert.equal((await (await call('/feedback/prompt',{actor:'a'})).json()).due,false);
+const note=query("SELECT title,body FROM notifications WHERE member_id='b' AND kind='valutazione'",[],'first');
+assert.ok(note&&!/Esploratore/.test(note.title+note.body));
+assert.equal((await call('/feedback/suggestions',{actor:'a',method:'POST',body:{category:'x',message:'Un suggerimento valido'}})).status,400);
+assert.equal((await call('/feedback/suggestions',{actor:'a',method:'POST',body:{category:'idea',message:'corto'}})).status,400);
+assert.equal((await call('/feedback/suggestions',{actor:'a',method:'POST',body:{category:'idea',message:'Aggiungere un angolo giochi da tavolo'}})).status,201);
+assert.equal((await call('/feedback/suggestions',{actor:'a',method:'POST',body:{category:'critica',message:'Il calendario è confuso sul telefono',anonymous:true}})).status,201);
+const sug=query("SELECT title FROM notifications WHERE member_id='b' AND kind='suggerimento' ORDER BY id",[],'all').results;
+assert.equal(sug.length,2);assert.match(sug[0].title,/Esploratore/);assert.match(sug[1].title,/anonimo/);assert.doesNotMatch(sug[1].title,/Esploratore/);
+for(let i=0;i<3;i++)await call('/feedback/suggestions',{actor:'a',method:'POST',body:{category:'idea',message:'Altro suggerimento numero '+i}});
+assert.equal((await call('/feedback/suggestions',{actor:'a',method:'POST',body:{category:'idea',message:'Sesto suggerimento oggi'}})).status,429);
+assert.equal((await call('/feedback/summary',{actor:'a'})).status,403);
+const sum=await (await call('/feedback/summary',{actor:'b'})).json();
+assert.equal(sum.count,1);assert.equal(sum.average,4);assert.equal(JSON.stringify(sum).includes('Esploratore'),false);
+console.log('OK: valutazioni e suggerimenti: soglia d’uso, rinvio, limiti, anonimato verso i referenti, notifiche ai referenti.');

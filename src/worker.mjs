@@ -18,6 +18,7 @@ import * as assignments from './routes/assignments.mjs';
 import * as putia from './routes/putia.mjs';
 import * as banca from './routes/banca.mjs';
 import * as proposte from './routes/proposte.mjs';
+import * as feedback from './routes/feedback.mjs';
 import {runDaily} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
@@ -113,6 +114,12 @@ const routes = [
  ['POST', '/api/proposals/:id/vote', 'member', proposte.vote],
  ['POST', '/api/proposals/:id/schedule', 'organizer', proposte.schedule],
  ['POST', '/api/proposals/:id/decline', 'organizer', proposte.decline],
+
+ ['GET', '/api/feedback/prompt', 'member', feedback.prompt],
+ ['POST', '/api/feedback/snooze', 'member', feedback.snooze],
+ ['POST', '/api/feedback/rating', 'member', feedback.rate],
+ ['POST', '/api/feedback/suggestions', 'member', feedback.suggest],
+ ['GET', '/api/feedback/summary', 'organizer', feedback.summary],
 
  ['GET', '/api/notifications', 'member', notifications.list],
  ['POST', '/api/notifications/read', 'member', notifications.markRead]

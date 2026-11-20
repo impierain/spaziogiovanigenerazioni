@@ -89,10 +89,13 @@ export async function done({env, db, member, params}) {
  const weekStart = romeWeekStart(Date.now());
  const outcome = {};
  for (const who of [x.ownerId, x.requesterId]) {
-  const used = (await db.prepare(`SELECT COUNT(*) AS n FROM awards WHERE member_id = ? AND source = 'scambio' AND created_at >= ?`).bind(who, weekStart).first()).n;
-  if (used >= WEEKLY_EXCHANGES) { outcome[who] = false; continue; }
-  await db.prepare(`INSERT INTO awards (member_id, source, ref, title, xp, cheese) VALUES (?, 'scambio', ?, ?, ?, ?)`).bind(who, String(x.id), `Banca del tempo: ${x.title}`.slice(0, 120), EXCHANGE_XP, EXCHANGE_CHEESE).run();
-  outcome[who] = true;
+  // Conteggio e inserimento sono un unico comando: due conferme contemporanee non superano il limite.
+  const given = await db.prepare(`INSERT INTO awards (member_id, source, ref, title, xp, cheese)
+   SELECT ?1, 'scambio', ?2, ?3, ?4, ?5
+   WHERE (SELECT COUNT(*) FROM awards WHERE member_id = ?1 AND source = 'scambio' AND created_at >= ?6) < ?7`).bind(
+   who, String(x.id), `Banca del tempo: ${x.title}`.slice(0, 120), EXCHANGE_XP, EXCHANGE_CHEESE, weekStart, WEEKLY_EXCHANGES).run();
+  outcome[who] = given.meta.changes > 0;
+  if (!outcome[who]) continue;
   await notify(db, who, {kind: 'banca', level: 'ok', title: `Scambio concluso: ${x.title}`, body: `+${EXCHANGE_XP} XP e +${tumazzi(EXCHANGE_CHEESE)}.`});
  }
  for (const who of [x.ownerId, x.requesterId]) await checkTrophies(env, db, who);

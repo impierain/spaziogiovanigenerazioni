@@ -1,10 +1,11 @@
 import {fail, json, readJson, email, text} from '../lib/http.mjs';
 import {hashPassword, passwordProblem, verifyPassword} from '../lib/password.mjs';
 import {EXPIRED_COOKIE, endSession, startSession} from '../lib/session.mjs';
-import {tokenHash} from '../tokens.mjs';
+import {sessionToken, tokenHash} from '../tokens.mjs';
 import {unreadCount} from './notifications.mjs';
 
-const MAX_FAILED = 8;
+const MAX_FAILED = 8; // errori per email e indirizzo di rete in 15 minuti
+const MAX_FAILED_EMAIL = 30; // tetto complessivo per email, contro chi cambia indirizzo
 const WINDOW_SECONDS = 15 * 60;
 
 export const publicMember = member => ({
@@ -22,9 +23,11 @@ export async function login({request, db}) {
  const body = await readJson(request);
  const address = email(body.email);
  const password = typeof body.password === 'string' ? body.password : '';
+ const ip = (request.headers.get('CF-Connecting-IP') || '').slice(0, 64);
  const since = Math.floor(Date.now() / 1000) - WINDOW_SECONDS;
- const failed = await db.prepare('SELECT COUNT(*) AS n FROM auth_attempts WHERE email = ? AND at > ?').bind(address, since).first();
- if (failed.n >= MAX_FAILED) fail(429, 'Troppi tentativi. Riprova tra qualche minuto.');
+ const failed = await db.prepare(`SELECT COUNT(*) AS total, COALESCE(SUM(ip = ?), 0) AS mine
+  FROM auth_attempts WHERE email = ? AND at > ?`).bind(ip, address, since).first();
+ if (failed.mine >= MAX_FAILED || failed.total >= MAX_FAILED_EMAIL) fail(429, 'Troppi tentativi. Riprova tra qualche minuto.');
 
  const member = await db.prepare(`SELECT id, email, pseudonym, full_name, role, status, interests, password_hash
   FROM members WHERE email = ?`).bind(address).first();
@@ -32,11 +35,11 @@ export async function login({request, db}) {
  if (!member || !valid || member.status !== 'approved') {
   await db.batch([
    db.prepare('DELETE FROM auth_attempts WHERE at <= ?').bind(since),
-   db.prepare('INSERT INTO auth_attempts (email, at) VALUES (?, unixepoch())').bind(address)
+   db.prepare('INSERT INTO auth_attempts (email, ip, at) VALUES (?, ?, unixepoch())').bind(address, ip)
   ]);
   fail(401, 'Email o password non corretti.');
  }
- await db.prepare('DELETE FROM auth_attempts WHERE email = ?').bind(address).run();
+ await db.prepare('DELETE FROM auth_attempts WHERE email = ? AND ip = ?').bind(address, ip).run();
  const cookie = await startSession(db, member.id);
  return json({member: publicMember(member)}, 200, {'Set-Cookie': cookie});
 }
@@ -93,11 +96,23 @@ export async function changePassword({request, db, member}) {
  const body = await readJson(request);
  const problem = passwordProblem(body.next);
  if (problem) fail(400, problem);
+ // Anche il cambio password ha un limite di errori: con una sessione rubata non si indovina la password attuale.
+ const key = `cambio:${member.id}`;
+ const since = Math.floor(Date.now() / 1000) - WINDOW_SECONDS;
+ const failed = await db.prepare('SELECT COUNT(*) AS n FROM auth_attempts WHERE email = ? AND at > ?').bind(key, since).first();
+ if (failed.n >= MAX_FAILED) fail(429, 'Troppi tentativi. Riprova tra qualche minuto.');
  const row = await db.prepare('SELECT password_hash FROM members WHERE id = ?').bind(member.id).first();
  if (!await verifyPassword(text(body.current, 'Password attuale', {max: 128}), row?.password_hash)) {
+  await db.prepare('INSERT INTO auth_attempts (email, ip, at) VALUES (?, \'\', unixepoch())').bind(key).run();
   fail(403, 'La password attuale non è corretta.');
  }
- await db.prepare('UPDATE members SET password_hash = ? WHERE id = ?').bind(await hashPassword(body.next), member.id).run();
+ // Con la nuova password le altre sessioni (per esempio un telefono perso) vengono chiuse, questa resta.
+ const current = await tokenHash(sessionToken(request));
+ await db.batch([
+  db.prepare('UPDATE members SET password_hash = ? WHERE id = ?').bind(await hashPassword(body.next), member.id),
+  db.prepare('DELETE FROM sessions WHERE member_id = ? AND token_hash <> ?').bind(member.id, current ?? ''),
+  db.prepare('DELETE FROM auth_attempts WHERE email = ?').bind(key)
+ ]);
  return json({ok: true});
 }
 

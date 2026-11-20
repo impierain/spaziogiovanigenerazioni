@@ -1,5 +1,5 @@
 export const json = (body, status = 200, headers = {}) =>
- Response.json(body, {status, headers: {'Cache-Control': 'no-store', ...headers}});
+ Response.json(body, {status, headers: {'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...headers}});
 
 export class HttpError extends Error {
  constructor(status, message) {

@@ -58,6 +58,12 @@ export const reminderEmail = (name, {activity, when}) => layout({
  button: 'Apri il calendario', url: `${SITE}/#calendario`, note: 'Non puoi più venire? Annulla la prenotazione dal calendario, così il posto va a un altro.'
 });
 
+export const stillInsideEmail = (name, {since}) => layout({
+ subject: 'Sei ancora in sede? · CCA SIEMMU', title: 'Sei ancora in sede?',
+ intro: `Ciao ${name}, hai registrato l’ingresso alle ${since}, più di due ore fa. Se sei già uscito, ricordati di registrare l’uscita: così le ore e le statistiche restano giuste.`,
+ button: 'Apri CCA SIEMMU', url: `${SITE}/#home`, note: 'Se sei ancora in sede, non devi fare niente: ti scriviamo una sola volta per ogni ingresso.'
+});
+
 export const weeklyEmail = (name, lines) => layout({
  subject: 'Riepilogo della settimana · CCA SIEMMU', title: 'La settimana in sede',
  intro: `Ciao ${name}, ecco cosa aspetta i referenti.`, itemsTitle: 'In breve', items: lines,

@@ -1,6 +1,6 @@
 // Lavori pianificati (Cron Trigger giornaliero): promemoria delle attività e riepilogo settimanale ai referenti.
 import {notify} from './lib/notify.mjs';
-import {layout, mailMember, reminderEmail, weeklyEmail, SITE} from './lib/emails.mjs';
+import {layout, mailMember, reminderEmail, stillInsideEmail, weeklyEmail, SITE} from './lib/emails.mjs';
 import {romeDay, romeWeekday} from './lib/time.mjs';
 
 const when = sec => new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(sec * 1000));
@@ -83,6 +83,34 @@ export async function checkMailIdle(env, nowMs = Date.now()) {
  } catch {
   return 0;
  }
+}
+
+const STILL_INSIDE_AFTER = 2 * 3600; // promemoria dopo due ore dall'ingresso
+const STILL_INSIDE_UNTIL = 4 * 3600; // oltre le quattro ore non lo mandiamo più (cron saltato)
+const hourMinute = sec => new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit'}).format(new Date(sec * 1000));
+
+// «Sei ancora in sede?»: una volta per ingresso, solo se l'ultimo movimento del socio è ancora quell'ingresso.
+export async function sendStillInsideReminders(env, nowMs = Date.now()) {
+ const db = env.DB;
+ const now = Math.floor(nowMs / 1000);
+ const {results} = await db.prepare(`SELECT a.id, a.member_id AS memberId, a.at FROM accessi a
+  JOIN members m ON m.id = a.member_id AND m.status = 'approved'
+  WHERE a.direction = 'IN' AND a.at <= ? AND a.at > ?
+   AND a.id = (SELECT id FROM accessi WHERE member_id = a.member_id ORDER BY at DESC, id DESC LIMIT 1)`).bind(now - STILL_INSIDE_AFTER, now - STILL_INSIDE_UNTIL).all();
+ let sent = 0;
+ for (const r of results) {
+  const res = await db.prepare(`INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id) VALUES ('sede', ?, ?)`).bind(String(r.id), r.memberId).run();
+  if (!res.meta.changes) continue;
+  sent++;
+  await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita con il QR o chiedi a un referente.`});
+  await mailMember(env, db, r.memberId, name => stillInsideEmail(name, {since: hourMinute(r.at)}));
+ }
+ return sent;
+}
+
+// Cron ogni 15 minuti.
+export async function runFrequent(env, nowMs = Date.now()) {
+ return {stillInside: await sendStillInsideReminders(env, nowMs)};
 }
 
 export async function runDaily(env, nowMs = Date.now()) {

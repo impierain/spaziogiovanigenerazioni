@@ -19,7 +19,7 @@ import * as putia from './routes/putia.mjs';
 import * as banca from './routes/banca.mjs';
 import * as proposte from './routes/proposte.mjs';
 import * as feedback from './routes/feedback.mjs';
-import {runDaily} from './jobs.mjs';
+import {runDaily, runFrequent} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
 const routes = [
@@ -159,7 +159,8 @@ async function handle(request, env) {
 
 export default {
  async scheduled(event, env, ctx) {
-  ctx.waitUntil(runDaily(env));
+  // Ogni 15 minuti: promemoria di uscita. Una volta al giorno: promemoria attività e riepiloghi.
+  ctx.waitUntil(event.cron === '*/15 * * * *' ? runFrequent(env) : runDaily(env));
  },
  async fetch(request, env) {
   const url = new URL(request.url);

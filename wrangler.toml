@@ -17,4 +17,4 @@ migrations_dir = "migrations"
 
 # Promemoria e riepilogo settimanale: ogni giorno alle 07:00 UTC.
 [triggers]
-crons = ["0 7 * * *"]
+crons = ["0 7 * * *", "*/15 * * * *"]

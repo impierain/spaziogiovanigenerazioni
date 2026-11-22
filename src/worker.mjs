@@ -19,6 +19,7 @@ import * as putia from './routes/putia.mjs';
 import * as banca from './routes/banca.mjs';
 import * as proposte from './routes/proposte.mjs';
 import * as feedback from './routes/feedback.mjs';
+import * as push from './routes/push.mjs';
 import {runDaily, runFrequent} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
@@ -115,6 +116,9 @@ const routes = [
  ['POST', '/api/proposals/:id/schedule', 'organizer', proposte.schedule],
  ['POST', '/api/proposals/:id/decline', 'organizer', proposte.decline],
 
+ ['GET', '/api/push/key', 'member', push.key],
+ ['POST', '/api/push/subscribe', 'member', push.subscribe],
+ ['DELETE', '/api/push/subscribe', 'member', push.unsubscribe],
  ['GET', '/api/feedback/prompt', 'member', feedback.prompt],
  ['POST', '/api/feedback/snooze', 'member', feedback.snooze],
  ['POST', '/api/feedback/rating', 'member', feedback.rate],

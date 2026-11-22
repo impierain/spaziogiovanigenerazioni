@@ -1,5 +1,6 @@
 // Lavori pianificati (Cron Trigger giornaliero): promemoria delle attività e riepilogo settimanale ai referenti.
 import {notify} from './lib/notify.mjs';
+import {sendPush} from './lib/webpush.mjs';
 import {layout, mailMember, reminderEmail, stillInsideEmail, weeklyEmail, SITE} from './lib/emails.mjs';
 import {romeDay, romeWeekday} from './lib/time.mjs';
 
@@ -103,7 +104,9 @@ export async function sendStillInsideReminders(env, nowMs = Date.now()) {
   if (!res.meta.changes) continue;
   sent++;
   await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita con il QR o chiedi a un referente.`});
-  await mailMember(env, db, r.memberId, name => stillInsideEmail(name, {since: hourMinute(r.at)}));
+  // Notifica sul telefono per chi l'ha attivata; l'email solo per gli altri.
+  const pushed = await sendPush(env, db, r.memberId, {title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita.`, url: '/#home'});
+  if (!pushed) await mailMember(env, db, r.memberId, name => stillInsideEmail(name, {since: hourMinute(r.at)}));
  }
  return sent;
 }

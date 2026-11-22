@@ -699,6 +699,7 @@ function privacy(){
   card('<h3>Accesso e partecipazione</h3><p>Puoi consultare le pagine pubbliche e il calendario senza account. Per attivare il profilo e gestire prenotazioni, presenze, missioni e ricompense, trattiamo i dati necessari al servizio che richiedi. Usiamo nome, email, pseudonimo, ruolo e stato dell’account, oltre ai registri delle attività che svolgi. Telefono, interessi e tessera sono facoltativi. Le password sono conservate come impronte crittografiche.</p>'),
   card('<h3>Comunità e Youthpass</h3><p>Se usi la Banca del tempo o pubblichi una proposta, gli altri soci vedono lo pseudonimo e ciò che pubblichi. Le note di uno scambio sono visibili alle persone coinvolte. Il diario Youthpass è accessibile dal tuo account e resta fuori dal pannello referenti. Puoi svuotarlo e salvare per cancellare il testo.</p>'),
   card('<h3>Sicurezza</h3><p>Per proteggere gli account e limitare tentativi di accesso abusivi trattiamo le informazioni tecniche necessarie, compresi l’email e l’indirizzo IP usati nei tentativi di accesso falliti e nei tentativi di cambio password. I tentativi contano per 15 minuti; quelli più vecchi non vengono più considerati e si eliminano alla successiva operazione di accesso. Cloudflare, che ospita il sito, tratta l’indirizzo IP anche per erogare e proteggere il servizio.</p>'),
+  card('<h3>Notifiche sul telefono</h3><p>Se le attivi dal profilo, salviamo l’identificativo tecnico del tuo dispositivo fornito dal browser (indirizzo del servizio push e chiavi di cifratura) per inviarti i promemoria, per esempio «Sei ancora in sede?». Passano dal servizio push del tuo browser (Google, Apple o Mozilla). Puoi disattivarle in qualsiasi momento dal profilo e il dato viene cancellato. Chi non le attiva riceve gli stessi promemoria via email.</p>'),
   card('<h3>Valutazioni e suggerimenti</h3><p>Dopo alcuni giorni d’uso ti chiediamo, in modo facoltativo, una valutazione da 1 a 5 con un commento. I referenti vedono voto e commento senza il tuo nome. Nella pagina «Suggerisci una modifica» puoi scrivere un suggerimento, una critica o un’idea: arriva nella bacheca dei referenti con il tuo pseudonimo, a meno che tu scelga l’invio anonimo. Anche i suggerimenti anonimi restano collegati al tuo account nel database, solo per limitarne l’abuso; i referenti non lo vedono. Non scrivere dati personali tuoi o di altri nel testo. Conserviamo valutazioni e suggerimenti per un anno, poi vengono cancellati; le copie in bacheca si eliminano dopo 90 giorni.</p>'),
   card('<h3>Condivisione facoltativa</h3><p>La card dei progressi o dei trofei si crea sul tuo dispositivo. Contiene il traguardo scelto o il tuo livello e gli XP, con l’avatar selezionato. È priva di nome, email, diario e storico delle presenze. Sei tu a scegliere dove inviarla. Quando usi un’app esterna si applica l’informativa di quell’app.</p>')
  ],'two'))+
@@ -808,6 +809,36 @@ async function journalCard(){
   return failCard(e);
  }
 }
+/* ---- notifiche push ---- */
+const pushSupported=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+const keyBytes=text=>Uint8Array.from(atob(text.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(text.length/4)*4,'=')),c=>c.charCodeAt(0));
+async function pushOn(){
+ if(!pushSupported()||Notification.permission!=='granted')return false;
+ try{return !!await (await navigator.serviceWorker.ready).pushManager.getSubscription();}catch{return false;}
+}
+const iosNotInstalled=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)&&!(navigator.standalone||matchMedia('(display-mode: standalone)').matches);
+async function pushCard(){
+ if(iosNotInstalled())return card('<h3>Notifiche sul telefono</h3><p class="muted">Su iPhone funzionano dopo aver aggiunto il sito alla schermata Home: in Safari tocca Condividi → «Aggiungi alla schermata Home», poi apri CCA SIEMMU da lì.</p>');
+ if(!pushSupported())return card('<h3>Notifiche sul telefono</h3><p class="muted">Questo browser non supporta le notifiche. Continuerai a ricevere i promemoria via email.</p>');
+ const on=await pushOn();
+ return card(`<h3>Notifiche sul telefono</h3><p>${on?'Sono attive su questo dispositivo: il promemoria «Sei ancora in sede?» arriva qui, senza email.':'Attivale per ricevere i promemoria direttamente sul telefono, senza email. Puoi disattivarle quando vuoi.'}</p>${btn(on?'Disattiva le notifiche':'Attiva le notifiche','push-toggle','',{secondary:on})}`);
+}
+async function togglePush(){
+ const reg=await navigator.serviceWorker.ready;
+ const current=await reg.pushManager.getSubscription();
+ if(current&&Notification.permission==='granted'){
+  await api('/push/subscribe',{method:'DELETE',body:{endpoint:current.endpoint}}).catch(()=>{});
+  await current.unsubscribe();
+  return 'Notifiche disattivate su questo dispositivo.';
+ }
+ if(await Notification.requestPermission()!=='granted')throw Object.assign(new Error('Per attivarle devi consentire le notifiche nel browser.'),{status:0});
+ const {publicKey}=await api('/push/key');
+ const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:keyBytes(publicKey)});
+ await api('/push/subscribe',{method:'POST',body:sub.toJSON()});
+ return 'Notifiche attivate su questo dispositivo.';
+}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
 async function profilo(){
  if(!S.me)return needLogin();
  const [prog,types,journal,streak]=await Promise.all([api('/my/progress').catch(()=>({counts:{}})),api('/chore-types').catch(()=>({types:[]})),journalCard(),getStreaks()]);
@@ -827,6 +858,7 @@ async function profilo(){
   card(`<h3>${esc(S.me.fullName||S.me.pseudonym)}</h3><p>${esc(S.me.email)}</p><p>${badge(isOrganizer()?'Referente':'Socio')}</p>${btn('Esci','logout','',{secondary:true})}`),
   form('changepw','<h3>Cambia password</h3>'+field('current','Password attuale','password','required autocomplete="current-password"')+field('next','Nuova password (almeno 10 caratteri)','password','required minlength="10" autocomplete="new-password"'),'Cambia password')
  ],'two')+'</details>')+
+ section('Notifiche',await pushCard())+
  section('Personalizza il profilo',card(`<details class="disclosure"><summary>Cambia avatar e colore</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`))+
  section('Preferenze',card(`<label class="sound-setting"><input type="checkbox" id="sound-toggle" ${pref.get('sound','off')==='on'?'checked':''}> Suoni dei pulsanti</label><p class="muted">Breve suono pixel quando usi un pulsante o un link. La scelta vale su questo browser.</p>`))+
  mu('profilo',{streak});
@@ -1289,6 +1321,7 @@ main.addEventListener('input',event=>{
  status.textContent=shown===0?'Nessun socio trovato.':shown===1?'1 socio trovato.':`${shown} soci trovati.`;
 });
 const actions={
+ async 'push-toggle'(){let msg='';if(await run(async()=>{msg=await togglePush();},null))say(msg);},
  'mission-category'(id){missionCategory=id;missionPage=0;refreshMissionChoices();},
  'mission-page'(id){missionPage=Math.max(0,missionPage+(id==='next'?1:-1));refreshMissionChoices();},
  async 'assignment-take'(id){const ok=await run(()=>api('/my/assignments',{method:'POST',body:{typeId:id}}),'Missione presa in carico.');if(ok){const next=document.getElementById('mission-running');next?.focus({preventScroll:true});next?.scrollIntoView({block:'start'});}},

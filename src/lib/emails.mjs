@@ -61,7 +61,7 @@ export const reminderEmail = (name, {activity, when}) => layout({
 export const stillInsideEmail = (name, {since}) => layout({
  subject: 'Sei ancora in sede? · CCA SIEMMU', title: 'Sei ancora in sede?',
  intro: `Ciao ${name}, hai registrato l’ingresso alle ${since}, più di due ore fa. Se sei già uscito, ricordati di registrare l’uscita: così le ore e le statistiche restano giuste.`,
- button: 'Apri CCA SIEMMU', url: `${SITE}/#home`, note: 'Se sei ancora in sede, non devi fare niente: ti scriviamo una sola volta per ogni ingresso.'
+ button: 'Apri CCA SIEMMU', url: `${SITE}/#home`, note: 'Ti scriviamo una sola volta per ogni ingresso. Se entro un’ora non risulta l’uscita, la registriamo noi all’orario di fine delle due ore.'
 });
 
 export const weeklyEmail = (name, lines) => layout({

@@ -122,4 +122,23 @@ ins('a','OUT',T+20000);ins('a','IN',T+20100);
 await jobs.sendStillInsideReminders(env,(T+20100+7300)*1000);
 assert.equal(query("SELECT COUNT(*) AS n FROM push_subscriptions",[],'first').n,0);  // dispositivo scaduto rimosso
 globalThis.fetch=realFetch;
+
+// Uscita automatica: un'ora dopo il promemoria, registrata alla fine delle due ore, solo se il promemoria è partito.
+globalThis.fetch=async()=>new Response('{}',{status:200});
+query("INSERT INTO members (id,email,pseudonym,role,status) VALUES ('e','e@example.test','Quinta','participant','approved'),('f','f@example.test','Sesta','participant','approved')");
+query("DELETE FROM reminders_sent WHERE kind='sede'");   // si riparte da zero: i promemoria delle prove precedenti non contano
+const T2=T+50000;
+ins('e','IN',T2);ins('f','IN',T2);
+assert.equal(await jobs.sendStillInsideReminders(env,(T2+7300)*1000),2);
+query("DELETE FROM reminders_sent WHERE kind='sede' AND member_id='f'");           // f: promemoria mai partito
+assert.equal(await jobs.autoCheckouts(env,(T2+7300+1800)*1000),0);                  // troppo presto
+assert.equal(await jobs.autoCheckouts(env,(T2+7300+3700)*1000),1);                  // e: uscita automatica
+const out=query("SELECT direction,at,recorded_by,source FROM accessi WHERE member_id='e' ORDER BY at DESC,id DESC LIMIT 1",[],'first');
+assert.equal(out.direction,'OUT');assert.equal(out.at,T2+7200);assert.equal(out.recorded_by,null);
+assert.equal(query("SELECT COUNT(*) AS n FROM notifications WHERE member_id='e' AND title='Uscita registrata in automatico'",[],'first').n,1);
+assert.equal(await jobs.autoCheckouts(env,(T2+7300+7200)*1000),0);                  // una volta sola
+assert.equal(query("SELECT direction FROM accessi WHERE member_id='f' ORDER BY at DESC,id DESC LIMIT 1",[],'first').direction,'IN'); // f senza promemoria resta dentro
+ins('e','IN',T2+20000);                                                              // rientro: niente uscita automatica senza nuovo promemoria
+assert.equal(await jobs.autoCheckouts(env,(T2+20000+7300+3700)*1000),0);
+globalThis.fetch=realFetch;
 console.log('OK: promemoria «sei ancora in sede?» dopo due ore, una volta per ingresso, solo per chi è ancora dentro.');

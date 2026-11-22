@@ -1,6 +1,7 @@
 // Lavori pianificati (Cron Trigger giornaliero): promemoria delle attività e riepilogo settimanale ai referenti.
 import {notify} from './lib/notify.mjs';
 import {sendPush} from './lib/webpush.mjs';
+import {recordAccess} from './routes/accessi.mjs';
 import {layout, mailMember, reminderEmail, stillInsideEmail, weeklyEmail, SITE} from './lib/emails.mjs';
 import {romeDay, romeWeekday} from './lib/time.mjs';
 
@@ -100,20 +101,45 @@ export async function sendStillInsideReminders(env, nowMs = Date.now()) {
    AND a.id = (SELECT id FROM accessi WHERE member_id = a.member_id ORDER BY at DESC, id DESC LIMIT 1)`).bind(now - STILL_INSIDE_AFTER, now - STILL_INSIDE_UNTIL).all();
  let sent = 0;
  for (const r of results) {
-  const res = await db.prepare(`INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id) VALUES ('sede', ?, ?)`).bind(String(r.id), r.memberId).run();
+  const res = await db.prepare(`INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id, sent_at) VALUES ('sede', ?, ?, ?)`).bind(String(r.id), r.memberId, now).run();
   if (!res.meta.changes) continue;
   sent++;
-  await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita con il QR o chiedi a un referente.`});
+  await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita con il QR o chiedi a un referente: se entro un'ora non la registri, lo facciamo noi.`});
   // Notifica sul telefono per chi l'ha attivata; l'email solo per gli altri.
-  const pushed = await sendPush(env, db, r.memberId, {title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita.`, url: '/#home'});
+  const pushed = await sendPush(env, db, r.memberId, {title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita: tra un'ora lo facciamo noi.`, url: '/#home'});
   if (!pushed) await mailMember(env, db, r.memberId, name => stillInsideEmail(name, {since: hourMinute(r.at)}));
  }
  return sent;
 }
 
+const AUTO_OUT_AFTER_REMINDER = 3600; // se un'ora dopo il promemoria l'ingresso è ancora aperto, l'uscita si registra da sé
+
+// Uscita automatica: scatta solo dopo un promemoria già mandato e solo se l'ultimo movimento è ancora quell'ingresso.
+// Si registra all'orario in cui sono finite le due ore (non all'orario di chiusura) e senza «registrato da» (recorded_by vuoto).
+export async function autoCheckouts(env, nowMs = Date.now()) {
+ const db = env.DB;
+ const now = Math.floor(nowMs / 1000);
+ const {results} = await db.prepare(`SELECT a.id, a.member_id AS memberId, a.at FROM reminders_sent r
+  JOIN accessi a ON a.id = CAST(r.ref AS INTEGER) AND a.member_id = r.member_id
+  WHERE r.kind = 'sede' AND r.sent_at <= ? AND r.sent_at > ? AND a.direction = 'IN'
+   AND a.id = (SELECT id FROM accessi WHERE member_id = a.member_id ORDER BY at DESC, id DESC LIMIT 1)`).bind(now - AUTO_OUT_AFTER_REMINDER, now - 86400).all();
+ let done = 0;
+ for (const r of results) {
+  const outAt = r.at + STILL_INSIDE_AFTER;
+  try {
+   await recordAccess(db, {memberId: r.memberId, direction: 'OUT', at: outAt, source: 'pannello', recordedBy: null});
+  } catch { continue; }
+  done++;
+  const text = `Non hai risposto al promemoria, quindi abbiamo registrato la tua uscita alle ${hourMinute(outAt)} (due ore dopo l'ingresso). Se sei rimasto in sede più a lungo, chiedi a un referente di correggere.`;
+  await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: 'Uscita registrata in automatico', body: text});
+  await sendPush(env, db, r.memberId, {title: 'Uscita registrata in automatico', body: `Abbiamo registrato la tua uscita alle ${hourMinute(outAt)}.`, url: '/#home'});
+ }
+ return done;
+}
+
 // Cron ogni 15 minuti.
 export async function runFrequent(env, nowMs = Date.now()) {
- return {stillInside: await sendStillInsideReminders(env, nowMs)};
+ return {stillInside: await sendStillInsideReminders(env, nowMs), autoOut: await autoCheckouts(env, nowMs)};
 }
 
 export async function runDaily(env, nowMs = Date.now()) {

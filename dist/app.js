@@ -817,7 +817,7 @@ async function pushCard(){
  if(iosNotInstalled())return card('<h3>Notifiche sul telefono</h3><p class="muted">Su iPhone funzionano dopo aver aggiunto il sito alla schermata Home: in Safari tocca Condividi → «Aggiungi alla schermata Home», poi apri CCA SIEMMU da lì.</p>');
  if(!pushSupported())return card('<h3>Notifiche sul telefono</h3><p class="muted">Questo browser non supporta le notifiche. Continuerai a ricevere i promemoria via email.</p>');
  const on=await pushOn();
- return card(`<h3>Notifiche sul telefono</h3><p>${on?'Sono attive su questo dispositivo: il promemoria «Sei ancora in sede?» arriva qui, senza email.':'Attivale per ricevere i promemoria direttamente sul telefono, senza email. Puoi disattivarle quando vuoi.'}</p>${btn(on?'Disattiva le notifiche':'Attiva le notifiche','push-toggle','',{secondary:on})}`);
+ return card(`<h3>Notifiche sul telefono</h3><p>${on?'Sono attive su questo dispositivo: il promemoria «Sei ancora in sede?» arriva qui, senza email.':'Vuoi ricevere notifiche dall’app? Attivale e ricevi 1 Tumazzu in regalo (una sola volta). I promemoria arrivano direttamente sul telefono, senza email, e puoi disattivarle quando vuoi.'}</p>${btn(on?'Disattiva le notifiche':'Attiva le notifiche','push-toggle','',{secondary:on})}`);
 }
 async function togglePush(){
  const reg=await navigator.serviceWorker.ready;
@@ -830,8 +830,9 @@ async function togglePush(){
  if(await Notification.requestPermission()!=='granted')throw Object.assign(new Error('Per attivarle devi consentire le notifiche nel browser.'),{status:0});
  const {publicKey}=await api('/push/key');
  const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:keyBytes(publicKey)});
- await api('/push/subscribe',{method:'POST',body:sub.toJSON()});
- return 'Notifiche attivate su questo dispositivo.';
+ const done=await api('/push/subscribe',{method:'POST',body:sub.toJSON()});
+ if(done.reward)await refreshTotals();
+ return done.reward?'Notifiche attivate! Ti abbiamo regalato 1 Tumazzu.':'Notifiche attivate su questo dispositivo.';
 }
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 

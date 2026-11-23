@@ -2,6 +2,7 @@
 // Il codice nel QR è un segreto che i referenti possono rigenerare; l'uscita non richiede il codice.
 import {fail, json, readJson} from '../lib/http.mjs';
 import {lastAccess, recordAccess} from './accessi.mjs';
+import {announceStudyRoom} from './aula.mjs';
 import {checkTrophies} from '../lib/trophies.mjs';
 
 const STALE_SECONDS = 16 * 3600;
@@ -48,7 +49,7 @@ export async function checkin({request, env, db, member}) {
  if (body.code !== undefined && !same(typeof body.code === 'string' ? body.code : '', await currentCode(db))) fail(403, 'Codice non valido o cambiato: scansiona il QR aggiornato all’ingresso.');
  if(body.direction==='IN'){const state=await myState(db,member.id,now);if(state.inside)return json({access:{direction:'IN',at:state.since}});}
  const result = await recordAccess(db, {memberId: member.id, direction: body.direction==='IN'?'IN':undefined, at: now, source: 'pannello', recordedBy: member.id});
- if (result.direction === 'IN') await checkTrophies(env, db, member.id);
+ if (result.direction === 'IN') { await checkTrophies(env, db, member.id); await announceStudyRoom(env, db, member.id, now); }
  return json({access: result});
 }
 

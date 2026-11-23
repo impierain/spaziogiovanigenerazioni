@@ -53,11 +53,4 @@ export function integer(value, label, {min = 0, max = 1000000, optional = false}
  return number;
 }
 
-// Normalizza l'UID di una tessera NFC: esadecimale maiuscolo senza separatori.
-export function uid(value) {
- const clean = text(value, 'Codice tessera', {max: 40}).replace(/[-: ]/g, '').toUpperCase();
- if (!/^[0-9A-F]{8,20}$/.test(clean) || clean.length % 2) fail(400, 'Codice tessera non valido.');
- return clean;
-}
-
 export const tumazzi = n => `${n} ${Number(n) === 1 ? 'Tumuzzu' : 'Tumazzi'}`;

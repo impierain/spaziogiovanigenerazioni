@@ -96,5 +96,21 @@ assert.equal(await announceStudyRoom(env,db,'b',at(24,15,5)),1);   // il giorno 
 assert.equal(await announceStudyRoom(env,db,'a',at(28,15,5)),0);    // sabato: niente
 assert.equal(await announceStudyRoom(env,db,'a',at(25,19,30)),0);   // 20:30 a Roma: chiuso
 assert.equal(await announceStudyRoom(env,db,'a',at(25,18,59)),2);   // 19:59: ancora aperto
+// Chi era già dentro prima delle 15:30: l'avviso parte alle 16:00 dal cron
+const {announceIfAlreadyOpen}=await import(pathToFileURL(join(root,'src/routes/aula.mjs')));
+const ms=(d,h,m)=>Date.UTC(2026,10,d,h,m);
+query("INSERT INTO accessi(member_id,direction,at,source) VALUES('a','IN',?,'pannello')",[at(26,13,0)]);   // 14:00 a Roma, giovedì
+pushes=[];
+assert.equal(await announceIfAlreadyOpen(env,ms(26,14,45)),0);   // 15:45: non ancora le 16
+assert.equal(await announceIfAlreadyOpen(env,ms(26,15,0)),2);    // 16:00: avvisa b e c
+assert.equal(await announceIfAlreadyOpen(env,ms(26,15,15)),0);   // una volta sola
+assert.equal(pushes.length,2);
+assert.equal(await announceIfAlreadyOpen(env,ms(28,15,0)),0);    // sabato
+// se l'ingresso delle 15:40 ha già fatto scattare l'avviso, il cron non lo ripete
+query("INSERT INTO accessi(member_id,direction,at,source) VALUES('d','IN',?,'pannello')",[at(27,14,40)]);
+assert.equal(await announceStudyRoom(env,db,'d',at(27,14,40)),2);
+assert.equal(await announceIfAlreadyOpen(env,ms(27,15,0)),0);
+// nessuno dentro alle 16: niente
+assert.equal(await announceIfAlreadyOpen(env,ms(30,15,0)),0);
 globalThis.fetch=origFetch;
 console.log('OK: avviso «aula studio aperta»: primo ingresso, finestra 15:30–20:00, lun–ven, una volta al giorno, solo a chi lo vuole.');

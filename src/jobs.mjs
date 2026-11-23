@@ -2,6 +2,7 @@
 import {notify} from './lib/notify.mjs';
 import {sendPush} from './lib/webpush.mjs';
 import {recordAccess} from './routes/accessi.mjs';
+import {announceIfAlreadyOpen} from './routes/aula.mjs';
 import {mailMember, stillInsideEmail} from './lib/emails.mjs';
 import {romeDay, romeWeekday} from './lib/time.mjs';
 
@@ -132,7 +133,7 @@ export async function autoCheckouts(env, nowMs = Date.now()) {
 
 // Cron ogni 15 minuti.
 export async function runFrequent(env, nowMs = Date.now()) {
- return {stillInside: await sendStillInsideReminders(env, nowMs), autoOut: await autoCheckouts(env, nowMs)};
+ return {stillInside: await sendStillInsideReminders(env, nowMs), autoOut: await autoCheckouts(env, nowMs), aula: await announceIfAlreadyOpen(env, nowMs)};
 }
 
 export async function runDaily(env, nowMs = Date.now()) {

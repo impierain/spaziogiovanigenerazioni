@@ -69,12 +69,14 @@ export async function encryptPayload(plaintext, p256dh, auth) {
 }
 
 // Manda la notifica a tutti i dispositivi attivi del socio. Ritorna quanti l'hanno ricevuta.
-export async function sendPush(env, db, memberId, {title, body, url = '/'}) {
+export async function sendPush(env, db, memberId, {title, body, url = '/', ...extra}, {endpoint = null} = {}) {
  try {
-  const {results} = await db.prepare('SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE member_id = ?').bind(memberId).all();
+  const {results} = endpoint
+   ? await db.prepare('SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE member_id = ? AND endpoint = ?').bind(memberId, endpoint).all()
+   : await db.prepare('SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE member_id = ?').bind(memberId).all();
   if (!results.length) return 0;
   const keys = await vapidKeys(env, db);
-  const payload = JSON.stringify({title, body, url});
+  const payload = JSON.stringify({title, body, url, ...extra});
   let delivered = 0;
   for (const sub of results) {
    try {

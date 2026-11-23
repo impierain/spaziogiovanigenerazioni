@@ -24,10 +24,11 @@ export async function subscribe({request, env, db, member}) {
  const sameOwner = before?.member_id === member.id;
  await db.prepare(`INSERT INTO push_subscriptions (member_id, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)
   ON CONFLICT(endpoint) DO UPDATE SET member_id = excluded.member_id, p256dh = excluded.p256dh, auth = excluded.auth,
-   confirmed_at = CASE WHEN push_subscriptions.member_id = excluded.member_id THEN push_subscriptions.confirmed_at ELSE NULL END`).bind(member.id, endpoint, p256dh, auth).run();
+   confirmed_at = CASE WHEN push_subscriptions.member_id = excluded.member_id THEN push_subscriptions.confirmed_at ELSE NULL END,
+   received_at = CASE WHEN push_subscriptions.member_id = excluded.member_id THEN push_subscriptions.received_at ELSE NULL END`).bind(member.id, endpoint, p256dh, auth).run();
  if (sameOwner && before.confirmed_at) return json({ok: true, confirmed: true, testSent: false}, 201);
  const {token, hash} = await newToken();
- await db.prepare('UPDATE push_subscriptions SET test_token = ? WHERE endpoint = ?').bind(hash, endpoint).run();
+ await db.prepare('UPDATE push_subscriptions SET test_token = ?, received_at = NULL WHERE endpoint = ?').bind(hash, endpoint).run();
  const delivered = await sendPush(env, db, member.id, {
   title: 'Notifiche attive ✓', body: 'Ti è arrivata la notifica? Toccala per confermare e ricevere 1 Tumazzu.',
   url: `/#notifiche-ok/${token}`, token, tag: 'cca-prova', actions: [{action: 'ok', title: 'Sì, tutto ok'}]
@@ -36,12 +37,29 @@ export async function subscribe({request, env, db, member}) {
 }
 
 // Il socio conferma di aver ricevuto la notifica di prova: il codice è nel messaggio cifrato, quindi prova la ricezione.
-export async function confirm({request, db, member}) {
+// Il service worker del dispositivo lo chiama appena la notifica arriva, senza bisogno di toccarla.
+export async function received({request, db, member}) {
  const body = await readJson(request);
  const token = typeof body.token === 'string' ? body.token : '';
- if (!/^[0-9a-f]{64}$/.test(token)) fail(400, 'Conferma non valida.');
- const row = await db.prepare('SELECT id FROM push_subscriptions WHERE member_id = ? AND test_token = ?').bind(member.id, await tokenHash(token)).first();
- if (!row) fail(400, 'Conferma non valida o già usata. Dal profilo puoi rimandare la notifica di prova.');
+ if (!/^[0-9a-f]{64}$/.test(token)) fail(400, 'Codice non valido.');
+ const res = await db.prepare('UPDATE push_subscriptions SET received_at = COALESCE(received_at, unixepoch()) WHERE member_id = ? AND test_token = ?').bind(member.id, await tokenHash(token)).run();
+ if (!res.meta.changes) fail(400, 'Codice non valido.');
+ return json({ok: true});
+}
+
+// Conferma: col codice contenuto nella notifica (tocco o pulsante) oppure, se il dispositivo ha già segnalato la ricezione,
+// col pulsante «Sì, mi è arrivata» nell'app. In ogni caso serve la prova che il messaggio è davvero arrivato al dispositivo.
+export async function confirm({request, db, member}) {
+ const body = await readJson(request);
+ const token = typeof body.token === 'string' && body.token ? body.token : '';
+ let row;
+ if (token) {
+  if (!/^[0-9a-f]{64}$/.test(token)) fail(400, 'Conferma non valida.');
+  row = await db.prepare('SELECT id FROM push_subscriptions WHERE member_id = ? AND test_token = ?').bind(member.id, await tokenHash(token)).first();
+ } else {
+  row = await db.prepare('SELECT id FROM push_subscriptions WHERE member_id = ? AND received_at IS NOT NULL AND confirmed_at IS NULL ORDER BY received_at DESC LIMIT 1').bind(member.id).first();
+ }
+ if (!row) fail(400, token ? 'Conferma non valida o già usata. Dal profilo puoi rimandare la notifica di prova.' : 'La notifica di prova non risulta ancora arrivata su questo dispositivo. Rimandala dal profilo.');
  await db.prepare('UPDATE push_subscriptions SET confirmed_at = unixepoch(), test_token = NULL WHERE id = ?').bind(row.id).run();
  // Un Tumazzu una sola volta in assoluto (chiave: socio + tipo + riferimento).
  const gift = await db.prepare("INSERT OR IGNORE INTO joy_rewards (member_id, kind, ref, cheese, payload) VALUES (?, 'micro', 'notifiche', 1, ?)")
@@ -57,14 +75,14 @@ export async function unsubscribe({request, db, member}) {
 
 // Stato per il socio: ha almeno un dispositivo verificato?
 export async function status({db, member}) {
- const row = await db.prepare('SELECT COUNT(*) AS devices, COALESCE(SUM(confirmed_at IS NOT NULL), 0) AS confirmed FROM push_subscriptions WHERE member_id = ?').bind(member.id).first();
- return json({devices: row.devices, confirmed: row.confirmed > 0});
+ const row = await db.prepare('SELECT COUNT(*) AS devices, COALESCE(SUM(confirmed_at IS NOT NULL), 0) AS confirmed, COALESCE(SUM(received_at IS NOT NULL AND confirmed_at IS NULL), 0) AS received FROM push_subscriptions WHERE member_id = ?').bind(member.id).first();
+ return json({devices: row.devices, confirmed: row.confirmed > 0, received: row.received > 0});
 }
 
 // Per i referenti: chi ha attivato le notifiche e se la prova è andata a buon fine (mai l'identificativo del dispositivo).
 export async function overview({db}) {
- const {results} = await db.prepare(`SELECT m.pseudonym AS name, COUNT(*) AS devices, SUM(p.confirmed_at IS NOT NULL) AS confirmed, MIN(p.created_at) AS since
+ const {results} = await db.prepare(`SELECT m.pseudonym AS name, COUNT(*) AS devices, SUM(p.confirmed_at IS NOT NULL) AS confirmed, SUM(p.received_at IS NOT NULL) AS received, MIN(p.created_at) AS since
   FROM push_subscriptions p JOIN members m ON m.id = p.member_id WHERE m.status = 'approved' GROUP BY m.id ORDER BY since`).all();
  const total = await db.prepare("SELECT COUNT(*) AS n FROM members WHERE status = 'approved'").first();
- return json({members: results.map(r => ({name: r.name, devices: r.devices, verified: r.confirmed > 0, since: r.since})), totalMembers: total.n});
+ return json({members: results.map(r => ({name: r.name, devices: r.devices, verified: r.confirmed > 0, received: r.received > 0, since: r.since})), totalMembers: total.n});
 }

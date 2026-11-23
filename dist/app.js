@@ -825,11 +825,12 @@ async function pushCard(){
  if(iosNotInstalled())return card('<h3>Notifiche sul telefono</h3><p class="muted">Su iPhone funzionano dopo aver aggiunto il sito alla schermata Home: in Safari tocca Condividi → «Aggiungi alla schermata Home», poi apri CCA SIEMMU da lì.</p>');
  if(!pushSupported())return card('<h3>Notifiche sul telefono</h3><p class="muted">Questo browser non supporta le notifiche. Continuerai a ricevere i promemoria via email.</p>');
  const on=await pushOn();
- const st=on?await api('/push/status').catch(()=>({confirmed:true})):{confirmed:false};
+ const st=on?await api('/push/status').catch(()=>({confirmed:true})):{confirmed:false,received:false};
  const text=!on?'Vuoi ricevere notifiche dall’app? Attivale: ti mandiamo una notifica di prova e, se ti arriva e la confermi, ricevi 1 Tumazzu in regalo (una sola volta). Poi i promemoria arrivano sul telefono, senza email, e puoi disattivarle quando vuoi.'
   :st.confirmed?'Sono attive e verificate su questo dispositivo: il promemoria «Sei ancora in sede?» arriva qui, senza email.'
-  :'Sono attive, ma non ancora verificate. Cerca la notifica di prova: toccala (o premi «Sì, tutto ok») per confermare e ricevere 1 Tumazzu. Non l’hai ricevuta? Rimandala.';
- return card(`<h3>Notifiche sul telefono</h3><p>${text}</p>${btn(on?'Disattiva le notifiche':'Attiva le notifiche','push-toggle','',{secondary:on})}${on&&!st.confirmed?' '+btn('Rimanda la notifica di prova','push-resend'):''}`);
+  :st.received?'La notifica di prova è arrivata sul tuo dispositivo! Conferma per ricevere 1 Tumazzu.'
+  :'Sono attive, ma la notifica di prova non risulta ancora arrivata. Se la vedi sul telefono toccala; altrimenti rimandala.';
+ return card(`<h3>Notifiche sul telefono</h3><p>${text}</p>${btn(on?'Disattiva le notifiche':'Attiva le notifiche','push-toggle','',{secondary:on})}${on&&st.received&&!st.confirmed?' '+btn('Sì, mi è arrivata','push-confirm'):''}${on&&!st.confirmed&&!st.received?' '+btn('Rimanda la notifica di prova','push-resend'):''}`);
 }
 async function togglePush(){
  const reg=await navigator.serviceWorker.ready;
@@ -845,7 +846,10 @@ async function togglePush(){
  const done=await api('/push/subscribe',{method:'POST',body:sub.toJSON()});
  return done.testSent?'Notifiche attivate. Ti abbiamo mandato una notifica di prova: toccala per ricevere 1 Tumazzu.':done.confirmed?'Notifiche attivate su questo dispositivo.':'Notifiche attivate, ma la prova non è partita. Riprova con «Rimanda la notifica di prova».';
 }
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register('sw.js').catch(()=>{});
+ navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='cca-open'){try{const h=new URL(e.data.url).hash;if(h)location.hash=h;else render();}catch{}}});
+}
 
 async function profilo(){
  if(!S.me)return needLogin();
@@ -1028,7 +1032,7 @@ async function notifiche(){
  const fb=isOrganizer()?await api('/feedback/summary').catch(()=>null):null;
  const fbCard=fb&&fb.count?section('Valutazioni della webapp',card(`<p><strong>${String(fb.average).replace('.',',')}</strong> su 5 · ${fb.count} ${fb.count===1?'valutazione':'valutazioni'} (anonime)</p>${[5,4,3,2,1].map(n=>bar(fb.spread[n]||0,Math.max(...Object.values(fb.spread)),n+' stelle')).join('')}${fb.comments.length?`<h3>Ultimi commenti</h3><ul>${fb.comments.map(c=>`<li>${c.rating}/5 · ${esc(c.message)} <span class="muted">${dateShort(c.createdAt)}</span></li>`).join('')}</ul>`:''}`)):'';
  const pv=isOrganizer()?await api('/push/overview').catch(()=>null):null;
- const pvCard=pv?section('Notifiche sul telefono',card(`<p><strong>${pv.members.length}</strong> su ${pv.totalMembers} soci hanno attivato le notifiche (${pv.members.filter(m=>m.verified).length} verificate).</p>${pv.members.length?`<ul>${pv.members.map(m=>`<li>${esc(m.name)} · ${m.verified?'✓ verificata':'in attesa di conferma'}${m.devices>1?' · '+m.devices+' dispositivi':''}</li>`).join('')}</ul>`:''}`)):'';
+ const pvCard=pv?section('Notifiche sul telefono',card(`<p><strong>${pv.members.length}</strong> su ${pv.totalMembers} soci hanno attivato le notifiche (${pv.members.filter(m=>m.verified).length} verificate).</p>${pv.members.length?`<ul>${pv.members.map(m=>`<li>${esc(m.name)} · ${m.verified?'✓ verificata':m.received?'notifica ricevuta, manca la conferma':'in attesa di conferma'}${m.devices>1?' · '+m.devices+' dispositivi':''}</li>`).join('')}</ul>`:''}`)):'';
  const html=title('Notifiche','Esiti delle operazioni e avvisi che ti riguardano.')+fbCard+pvCard+
   section('Bacheca',items.length?`<div class="notice-list">${items.map(n=>`<article class="card notice-item notice-${n.level} ${n.read?'':'notice-unread'}"><span class="notice-icon" aria-hidden="true">${levelIcon[n.level]||'ℹ'}</span><div><h3>${esc(missionWording(n.title))}${n.read?'':' '+badge('Nuova')}</h3>${n.body?`<p>${esc(missionWording(n.body))}</p>`:''}<p class="muted">${dateShort(n.createdAt)}</p></div></article>`).join('')}</div>`:card('<p>Nessuna notifica per ora. Qui compariranno gli esiti degli invii email e gli avvisi su prenotazioni e missioni.</p>'));
  if(d.unread){api('/notifications/read',{method:'POST',body:{all:true}}).then(r=>{S.unread=r.unread??0;renderChrome('');}).catch(()=>{});}
@@ -1300,6 +1304,7 @@ const actions={
  async 'approve-access'(id){
   await run(async()=>{const d=await api('/members/'+encodeURIComponent(id)+'/approve',{method:'POST',body:{}});S.invite=d.invite;emailBanner(d.invite,'il nuovo socio');},null);
  },
+ async 'push-confirm'(){let msg='';if(await run(async()=>{const d=await api('/push/confirm',{method:'POST',body:{}});if(d.reward)await refreshTotals();msg=d.reward?'Notifiche verificate! Ti abbiamo regalato 1 Tumazzu.':'Notifiche verificate.';},null))say(msg);},
  async 'push-resend'(){let msg='';if(await run(async()=>{const sub=await (await navigator.serviceWorker.ready).pushManager.getSubscription();if(!sub)throw new Error('Attiva prima le notifiche.');const d=await api('/push/subscribe',{method:'POST',body:sub.toJSON()});msg=d.testSent?'Notifica di prova inviata: toccala per confermare.':'Non siamo riusciti a mandare la prova. Riprova tra poco.';},null))say(msg);},
  async 'push-toggle'(){let msg='';if(await run(async()=>{msg=await togglePush();},null))say(msg);},
  'mission-category'(id){missionCategory=id;missionPage=0;refreshMissionChoices();},

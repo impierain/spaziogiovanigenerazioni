@@ -1,4 +1,7 @@
-// Riceve le notifiche push e apre l'app quando si tocca la notifica.
+// Riceve le notifiche push e apre l'app quando si tocca la notifica. Versione 3.
+// La nuova versione si attiva subito, senza aspettare che tutte le finestre dell'app si chiudano (su iPhone restano aperte a lungo).
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
 const post = (path, token) => fetch(path, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({token})});
 self.addEventListener('push', event => {
  let data = {};

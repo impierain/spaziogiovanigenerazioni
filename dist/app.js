@@ -847,7 +847,7 @@ async function togglePush(){
  return done.testSent?'Notifiche attivate. Ti abbiamo mandato una notifica di prova: toccala per ricevere 1 Tumazzu.':done.confirmed?'Notifiche attivate su questo dispositivo.':'Notifiche attivate, ma la prova non è partita. Riprova con «Rimanda la notifica di prova».';
 }
 if('serviceWorker' in navigator){
- navigator.serviceWorker.register('sw.js').catch(()=>{});
+ navigator.serviceWorker.register('sw.js').then(reg=>reg.update()).catch(()=>{});
  navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='cca-open'){try{const h=new URL(e.data.url).hash;if(h)location.hash=h;else render();}catch{}}});
 }
 

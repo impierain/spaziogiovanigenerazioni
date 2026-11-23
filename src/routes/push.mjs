@@ -19,7 +19,10 @@ export async function subscribe({request, db, member}) {
  if (count.n >= MAX_DEVICES) fail(409, `Puoi attivare le notifiche su al massimo ${MAX_DEVICES} dispositivi.`);
  await db.prepare(`INSERT INTO push_subscriptions (member_id, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)
   ON CONFLICT(endpoint) DO UPDATE SET member_id = excluded.member_id, p256dh = excluded.p256dh, auth = excluded.auth`).bind(member.id, endpoint, p256dh, auth).run();
- return json({ok: true}, 201);
+ // Un Tumazzu in regalo la prima volta che il socio attiva le notifiche (una sola volta in assoluto: la chiave è socio+tipo+riferimento).
+ const gift = await db.prepare("INSERT OR IGNORE INTO joy_rewards (member_id, kind, ref, cheese, payload) VALUES (?, 'micro', 'notifiche', 1, ?)")
+  .bind(member.id, JSON.stringify({title: 'Notifiche attivate'})).run();
+ return json({ok: true, reward: gift.meta.changes > 0 ? {cheese: 1} : null}, 201);
 }
 
 export async function unsubscribe({request, db, member}) {

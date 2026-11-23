@@ -105,7 +105,12 @@ assert.equal(wp.allowedEndpoint('https://fcm.googleapis.com.evil.com/x'),false);
 sessions.a??=null;
 const subBody={endpoint:'https://fcm.googleapis.com/fcm/send/xyz',keys:{p256dh:wp.b64u.enc(ua.getPublicKey()),auth:wp.b64u.enc(authSecret)}};
 assert.equal((await call('/push/subscribe',{actor:'a',method:'POST',body:{endpoint:'https://evil.example.com/x',keys:subBody.keys}})).status,400);
-assert.equal((await call('/push/subscribe',{actor:'a',method:'POST',body:subBody})).status,201);
+const first=await call('/push/subscribe',{actor:'a',method:'POST',body:subBody});
+assert.equal(first.status,201);assert.deepEqual((await first.json()).reward,{cheese:1});
+assert.equal(query("SELECT cheese FROM joy_rewards WHERE member_id='a' AND kind='micro' AND ref='notifiche'",[],'first').cheese,1);
+const again=await call('/push/subscribe',{actor:'a',method:'POST',body:subBody});            // riattivare non rida il premio
+assert.equal(again.status,201);assert.equal((await again.json()).reward,null);
+assert.equal(query("SELECT COUNT(*) AS n FROM joy_rewards WHERE member_id='a' AND ref='notifiche'",[],'first').n,1);
 assert.equal(typeof (await (await call('/push/key',{actor:'a'})).json()).publicKey,'string');
 let pushed=0,mails=0;const realFetch=globalThis.fetch;
 globalThis.fetch=async(url,opt)=>{if(String(url).includes('fcm.googleapis.com')){pushed++;return new Response('',{status:201});}mails++;return new Response('{}',{status:200});};

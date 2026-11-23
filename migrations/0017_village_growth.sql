@@ -1,0 +1,4 @@
+CREATE TABLE village_growth (
+ key TEXT PRIMARY KEY,
+ stage INTEGER NOT NULL DEFAULT 0 CHECK(stage BETWEEN 0 AND 3)
+);

@@ -1,0 +1,36 @@
+/* Un feedback breve per il gesto; la festa resta ai completamenti. */
+body.cozy-theme:not(.tv) :is(button,a.btn,summary,.shortcut,.world-place-card,.profile-wallet){transition:scale 90ms ease,box-shadow 90ms ease,background-color 0s}
+body.cozy-theme:not(.tv) :is(button,a.btn,summary,.shortcut,.world-place-card,.profile-wallet):is(:active,.joy-pressed){scale:.96;box-shadow:0 0 transparent;background-color:var(--cozy-soft)}
+body.cozy-theme:not(.tv) .card.joy-pressed{scale:.98;box-shadow:0 0 transparent}
+body.cozy-theme:not(.tv) button.world-pin.joy-pressed{scale:.96;background:transparent}
+body.cozy-theme .opening .opening-time.is-scheduled,body.cozy-theme .opening .live,body.cozy-theme .week .day-open{background:var(--cozy-soft);color:var(--cozy-text);border-color:var(--cozy-line)}
+body.cozy-theme .week [aria-current=date]{outline:2px solid var(--cozy-text);outline-offset:1px}
+body.cozy-theme .live-on .live-dot{background:#A5B865}
+.joy-interest-picks,.joy-decoration-picks,.joy-dialog-actions{display:flex;flex-wrap:wrap;gap:10px}
+.joy-interest-picks button{font-size:.85rem}
+.joy-weekly{align-content:start}.joy-weekly .weekly-torch{width:48px;height:48px;color:#E6B94D}.joy-weekly small{color:var(--cozy-muted);line-height:1.45}
+.joy-torch-on>span::after{content:'';width:10px;height:14px;position:absolute;top:-9px;right:4px;background:#E6B94D;clip-path:polygon(50% 0,100% 65%,75% 100%,25% 100%,0 65%);filter:drop-shadow(0 0 4px #FFE79C)}
+.joy-merchant{display:flex;gap:18px;align-items:center}.joy-merchant-sprite{width:96px;height:96px;flex:none}.joy-merchant>div{min-width:0}
+.joy-frame{outline:6px solid #E6B94D;outline-offset:2px;filter:drop-shadow(0 0 1px #29251F)}
+.joy-frame-ulivo{outline-color:#7C8B47}.joy-frame-grano{outline-color:#E6B94D}.joy-frame-stelle{outline-color:#8D7A9F}
+body.cozy-theme :is(.joy-greeting,.joy-bundle-dialog){max-width:min(600px,calc(100vw - 32px));max-height:85dvh;overflow:auto;padding:28px;border:3px solid var(--cozy-border);box-shadow:5px 5px var(--cozy-shadow);background:var(--cozy-surface);color:var(--cozy-text);margin:auto}
+.joy-greeting::backdrop,.joy-bundle-dialog::backdrop{background:#101C22B3}.joy-greeting h2,.joy-bundle-dialog h2{margin-bottom:20px}.joy-greeting p,.joy-bundle-dialog p{margin:14px 0 20px}.joy-greeting .mascot{margin:14px 0}.joy-greeting .mascot p{margin:0}.joy-bundle-dialog>button{margin-top:16px}
+.joy-rummage{height:190px;position:relative;display:grid;place-items:center;overflow:hidden}.joy-rummage>.pixel-icon:first-child{width:160px;height:160px;animation:joy-rummage 450ms steps(4) infinite}.joy-rummage>.pixel-icon:last-child{width:64px;height:64px;position:absolute;bottom:0;right:25%}
+.journey-bar{position:fixed;left:214px;bottom:20px;width:min(440px,calc(100vw - 560px));z-index:5;display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;padding:10px 14px;text-decoration:none;border:2px solid var(--cozy-border);box-shadow:3px 3px var(--cozy-shadow);background:var(--cozy-surface);color:var(--cozy-text);font-size:14px;line-height:1.1}
+.journey-numbers{grid-column:1/-1;display:flex;gap:5px;align-items:baseline}.journey-numbers small{margin-left:auto;color:var(--cozy-muted)}.journey-track{height:12px;align-self:center;background:var(--cozy-soft);border:1px solid var(--cozy-line);overflow:hidden}.journey-track i{display:block;height:100%;background:#7C8B47;transform-origin:left}.journey-next{font-size:12px;line-height:1.2;color:var(--cozy-muted)}
+.joy-particles{position:fixed;inset:0;z-index:1001;pointer-events:none;overflow:hidden}.joy-particles i{position:absolute;left:var(--x);top:8vh;width:9px;height:9px;animation:joy-confetti 1100ms steps(14) var(--delay) both;box-shadow:1px 1px #29251F}
+.joy-stamp{pointer-events:none;position:fixed;left:50%;top:35%;z-index:1002;font:clamp(30px,5vw,60px)/1 var(--font-display);max-width:90vw;text-align:center;border:5px double #BF694C;color:#BF694C;background:var(--cozy-surface);padding:16px 24px;box-shadow:5px 5px #101C2233;animation:joy-stamp 1s cubic-bezier(.2,.85,.4,1) both;transform:translate(-50%,-50%) rotate(-8deg)}
+.joy-coin{position:fixed;left:0;top:0;width:32px;height:32px;z-index:1003;pointer-events:none;image-rendering:pixelated}.joy-coin svg{width:32px;height:32px}.joy-wallet-glow{animation:joy-wallet 1s steps(6)}
+html[data-joy-effects=on] .journey-track i{animation:joy-bar 550ms cubic-bezier(.16,1.4,.35,1)}
+@keyframes joy-confetti{0%{opacity:0;transform:translate(0,-50px) rotate(0)}10%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(var(--drift),75vh) rotate(180deg)}}
+@keyframes joy-stamp{0%{opacity:0;translate:0 -70px;scale:1.6}22%{opacity:1;translate:0 4px;scale:.94}35%,75%{opacity:1;translate:0;scale:1}100%{opacity:0;scale:1}}
+@keyframes joy-wallet{25%,65%{outline:3px solid #E6B94D;outline-offset:4px}45%,100%{outline-color:transparent}}
+@keyframes joy-bar{0%{scale:.88 1}65%{scale:1.035 1}100%{scale:1 1}}
+@keyframes joy-rummage{0%,100%{translate:0 0;rotate:0deg}25%{translate:-12px 20px;rotate:-6deg}75%{translate:12px 24px;rotate:6deg}}
+@media(max-width:999px){.journey-bar{bottom:calc(72px + env(safe-area-inset-bottom));left:12px;width:calc(100% - 24px);padding:8px 12px;min-height:54px}.has-journey .world-menu-launch,.has-journey.cozy-theme .mu-launch{bottom:calc(142px + env(safe-area-inset-bottom))!important}.has-journey.cozy-theme main{padding-bottom:245px}.joy-merchant{gap:12px}.joy-merchant-sprite{width:64px;height:64px}}
+@media(min-width:1000px){.has-journey.cozy-theme main{padding-bottom:120px}}
+html[data-joy-effects=off] :is(.joy-rummage>.pixel-icon,.joy-wallet-glow,.journey-track i){animation:none}html[data-joy-effects=off] .joy-pressed{scale:1}
+@media(prefers-reduced-motion:reduce){body.cozy-theme :is(button,a.btn,summary,.shortcut,.world-place-card,.profile-wallet){transition:none}body.cozy-theme :is(:active,.joy-pressed){scale:1!important}.joy-particles,.joy-stamp,.joy-coin,.confetti{display:none!important}.joy-wallet-glow,.joy-rummage>.pixel-icon,.journey-track i{animation:none!important}}
+.joy-rummage.is-revealed>.pixel-icon{animation:none;position:static;width:128px;height:128px}.joy-prize-portrait{width:128px;height:128px}.joy-prize-portrait .avatar{width:128px;height:128px}
+html[data-joy-effects=off] .confetti{display:none}html[data-joy-effects=off] :is(.wheel-spinning .wheel-disc,.wheel-result,.reward-celebration .pixel-icon){animation:none!important}
+.weekly-torch.is-unlit{filter:grayscale(1);opacity:.65}

@@ -66,7 +66,7 @@ export async function presenti({db}) {
 
 // Stato pubblico della sede: aperta quando c'è almeno una persona dentro.
 // Il numero di persone lo vedono solo i soci con l'accesso.
-export const OPENING = {days: 'Da lunedì a venerdì', hours: '16:00–20:00'};
+export const OPENING = {days: 'Da mercoledì a domenica · novembre 2026', hours: '16:00–20:00'};
 export async function status({db, member}) {
  const since = Math.floor(Date.now() / 1000) - STALE_SECONDS;
  const row = await db.prepare(`SELECT COUNT(*) AS n FROM members m

@@ -1,6 +1,6 @@
+import {microAward} from './joy.mjs';
 import {tumazzi, fail, json, readJson, text, integer} from '../lib/http.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
-import {mailMember, proposalEmail} from '../lib/emails.mjs';
 import {checkTrophies} from '../lib/trophies.mjs';
 
 const MAX_OPEN = 3;
@@ -35,7 +35,8 @@ export async function vote({request, env, db, member, params}) {
  if (p.member_id === member.id) fail(409, 'Non puoi votare una tua proposta.');
  if (body.on === false) await db.prepare('DELETE FROM proposal_votes WHERE proposal_id = ? AND member_id = ?').bind(p.id, member.id).run();
  else {
-  await db.prepare('INSERT OR IGNORE INTO proposal_votes (proposal_id, member_id) VALUES (?, ?)').bind(p.id, member.id).run();
+  const inserted=await db.prepare('INSERT OR IGNORE INTO proposal_votes (proposal_id, member_id) VALUES (?, ?)').bind(p.id, member.id).run();
+  if(inserted.meta.changes)await microAward(db,member.id,'voto');
   await checkTrophies(env, db, member.id);
  }
  const votes = (await db.prepare('SELECT COUNT(*) AS n FROM proposal_votes WHERE proposal_id = ?').bind(p.id).first()).n;
@@ -67,7 +68,6 @@ export async function schedule({request, env, db, member, params}) {
  }
  await notify(db, p.member_id, {kind: 'proposta', level: 'ok', title: `La tua proposta va in calendario: ${p.title}`, body: `+${PROPOSAL_XP} XP e +${tumazzi(PROPOSAL_CHEESE)}.`});
  const when = new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(startsAt * 1000));
- await mailMember(env, db, p.member_id, name => proposalEmail(name, {proposal: p.title, when}));
  await checkTrophies(env, db, p.member_id);
  return json({activityId}, 201);
 }

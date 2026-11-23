@@ -1,67 +1,14 @@
 /* CCA SIEMMU · sito collegato alle API del Worker */
-const navIcons = {
- home:'<path d="M1 7h2V5h2V3h2V1h2v2h2v2h2v2h2v3h-2v5H3v-5H1z"/><path fill="#B30016" d="M3 8h2V6h2V4h2v2h2v2h2v1H3z"/><path fill="#FFFFFF" d="M5 10h6v3H9v-2H7v2H5z"/>',
- calendario:'<path d="M4 1h2v2h4V1h2v2h3v12H1V3h3z"/><path fill="#B30016" d="M3 5h10v2H3z"/><path fill="#FFFFFF" d="M3 8h10v5H3z"/><path fill="#6f440f" d="M4 9h2v1H4z M7 9h2v1H7z M10 9h2v1h-2z M4 11h2v1H4z M7 11h2v1H7z"/>',
- missioni:'<path d="M4 1h8v2h3v5h-2v2h-3v2h3v3H3v-3h3v-2H3V8H1V3h3z"/><path fill="#b9954b" d="M5 3h6v5h-1v1H6V8H5z M7 10h2v2H7z M5 13h6v1H5z"/><path fill="#FFFFFF" d="M7 4h2v2H7z M3 5h1v2H3z M12 5h1v2h-1z"/>',
- comunita:'<path d="M2 2h4v1h1v4H6v1h4V7H9V3h1V2h4v1h1v4h-1v2h1v1h1v4H0v-4h1V9h1V7H1V3h1z"/><path fill="#bdd9da" d="M3 4h2v2H3z M2 10h4v2H2z"/><path fill="#B30016" d="M11 4h2v2h-2z M10 10h4v2h-4z"/>',
- referenti:'<path d="M5 1h6v2h3v9h-2v2H4v-2H2V3h3z"/><path fill="#bdd9da" d="M4 5h8v6h-2v2H6v-2H4z"/><path fill="#B30016" d="M6 3h4v2H6z"/><path d="M6 7h2v2h2v1H6z M9 6h2v2H9z"/>',
- profilo:'<path d="M2 1h12v1h1v12h-1v1H2v-1H1V2h1z"/><path fill="#FFFFFF" d="M3 3h10v10H3z"/><path d="M6 4h4v4H6z M5 9h6v1h1v2H4v-2h1z"/><path fill="#b9954b" d="M7 5h2v2H7z"/><path fill="#B30016" d="M6 10h4v1H6z"/>'
-};
-const shapes = {
- sun:'<path fill="#6d3519" d="M7 0h2v3H7z M7 13h2v3H7z M0 7h3v2H0z M13 7h3v2h-3z M2 2h2v2H2z M12 2h2v2h-2z M2 12h2v2H2z M12 12h2v2h-2z M6 4h4v1h1v1h1v4h-1v1h-1v1H6v-1H5v-1H4V6h1V5h1z"/><path fill="#ffb32f" d="M6 5h4v1h1v4h-1v1H6v-1H5V6h1z"/><path fill="#fff1aa" d="M6 6h3v1H7v2H6z"/>',
- moon:'<path fill="#292039" d="M7 1h3v2H8v2H7v4h1v2h2v1h3v-1h2v2h-2v2H6v-1H4v-2H3V9H2V6h1V4h2V2h2z"/><path fill="#e7ad42" d="M6 3h1v2H6v4h1v2h1v1h2v1h3v1H6v-1H5v-2H4V6h1V4h1z"/><path fill="#fff0ae" d="M5 6h1v5H5z M6 11h1v2H6z"/><path fill="#bd7a33" d="M11 3h1v1h1v1h-1v1h-1V5h-1V4h1z"/>',
- crown:'<path fill="#382332" d="M1 3h3v2h2V3h1V1h2v2h1v2h2V3h3v4h-1v5h-1v2H3v-2H2V7H1z"/><path fill="#eaa334" d="M2 4h1v2h3V5h1V3h2v2h1v1h3V4h1v3h-1v5H3V7H2z"/><path fill="#fff1a1" d="M4 8h1v2H4z M7 5h1v2H7z M4 11h8v1H4z"/><path fill="#bb3148" d="M7 8h2v2H7z M11 8h1v2h-1z"/>',
- book:'<path fill="#111111" d="M1 3h6v1h2V3h6v10H9v1H7v-1H1z"/><path fill="#eee7d9" d="M2 4h4v1h1v7H6v-1H2z M9 5h1V4h4v7h-4v1H9z"/><path fill="#5876df" d="M3 6h3v1H3z M3 8h3v1H3z M10 6h3v1h-3z M10 8h3v1h-3z"/>',
- camera:'<path fill="#111111" d="M1 5h3V3h7v2h4v9H1z"/><path fill="#eee7d9" d="M2 6h12v6H2z"/><path fill="#73528f" d="M6 6h5v1h1v4h-1v1H6v-1H5V7h1z"/><path fill="#9de2ff" d="M7 7h3v3H7z"/>',
- plant:'<path fill="#111111" d="M1 2h5v2h2v2h1V4h2V2h4v6h-2v2h-3v2h3v3H3v-3h4v-2H4V8H1z"/><path fill="#a8ef69" d="M2 3h3v2h2v4H5V7H2z M11 5h1V3h2v4h-2v2h-2V6h1z"/><path fill="#d37c4a" d="M4 13h8v1H4z"/>',
- heart:'<path fill="#111111" d="M1 3h5v1h4V3h5v6h-2v2h-2v2H9v2H7v-2H5v-2H3V9H1z"/><path fill="#B30016" d="M2 4h3v1h2v1h2V5h2V4h3v4h-2v2h-2v2H8v1H7v-1H6v-2H4V8H2z"/>',
- pin:'<path fill="#111111" d="M3 2h9v2h2v9h-2v2H3v-2H1V4h2z"/><path fill="#B30016" d="M4 4h7v1h1v7h-1v1H4v-1H3V5h1z"/><path fill="#FFFFFF" d="M7 5h2v2h2v2H9v2H7V9H5V7h2z"/>',
- bag:'<path fill="#111111" d="M5 1h6v2h1v3h2v9H2V6h2V3h1z"/><path fill="#b9954b" d="M6 3h4v3H9V4H7v2H6z M4 8h8v5H4z"/><path fill="#FFFFFF" d="M7 9h2v2H7z"/>',
- shirt:'<path fill="#111111" d="M5 1h6v1h2v2h2v5h-3v6H4V9H1V4h2V2h2z"/><path fill="#bdd9da" d="M3 5h2V3h1v2h4V3h1v2h2v2h-3v6H6V7H3z"/><path fill="#6f440f" d="M7 7h2v2H7z"/>',
- star:'<path fill="#111111" d="M7 1h2v3h2v2h4v3h-3v3h1v3h-3v-2H6v2H3v-3h1V9H1V6h4V4h2z"/><path fill="#FFD400" d="M7 3h2v3h2v1h3v1h-3v4H9v-1H7v1H5V8H2V7h3V6h2z"/>'
-};
-const spriteDetails={
- book:'<path fill="#d7bba3" d="M2 10h4v1H2z M10 10h4v1h-4z"/><path fill="#d0a053" d="M7 5h1v8H7z"/>',
- camera:'<path fill="#e8faff" d="M7 7h2v1H8v1H7z"/><path fill="#594268" d="M3 10h2v1H3z"/>',
- plant:'<path fill="#579554" d="M3 6h2v1H3z M11 7h2v1h-2z"/><path fill="#f6a45d" d="M4 13h5v1H4z"/>',
- heart:'<path fill="#ff827c" d="M3 5h2v1H4v1H3z"/><path fill="#780c31" d="M11 7h2v1h-2v2H9v1H8v1H7v-1h1v-1h1V9h2z"/>',
- star:'<path fill="#fff2a2" d="M7 4h1v3H7z M4 7h3v1H4z"/>',
- bag:'<path fill="#805737" d="M11 8h1v5H4v-1h7z"/>',
- shirt:'<path fill="#5983a5" d="M10 8h1v5H6v-1h4z"/>',
- pin:'<path fill="#f78072" d="M4 5h2v1H5v1H4z"/>'
-};
-const art = name=>`<div class="sprite-box"><svg class="sprite" viewBox="-2 -2 20 20" shape-rendering="crispEdges" aria-hidden="true"><path fill="#b9a88d" d="M2 15h12v1H2z"/>${shapes[name]}${spriteDetails[name]||''}<path fill="#FFFFFF" opacity=".6" d="M-1 0h1v1h-1z M16 3h1v1h-1z"/></svg></div>`;
-const avatarColors = {
- rosa:['Rosa fichidindia','#FFD400'],verde:['Verde salvia','#9abe7f'],blu:['Blu cielo','#699cff'],
- sole:['Giallo ginestra','#ffce39'],terracotta:['Terracotta','#dc7046'],viola:['Viola tramonto','#ad82ed'],
- ottanio:['Verde ottanio','#138f91'],crema:['Crema pietra','#FFFFFF'],rosso:['Rosso melograno','#e9435d'],
- bosco:['Verde bosco','#428357'],cobalto:['Blu cobalto','#3456c7'],prugna:['Prugna','#953c83'],
- arcobaleno:['Arcobaleno','linear-gradient(90deg,#ff697b 0 17%,#ffaf55 17% 34%,#f6df6c 34% 51%,#8bd294 51% 68%,#77bde9 68% 85%,#be9af0 85%)']
-};
-const animals = {
- mucca:{name:'Mucca',art:'<path fill="#b9954b" d="M4 2h2v3H4z M10 2h2v3h-2z"/><path fill="#111111" d="M2 4h4V3h4v1h4v4h-2v4H4V8H2z"/><path fill="#FFFFFF" d="M4 5h8v5H4z"/><path fill="#73584e" d="M4 5h3v3H4z"/><path fill="#111111" d="M6 6h1v2H6z M10 6h1v2h-1z"/><path fill="#ee99aa" d="M5 9h6v2H5z"/><path fill="#111111" d="M6 9h1v1H6z M9 9h1v1H9z"/>'},
- pecora:{name:'Pecora',art:'<path fill="#111111" d="M4 3h2V2h4v1h2v2h2v5h-2v2H4v-2H2V5h2z"/><path fill="#FFFFFF" d="M5 4h2V3h2v1h2v2h2v3h-2v2H5V9H3V6h2z"/><path fill="#7e6e80" d="M5 6h6v4H5z"/><path fill="#111111" d="M6 7h1v1H6z M9 7h1v1H9z M7 9h2v1H7z"/>'},
- gallina:{name:'Gallina',art:'<path fill="#111111" d="M7 2h4v2h1v2h3v3h-3v3H3v-2H2V6h3v1h1V4h1z"/><path fill="#B30016" d="M8 3h2v2H8z M10 9h1v2h-1z"/><path fill="#FFFFFF" d="M3 7h2v2h2V5h4v6H4V9H3z"/><path fill="#ffbd37" d="M11 7h3v1h-3z"/><path fill="#111111" d="M9 6h1v1H9z"/>'},
- asino:{name:'Asino',art:'<path fill="#111111" d="M3 1h3v3h4V1h3v5h-1v6H4V6H3z"/><path fill="#a8a0ad" d="M4 2h1v4h6V2h1v3h-1v6H5V5H4z"/><path fill="#FFFFFF" d="M5 9h6v2H5z"/><path fill="#111111" d="M6 6h1v2H6z M9 6h1v2H9z M7 9h2v1H7z"/>'},
- maiale:{name:'Maiale',art:'<path fill="#111111" d="M2 3h4v2h4V3h4v5h-1v3h-2v1H5v-1H3V8H2z"/><path fill="#ee99aa" d="M3 4h2v2h6V4h2v3h-1v3h-2v1H6v-1H4V7H3z"/><path fill="#cf6789" d="M6 8h4v2H6z"/><path fill="#111111" d="M5 6h1v1H5z M10 6h1v1h-1z M6 9h1v1H6z M9 9h1v1H9z"/>'},
- capra:{name:'Capra',art:'<path fill="#111111" d="M4 1h2v3h4V1h2v4h3v3h-3v2h-2v2H6v-2H4V8H1V5h3z"/><path fill="#b9954b" d="M5 2h1v3H5z M10 2h1v3h-1z"/><path fill="#FFFFFF" d="M2 6h3V5h6v1h3v1h-3v2H9v2H7V9H5V7H2z"/><path fill="#111111" d="M6 6h1v1H6z M9 6h1v1H9z M7 8h2v1H7z"/>'},
- ricotta:{name:'Vascello di ricotta',art:'<path fill="#111111" d="M6 2h4v1h2v2h2v4h-1v2h-2v1H5v-1H3V9H2V5h2V3h2z"/><path fill="#FFFFFF" d="M6 3h4v1h2v2h1v1H3V6h2V4h1z"/><path fill="#b9954b" d="M3 8h10v1h-1v2H4V9H3z"/><path fill="#6f440f" d="M5 8h1v3H5z M8 8h1v3H8z M11 8h1v2h-1z"/>'},
- ficodindia:{name:'Pala di fico d’India',art:'<path fill="#111111" d="M6 2h4v1h2v3h1v3h-2v2H9v1H6v-1H4V9H3V6h1V3h2z"/><path fill="#69a650" d="M6 3h4v1h1v3h1v1h-2v2H8v1H6v-1H5V8H4V6h1V4h1z"/><path fill="#FFFFFF" d="M6 5h1v1H6z M9 6h1v1H9z M6 8h1v1H6z"/><path fill="#B30016" d="M9 1h2v2H9z"/>'},
- torre:{name:'Torre in rovina',art:'<path fill="#111111" d="M3 2h3v2h2v1h2V3h3v9H3z"/><path fill="#b9954b" d="M4 3h1v2h3v1h3V4h1v7H4z"/><path fill="#FFFFFF" d="M4 6h3v1H4z M9 7h3v1H9z"/><path fill="#111111" d="M7 7h2v4H7z M5 9h1v1H5z M10 9h1v1h-1z"/>'},
- serpente:{name:'Serpente',art:'<path fill="#111111" d="M9 2h4v1h2v5h-3v4H2V9h2V7h5z"/><path fill="#69a650" d="M10 3h3v1h1v3h-3v4H3v-1h2V8h5z"/><path fill="#B30016" d="M4 10h6v1H4z"/><path fill="#111111" d="M12 4h1v1h-1z"/><path fill="#B30016" d="M13 7h3v1h-3z"/>'},
- cane:{name:'Cane',art:'<path fill="#111111" d="M2 3h4v1h4V3h4v7h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 4h2v5H3z M11 4h2v5h-2z"/><path fill="#FFFFFF" d="M5 5h6v6H5z"/><path fill="#111111" d="M6 6h1v1H6z M9 6h1v1H9z M7 8h2v1H7z"/><path fill="#ee99aa" d="M7 10h2v1H7z"/>'},
- civetta:{name:'Civetta',art:'<path fill="#111111" d="M2 2h3v2h6V2h3v8h-2v2H4v-2H2z"/><path fill="#b9954b" d="M3 3h1v2h8V3h1v6h-2v2H5V9H3z"/><path fill="#FFFFFF" d="M4 6h3v3H4z M9 6h3v3H9z"/><path fill="#111111" d="M5 7h1v1H5z M10 7h1v1h-1z"/><path fill="#B30016" d="M7 9h2v1H7z"/>'},
- leone:{name:'Leone rampante',art:'<path fill="#111111" d="M3 3h3V1h1v1h2V1h1v2h3v2h2v5h-2v2h-2v1H5v-1H3v-2H1V5h2z"/><path fill="#b96535" d="M4 4h8v1h2v4h-2v2h-2v1H6v-1H4V9H2V6h2z"/><path fill="#c6a55b" d="M6 5h4v1h2v3h-1v2H5V9H4V6h2z M6 3h4v1H6z"/><path fill="#111111" d="M5 7h2v1H5z M9 7h2v1H9z M7 9h2v1H7z"/><path fill="#ffe5aa" d="M6 10h4v1H6z"/>'}
-};
-const cheese='<path fill="#111111" d="M10 1h2v1h2v2h1v10H1V7h2V6h2V5h2V4h2V2h1z"/><path fill="#f4bf57" d="M10 3h2v1h1v2H5V5h2V4h3z"/><path fill="#ffd782" d="M3 8h10v4H3z"/><path fill="#a96a32" d="M5 9h2v2H5z M10 10h2v1h-2z"/>';
-function cowSprite(mood){
- const faces={
-  felice:'<path fill="#fff9ed" d="M5 6h7v3H5z"/><path fill="#2e2132" d="M5 8V7h1V6h1v1h1v1H7V7H6v1z M9 8V7h1V6h1v1h1v1h-1V7h-1v1z"/><path fill="#e7758e" d="M5 8h1v1H5z M11 8h1v1h-1z"/>',
-  triste:'<path fill="#fff9ed" d="M5 6h7v3H5z"/><path fill="#2e2132" d="M5 7h1V6h2v1H6v1H5z M9 6h2v1h1v1h-1V7H9z M7 11h2v1H7z"/><path fill="#739bc4" d="M11 8h1v2h-1z"/>',
-  festoso:'<path fill="#fff9ed" d="M5 6h7v3H5z"/><path fill="#99611d" d="M6 6h1v1h1v1H7v1H6V8H5V7h1z M10 6h1v1h1v1h-1v1h-1V8H9V7h1z"/>'
- };
- return animals.mucca.art+(faces[mood]||chibiFace('mucca'));
-}
+const scaledArt=(name,section='icone',size=32)=>`<g transform="scale(${16/size})">${window.CCAArt[section][name]||window.CCAArt.icone.star}</g>`;
+const navIcons=Object.fromEntries(['home','calendario','missioni','comunita','referenti','profilo'].map(id=>[id,scaledArt(id)]));
+const shapes=Object.fromEntries(Object.keys(window.CCAArt.icone).map(id=>[id,scaledArt(id)]));
+const art=name=>`<div class="sprite-box">${pixelIcon(shapes[name]||shapes.star,'sprite')}</div>`;
+const rainbowColors=['#DD9690','#E6B94D','#A5B865','#78B4C5','#8D7A9F','#82566E'];
+const avatarColors={"rosa": ["Rosa fichidindia", "#DD9690"], "verde": ["Verde salvia", "#A5B865"], "blu": ["Blu cielo", "#78B4C5"], "sole": ["Giallo ginestra", "#E6B94D"], "terracotta": ["Terracotta", "#BF694C"], "viola": ["Viola tramonto", "#8D7A9F"], "ottanio": ["Verde ottanio", "#4F9291"], "crema": ["Crema pietra", "#F1E7CA"], "rosso": ["Rosso melograno", "#AA4F4B"], "bosco": ["Verde bosco", "#4D6547"], "cobalto": ["Blu cobalto", "#526EA1"], "prugna": ["Prugna", "#82566E"]};
+avatarColors.arcobaleno=['Arcobaleno',`linear-gradient(90deg,${rainbowColors.map((c,i)=>`${c} ${i/6*100}% ${(i+1)/6*100}%`).join(',')})`];
+const animals=Object.fromEntries(Object.entries(window.CCAArt.avatars).map(([id,name])=>[id,{name,art:scaledArt(id,'avatar-v2',128)}]));
+const cheese=scaledArt('cheese');
+function cowSprite(mood){return scaledArt(Object.hasOwn(window.CCAArt.mu,mood)?mood:'normale','mu',64);}
 function cowMascot(mood,text,tips=[]){
  const all=[text,...tips.filter(t=>t&&t!==text)];
  return `<div class="mascot ${all.length>1?'talk':''}" ${all.length>1?`data-tips="${esc(JSON.stringify(all))}" data-i="0" tabindex="0" role="button" aria-label="Mù: tocca per un altro consiglio"`:''}>${pixelIcon(cowSprite(mood),'mu-sprite')}<div><strong>Mù</strong><p aria-live="polite">${esc(text)}</p></div></div>`;
@@ -72,10 +19,10 @@ const pixelIcon = (path,kind='')=>`<svg class="pixel-icon ${kind}" viewBox="0 0 
 const LEVELS=[['Latte',0],['Cagliata',60],['Primo sale',300],['Stagionato',800],['Gran riserva',1600]];
 const WEEKLY_CHEESE=12;
 const main=document.querySelector('main');
-const tumazzi=n=>`${n} ${Number(n)===1?'Tumuzzu':'Tumazzi'}`;
+const tumazzi=n=>`${n} ${Number(n)===1?'Tumazzu':'Tumazzi'}`;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const S={me:null,totals:{xp:0,cheese:0},invite:null,loaded:false,unread:0};
-const bellIcon=()=>pixelIcon('<path fill="currentColor" d="M7 1h2v2h3v2h1v6h2v2H1v-2h2V5h1V3h3zM6 14h4v2H6z"/>','bell-icon');
+const bellIcon=()=>pixelIcon(shapes.bell,'bell-icon');
 const pref={get(k,d){try{return localStorage.getItem('cca-'+k)??d;}catch{return d;}},set(k,v){try{localStorage.setItem('cca-'+k,v);}catch{}}};
 
 /* ---- rete ---- */
@@ -139,59 +86,20 @@ const activityDate=start=>Number.isFinite(Number(start))&&Number(start)>0?`<time
 const dateShort=sec=>fmt(sec,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const duration=min=>min>=60?`${Math.floor(min/60)} h ${min%60?String(min%60).padStart(2,'0')+' min':''}`.trim():`${min} min`;
 const statusText={pending:'In attesa',verified:'Verificata',rejected:'Respinta',confirmed:'Confermata',declined:'Rifiutata',cancelled:'Annullata',draft:'Bozza',published:'Pubblicata',approved:'Attivo',disabled:'Disattivato'};
-function chibiFace(species){
- const faces={
-  mucca:[6,6,10,6],pecora:[6,7,9,7],asino:[6,6,9,6],maiale:[5,6,10,6],
-  capra:[6,6,9,6],cane:[6,6,9,6],civetta:[5,7,10,7],leone:[5,7,9,7]
- };
- const eyes=faces[species];
- if(!eyes)return '';
- const [x,y,a,b]=eyes;
- return `<path fill="#111111" d="M${x-.5} ${y}h2v2h-2z M${a-.5} ${b}h2v2h-2z"/>
-  <path fill="#FFFFFF" d="M${x} ${y}h.5v.5h-.5z M${a} ${b}h.5v.5h-.5z"/>
-  <path fill="#e996a1" d="M${x-1} ${y+2}h1v.5h-1z M${a+1} ${b+2}h1v.5h-1z"/>`;
-}
-const avatarDetails={
- mucca:['#fff7ef','M10 11h2v2h-2z M18 13h2v2h-2z'],
- pecora:['#c6c4ea','M10 6h3v1h-3z M20 7h2v2h-2z M9 12h2v2H9z'],
- gallina:['#f5b16b','M9 16h4v1H9z M14 16h2v1h-2z'],
- asino:['#dfc8d6','M9 4h1v4H9z M23 4h1v4h-1z M13 18h2v1h-2z'],
- maiale:['#ffd0d5','M8 7h2v3H8z M24 7h2v3h-2z M14 13h4v1h-4z'],
- capra:['#cfb3e2','M12 16h2v1h-2z M20 16h2v1h-2z M15 20h2v2h-2z'],
- ricotta:['#e1cfaf','M13 8h4v1h-4z M11 10h2v1h-2z M19 11h3v1h-3z'],
- ficodindia:['#d7f17d','M12 10h1v3h-1z M11 11h3v1h-3z M18 14h3v1h-3z M19 13h1v3h-1z'],
- torre:['#d28e54','M9 12h3v1H9z M20 9h3v1h-3z M21 19h3v1h-3z'],
- serpente:['#f1db7f','M21 7h3v1h-3z M8 20h2v1H8z M15 18h2v1h-2z'],
- cane:['#f7c58f','M8 9h2v3H8z M24 9h2v3h-2z M14 15h4v1h-4z'],
- civetta:['#f8cc80','M8 9h3v1H8z M22 9h3v1h-3z M13 18h2v1h-2z M19 18h2v1h-2z'],
- leone:['#fff1b6','M12 8h2v2h-2z M19 8h2v2h-2z']
-};
-const avatar=(species=pref.get('species','mucca'),color=pref.get('color','rosa'))=>{
+const avatar=(species=S.me?.avatarSpecies,color=S.me?.avatarColor)=>{
  const key=Object.hasOwn(animals,species)?species:'mucca';
- const animal=animals[key];
- const accent=(Object.hasOwn(avatarColors,color)?avatarColors[color]:avatarColors.rosa)[1];
- const [highlight,detail]=avatarDetails[key];
- const colors=['#ff697b','#ffaf55','#f6df6c','#8bd294','#77bde9','#be9af0'];
- const backdrop=color==='arcobaleno'
-  ?colors.map((fill,i)=>`<path fill="${fill}" d="M${1+i*5} 1h5v30h-5z"/>`).join('')
-  :`<path fill="${accent}" d="M1 1h30v30H1z"/>`;
- return `<svg class="avatar" viewBox="0 0 32 32" shape-rendering="crispEdges" role="img" aria-label="Avatar pixel · ${animal.name}">
-  ${backdrop}<path fill="#38283b" opacity=".25" d="M1 28h30v3H1z M28 3h3v28h-3z"/><path fill="#fff2cf" opacity=".82" d="M9 3h14v2h4v4h2v12h-2v4H5v-4H3V9h2V5h4z"/>
-  <path fill="#937a8e" opacity=".45" d="M27 9h2v12h-2v3H6v-2h19v-2h2z"/>
-  <path fill="#fff9e8" d="M7 4h4v1H7z M5 6h2v2H5z M4 10h1v4H4z"/>
-  <path fill="#FFFFFF" d="M3 4h2v2H3z M27 5h2v2h-2z M3 21h1v1H3z M28 19h1v1h-1z"/>
-  <g transform="translate(0 1) scale(2)">${animal.art}${chibiFace(key)}</g><path fill="${highlight}" d="${detail}"/>
-  <path fill="#111111" d="M7 24h18v1h1v6H6v-6h1z"/><path fill="#FFFFFF" d="M8 25h16v5H8z"/>
-  <path fill="#111111" d="M10 26h3v1h-2v1h2v2h-3v-1h2v-1h-2z M15 26h3v1h-2v2h1v-1h1v2h-3z M20 26h3v1h-2v2h1v-1h1v2h-3z"/>
- </svg>`;
+ const colorKey=Object.hasOwn(avatarColors,color)?color:'rosa';
+ const backdrop=colorKey==='arcobaleno'?rainbowColors.map((fill,i)=>`<rect x="${4+i*128/6}" y="4" width="${128/6+1}" height="128" fill="${fill}"/>`).join(''):`<rect x="4" y="4" width="128" height="128" fill="${avatarColors[colorKey][1]}"/>`;
+ return `<svg class="avatar" viewBox="0 0 136 136" shape-rendering="crispEdges" role="img" aria-label="Avatar · ${esc(animals[key].name)}"><rect width="136" height="136" fill="#29251F"/>${backdrop}<g transform="translate(4 4)">${window.CCAArt['avatar-v2'][key]}</g></svg>`;
 };
+const trophyArt=t=>`<img class="cozy-trophy" src="art/trofei/${Object.hasOwn(window.CCAArt.trofei,t.id)?t.id:'cca'}.svg" width="128" height="128" alt="${esc(t.name)}" loading="lazy">`;
 function level(xp){
  const i=LEVELS.findLastIndex(([,t])=>xp>=t),[name,t]=LEVELS[i],next=LEVELS[i+1];
  return {number:i+1,name,xp,progress:xp-t,range:next?next[1]-t:1,left:next?next[1]-xp:0,top:!next};
 }
 function profileChip(){
  const l=level(S.totals.xp);
- return `<div class="row">${avatar()}<div><span class="eyebrow">LIVELLO ${l.number} / ${LEVELS.length}</span><div class="metric">${esc(S.me.pseudonym)}</div><p>${esc(l.name)}</p></div></div><progress value="${l.top?1:l.progress}" max="${l.range}" aria-label="Progresso del livello"></progress><p class="muted"><strong>${l.xp} XP permanenti</strong>${l.top?' · livello massimo':` · ${l.left} XP al livello ${l.number+1}`}</p>`;
+ return `<div class="row">${avatar()}<div><span class="eyebrow">LIVELLO ${l.number} / ${LEVELS.length}</span><div class="metric">${esc(S.me.pseudonym)}</div><p>Livello ${l.number}: ${esc(l.name)}</p></div></div><p class="level-explanation">Il tuo livello cresce con gli XP delle attività: dal Latte alla Gran riserva, come un formaggio che matura.</p><progress value="${l.top?1:l.progress}" max="${l.range}" aria-label="Progresso del livello"></progress><p class="muted"><strong>${l.xp} XP permanenti</strong>${l.top?' · livello massimo':` · ${l.left} XP al livello ${l.number+1}`}</p>`;
 }
 const loading=()=>`<p role="status">Stamu arrivannu…</p>`;
 const failCard=e=>card(`<h3>Qualcosa non ha funzionato</h3><p>${esc(e.message)}</p>${btn('Riprova','reload')}`);
@@ -206,7 +114,7 @@ const navDefs={
 function renderChrome(active){
  const ids=!S.me?['home','calendario','spazio','accedi']:isOrganizer()?['home','calendario','missioni','comunita','referenti','profilo']:['home','calendario','missioni','comunita','profilo'];
  const nav=document.querySelector('#nav');
- if(['banca','assemblea','proposte'].includes(active))active='comunita';
+ if(['banca','assemblea','proposte','mercato'].includes(active))active='comunita';
  nav.style.setProperty('--cols',ids.length);
  nav.innerHTML=ids.map(id=>`<a href="#${id}" ${active===id?'aria-current="page"':''}><span class="nav-icon-tile" aria-hidden="true">${pixelIcon(navIcons[navDefs[id][1]],'nav-icon')}</span>${navDefs[id][0]}</a>`).join('');
  const bell=document.querySelector('#notifications');
@@ -218,7 +126,7 @@ function renderChrome(active){
 }
 
 /* ---- orari, stato live, Mù, paese, albero, festa ---- */
-const clockIcon=()=>pixelIcon('<path fill="#111111" d="M5 1h6v1h2v1h1v2h1v6h-1v2h-1v1h-2v1H5v-1H3v-1H2v-2H1V5h1V3h1V2h2z"/><path fill="#FFFFFF" d="M5 2h6v1h2v2h1v6h-1v2h-2v1H5v-1H3v-2H2V5h1V3h2z"/><path fill="#111111" d="M7 4h2v4h3v2H7z"/>');
+const clockIcon=()=>pixelIcon(shapes.clock);
 const getStatus=async()=>{try{return await api('/status');}catch{return null;}};
 const getCommunity=async()=>{try{return (await api('/community')).metrics;}catch{return null;}};
 function liveLine(st){
@@ -226,10 +134,11 @@ function liveLine(st){
  const n=st.count,label=st.open?(n===undefined?'Aperto ora':`Aperto ora · ${n} ${n===1?'persona dentro':'persone dentro'}`):'Chiuso al momento';
  return `<span class="live ${st.open?'live-on':'live-off'}"><span class="live-dot" aria-hidden="true"></span>${label}</span>`;
 }
-const openingDetails=st=>`<p><strong>${esc(st?.days||'Da lunedì a venerdì')} · ${esc(st?.hours||'16:00–20:00')}</strong></p>`;
-const openDays=[['Mon','LU','Lunedì'],['Tue','MA','Martedì'],['Wed','ME','Mercoledì'],['Thu','GI','Giovedì'],['Fri','VE','Venerdì']];
-const openingCard=st=>card(`<span class="eyebrow">ORARI DELLA SEDE</span><div class="stat-figure opening-time" data-opening-time>${clockIcon()}<div><strong class="metric">${esc(st?.hours||'16:00–20:00')}</strong><span class="stat-label">${esc(st?.days||'Da lunedì a venerdì')}</span></div><small class="opening-now" hidden>In orario di apertura</small></div>
- <div class="week" aria-label="Giorni di apertura">${openDays.map(([key,short,name])=>`<span data-opening-day="${key}" aria-label="${name}">${short}</span>`).join('')}</div>
+const openingDetails=st=>`<p><strong>${esc(st?.days||'Da mercoledì a domenica · novembre 2026')} · ${esc(st?.hours||'16:00–20:00')}</strong></p>`;
+const weekDays=[['Mon','LU','Lunedì'],['Tue','MA','Martedì'],['Wed','ME','Mercoledì'],['Thu','GI','Giovedì'],['Fri','VE','Venerdì'],['Sat','SA','Sabato'],['Sun','DO','Domenica']];
+const openDays=[['Wed','ME','Mercoledì'],['Thu','GI','Giovedì'],['Fri','VE','Venerdì'],['Sat','SA','Sabato'],['Sun','DO','Domenica']];
+const openingCard=st=>card(`<span class="eyebrow">ORARI DELLA SEDE</span><div class="stat-figure opening-time" data-opening-time>${clockIcon()}<div><strong class="metric">${esc(st?.hours||'16:00–20:00')}</strong><span class="stat-label">${esc(st?.days||'Da mercoledì a domenica · novembre 2026')}</span></div><small class="opening-now" hidden>In orario di apertura</small></div>
+ <div class="week" aria-label="Giorni di apertura">${weekDays.map(([key,short,name])=>`<span class="${openDays.some(([day])=>day===key)?'day-open':'day-closed'}" data-opening-day="${key}" aria-label="${name}${openDays.some(([day])=>day===key)?'':', chiuso'}">${short}</span>`).join('')}</div>
  <div id="live" role="status" aria-live="polite">${liveLine(st)}</div>`,'opening');
 function updateDateIndicators(){
  const {weekday,hour}=romeNow();
@@ -255,16 +164,9 @@ setInterval(async()=>{
  const st=await getStatus(),again=main.querySelector('#live');
  if(st&&again&&again.innerHTML!==liveLine(st))again.innerHTML=liveLine(st);
 },30000);
-function streakMood(streak){
- if(!streak)return null;
- const {weekday,hour}=romeNow();
- if(openDays.some(([day])=>day===weekday)&&hour>=18&&hour<20&&streak.sede.current>=2&&!streak.sede.today)
-  return ['triste','Mi manca vederti in sede. Se oggi non riesci, ci vediamo un’altra volta!'];
- if(streak.sede.today&&streak.sede.current>=2)
-  return ['felice',`Che bello rivederti! ${streak.sede.current} giorni di apertura di fila in sede.`];
- if(streak.app.today&&streak.app.current>=2)
-  return ['felice',`Bentornato! Hai aperto l’app per ${streak.app.current} giorni di fila.`];
- return null;
+function streakMood(){
+ const w=window.CCAJoy?.getState()?.weekly;
+ return w?.active?['felice',`La Fiamma della Settimana è accesa: ${w.current} ${w.current===1?'settimana':'settimane'} di contributi insieme.`]:null;
 }
 function monthlyGoal(goal){
  if(!goal)return '';
@@ -342,24 +244,37 @@ setInterval(()=>{if(document.hidden)return;document.querySelectorAll('.mascot.ta
 document.addEventListener('click',e=>{const m=e.target.closest('.mascot.talk');if(m)nextTip(m);});
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.mascot.talk')){e.preventDefault();nextTip(e.target);}});
 
-const halfway=m=>m.value>=Math.ceil(m.target/2);
+const villageThresholds=[.25,.5,1];
+const villageStage=m=>m.growthStage??villageThresholds.filter(t=>(m.growthValue??m.value)>=Math.ceil((m.growthTarget??m.target)*t)).length;
+const villageCount=metrics=>(metrics||[]).reduce((total,m)=>total+villageStage(m),0);
+const villageKeys={giovani:'partecipazione',apertura:'aperture',attivita:'attivita',missioni:'cura'};
+const villageFocus={giovani:[102,105,160,94],apertura:[116,52,158,132],attivita:[216,89,128,82],missioni:[33,134,314,89]};
 function villageScene(metrics){
- const reached=(metrics||[]).filter(halfway);
- return `<div class="village"><img class="scenery-day" src="sicani.svg" alt="Paese pixel ispirato a Cammarata e San Giovanni Gemini"><img class="scenery-night" src="sicani-notte.svg" alt="" aria-hidden="true"><div aria-hidden="true">${reached.map(m=>pixelIcon(shapes[m.icon])).join('')}</div></div>`;
+ const stages=Object.fromEntries((metrics||[]).map(m=>[villageKeys[m.key],Math.min(3,Math.max(0,villageStage(m)))]));
+ const scene=theme=>window.CCAQuarter[theme]
+  .replace(/<g data-goal="([^"]+)" data-stage="(\d)"/g,(_,key,n)=>`<g${(stages[key]||0)>=Number(n)?'':' style="display:none"'}`)
+  .replace(/<g data-exact-goal="([^"]+)" data-exact-stage="(\d)"/g,(_,key,n)=>`<g${(stages[key]||0)===Number(n)?'':' style="display:none"'}`);
+ return `<div class="village cozy-village" role="img" aria-label="Quartiere della sede: ${villageCount(metrics)} trasformazioni permanenti su 12"><div class="quarter-layer quarter-layer-day">${scene('giorno')}</div><div class="quarter-layer quarter-layer-night">${scene('notte')}</div></div>`;
+}
+const villageLabels={giovani:'Persone e luoghi d’incontro',apertura:'Finestre e lampioni',attivita:'Libri, murales e piazza animata',missioni:'Alberi, fiori e orti'};
+function villageLegend(metrics){
+ return `<ul class="village-legend">${(metrics||[]).map(m=>`<li><strong>${villageLabels[m.key]||esc(m.label)}</strong><span>Stadio ${villageStage(m)}/3 · ${[0,25,50,100][villageStage(m)]}%</span><button type="button" class="secondary" data-village-focus="${esc(m.key)}">Guarda la zona ↗</button></li>`).join('')}</ul><button type="button" class="secondary" data-village-focus="all">Vista d’insieme</button>`;
 }
 function villageCard(metrics){
  if(!metrics)return '';
- const n=metrics.filter(halfway).length;
- return section('U paisi crisci',card(villageScene(metrics)+`<p>${n} ${n===1?"traguardo":"traguardi"} su ${metrics.length}. Il paese cresce con le presenze, le attività e le missioni fatte insieme.</p>${link('Guarda i numeri','paese')}`));
+ return section('U paisi crisci',card('<div class="cozy-growth-panel">'+villageScene(metrics)+`<p><strong>${villageCount(metrics)} trasformazioni su 12.</strong> Ogni obiettivo fa crescere il borgo al 25%, al 50% e al 100%. Gli elementi sbloccati restano.</p>`+villageLegend(metrics)+link('Guarda i numeri','paese')+'</div>'));
 }
 async function paese(){
  const metrics=await getCommunity();
  if(!metrics)throw new Error('I numeri del paese non sono disponibili.');
- const n=metrics.filter(halfway).length;
- return title('U paisi crisci','I numeri veri dello spazio. Nessun dato personale: contano solo i totali.')+
-  section('Il paese prende forma',card(villageScene(metrics)+`<p>${n} ${n===1?"traguardo":"traguardi"} su ${metrics.length}. Ogni traguardo (metà di un obiettivo) aggiunge un elemento al borgo.</p>`))+
-  section('Indicatori della comunità',grid(metrics.map(m=>card(`<span class="eyebrow">${m.target?'OBIETTIVO '+m.target:'IN CRESCITA'}</span><strong class="metric">${m.value}${m.target?' / '+m.target:''}</strong><h3>${esc(m.label)}</h3><p>${esc(m.note)}</p>${m.target?`<progress value="${Math.min(m.target,m.value)}" max="${m.target}" aria-label="${esc(m.label)}"></progress>`:''}`)),'two'))+
-  mu('paese',{reached:n,total:metrics.length});
+ const n=villageCount(metrics);
+ return title('U paisi crisci','Il borgo cresce con ciò che facciamo insieme. Ogni trasformazione sbloccata resta nel paesaggio.')+
+  section('Il paese prende forma',card('<div class="cozy-growth-panel">'+villageScene(metrics)+`<p><strong>${n} trasformazioni su 12.</strong> Tre stadi per ciascun obiettivo: 25%, 50% e 100%.</p>`+villageLegend(metrics)+'</div>'))+
+  section('Indicatori della comunità',grid(metrics.map(m=>{
+   const target=m.growthTarget??m.target;
+   const unit=m.key==='apertura'?' ore':'';
+   return card(`<span class="eyebrow">OBIETTIVO ${m.target}</span><strong class="metric">${m.value} / ${m.target}</strong><h3>${esc(m.label)}</h3><p>${esc(m.note)}</p><progress value="${Math.min(m.target,m.value)}" max="${m.target}" aria-label="${esc(m.label)}"></progress>${m.key==='apertura'?`<p>Aperture cumulative: <strong>${m.growthValue??0} / ${target} ore</strong></p>`:''}<p>Sblocchi a ${villageThresholds.map(t=>Math.ceil(target*t)+unit).join(' · ')}. Stadio permanente ${villageStage(m)}/3.</p>`);
+  }),'two'))+mu('paese',{reached:n,total:12});
 }
 
 const PATHS=[['studio','Studio e conoscenza','book'],['creativita','Creatività e cultura','camera'],['socialita','Socialità e comunità','heart'],['cittadinanza','Cittadinanza e partecipazione','star'],['solidarieta','Solidarietà e cura','plant']];
@@ -384,6 +299,7 @@ function checkLevelUp(){
  if(old&&n>old)celebrate(n);
 }
 function celebrate(n){
+ window.CCAJoy?.haptic(20);
  let box=document.querySelector('#celebration');
  if(!box){box=document.createElement('div');box.id='celebration';document.body.append(box);}
  const l=LEVELS[n-1];
@@ -400,7 +316,7 @@ function celebrate(n){
 
 
 /* ---- comunità: trofei, Putìa, banca del tempo, proposte ---- */
-const ARTS=[['star','Stella'],['pin','Spilla'],['book','Libro'],['bag','Borsa'],['shirt','Maglietta'],['heart','Cuore'],['plant','Pianta'],['camera','Foto']];
+const ARTS=[['star','Stella'],['pin','Spilla'],['book','Libro'],['bag','Borsa'],['shirt','Maglietta'],['heart','Cuore'],['plant','Pianta'],['camera','Foto'],['cup','Bicchiere']];
 const dayLong=sec=>fmt(sec,{day:'numeric',month:'long',year:'numeric'});
 function timeBankCard(){
  return card(`<div class="feature-heading">${pixelIcon(navIcons.comunita)}<h3>Banca del tempo</h3></div><p>Metti a disposizione un’ora di quello che sai fare o chiedi una mano a un’altra persona dello spazio.</p>${link('Apri la Banca del tempo','banca')}`,'time-bank');
@@ -424,8 +340,12 @@ async function trofei(){
  const {trophies}=await api('/trophies');
  const groups=[...new Set(trophies.map(t=>t.group))];
  const got=trophies.filter(t=>t.earned).length;
- return title('Trofei',`${got} su ${trophies.length} conquistati. Arrivano da soli quando i dati verificati raggiungono la soglia, e ti avvisiamo anche per email.`)+
- await teamTrophies()+(S.trophies=trophies,groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`<div class="${t.earned?'':'locked'}">${art(t.icon)}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<p>${badge('Bloccato')}</p><progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}${btn(t.earned?'Apri il trofeo':'Come si sblocca','trophy',t.id,{secondary:true})}${t.earned?btn('Condividi trofeo','share-trophy',t.id):''}`,t.earned?'green':'')),'three'))).join(''));
+ return title('Trofei',`${got} su ${trophies.length} conquistati. Arrivano da soli quando i dati verificati raggiungono la soglia, e li trovi qui nella webapp.`)+
+ `<div class="row">${link('Le mie statistiche','presenze')}</div>`+await teamTrophies()+(S.trophies=trophies,groups.map(g=>section(g,grid(trophies.filter(t=>t.group===g).map(t=>card(`<div class="${t.earned?'':'locked'}">${trophyArt(t)}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p>${t.earned?`<p>${badge('Ottenuto')} <span class="muted">${dayLong(t.awardedAt)}</span></p>`:`<p>${badge('Bloccato')}</p><progress value="${t.count}" max="${t.target}" aria-label="Progresso: ${esc(t.name)}"></progress><p class="muted">${t.count} / ${t.target}</p>`}${btn(t.earned?'Apri il trofeo':'Come si sblocca','trophy',t.id,{secondary:true})}${t.earned?btn('Condividi trofeo','share-trophy',t.id):''}`,t.earned?'green':'')),'three'))).join(''));
+}
+function mercato(){
+ if(!S.me)return needLogin();
+ return title('Il mercato','Oggetti da usare e riusare, tempo e competenze da mettere in comune.')+section('Scegli dove andare',grid([card(`${art('bag')}<h3>A Putìa</h3><p>Scopri le ricompense e scegli come usare i tuoi Tumazzi.</p>${link('Apri la Putìa','putia')}`),timeBankCard()],'two'));
 }
 async function putia(){
  if(!S.me)return needLogin();
@@ -434,12 +354,12 @@ async function putia(){
  const list=rw.rewards.filter(r=>r.active);
  return title('A Putìa','Il negozietto dello spazio: spendi i Tumazzi guadagnati in premi. Si ritirano in sede.')+
  section('Il mio saldo',card(`<div class="stat-figure">${pixelIcon(cheese)}<strong class="metric">${tumazzi(bal)}</strong></div><p class="muted">${rw.earned} guadagnati · ${rw.spent} spesi</p>`))+
- section('Premi',list.length?grid(list.map(r=>{
+ (window.CCAJoy?.bundlePanel()||'')+section('Premi',list.length?grid(list.map(r=>{
   const out=r.stock!==null&&r.stock<=0,poor=bal<r.cost;
   return card(`${art(r.art)}<h3>${esc(r.name)}</h3><p>${esc(r.description)}</p><p><strong>${tumazzi(r.cost)}</strong>${r.stock!==null?` · ${out?'esaurito':`${r.stock} disponibili`}`:''}</p>${out?badge('Esaurito'):poor?`<p class="muted">Ti mancano ${tumazzi(r.cost-bal)}.</p>`:btn('Riscatta','redeem',r.id)}`);
  }),'three'):card('<p>I referenti non hanno ancora messo premi in vetrina.</p>'))+
- section('I miei riscatti',rd.redemptions.length?card(`<ul class="list">${rd.redemptions.map(x=>`<li><strong>${esc(x.rewardName)}</strong> · ${x.cost} F. · ${dateShort(x.createdAt)} · ${badge(x.status==='pending'?'Da ritirare':x.status==='delivered'?'Consegnato':'Annullato')}${x.status==='pending'?` ${btn('Annulla','redeemCancel',x.id,{secondary:true})}`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora riscattato nulla.</p>'))+
- `<p class="muted">Ogni premio riscattato ti arriva anche via email, con le istruzioni per il ritiro.</p>`;
+ section('I miei riscatti',rd.redemptions.length?card(`<ul class="list">${rd.redemptions.map(x=>`<li><strong>${esc(x.rewardName)}</strong> · ${tumazzi(x.cost)} · ${dateShort(x.createdAt)} · ${badge(x.status==='pending'?'Da ritirare':x.status==='delivered'?'Consegnato':'Annullato')}${x.status==='pending'?` ${btn('Annulla','redeemCancel',x.id,{secondary:true})}`:''}</li>`).join('')}</ul>`):card('<p>Non hai ancora riscattato nulla.</p>'))+
+ `<p class="muted">I riscatti sono salvati qui e nelle notifiche. Ritira i premi in sede: nessuna email aggiuntiva.</p>`;
 }
 async function banca(){
  if(!S.me)return title('Banca del tempo','Un’ora del tuo tempo vale quanto un’ora di chiunque altro.')+
@@ -505,17 +425,91 @@ function firstVisit(st,details,upcoming){
   </div>
   <div class="row">${link('Apri il calendario','calendario')}</div>`,'visit-card'));
 }
+
+const worldPlaces=[
+ ['casa','Casa','Profilo personale','profilo',9.5,61],
+ ['sede','Sede della gilda','Orari e sede','spazio',51,57],
+ ['municipio','Municipio','Comunità','comunita',78,40],
+ ['mercato','Mercato','Putìa e banca del tempo','mercato',38,69],
+ ['castello','Castello','Trofei e statistiche','trofei',23,30],
+ ['albero','Albero della piazza','Missioni','missioni',44,66],
+ ['riserva','Riserva naturale','Diario Youthpass','profilo/diario',80,85],
+ ['antenne','Antenne del monte','Assemblea e decisioni','assemblea',59,10],
+ ['piazza','Piazza e 4 Canti','Proposte e voti','proposte',76,47]
+];
+const worldPlaceInfo={
+ casa:{intro:'Il tuo personaggio e il tuo percorso nello spazio.',features:['personalizzare avatar, colore e interessi.','consultare livello, XP e preferenze.','gestire il tuo account.'],actions:[['Apri il profilo','profilo']]},
+ sede:{intro:'Tutto quello che serve per organizzare la tua visita.',features:['consultare gli orari di apertura.','trovare sede, contatti e modalità di accesso.','informarti sull’accessibilità dello spazio.'],actions:[['Orari e sede','spazio'],['Calendario','calendario']]},
+ municipio:{intro:'Partecipa alla vita della comunità di Cca Siemmu.',features:['scoprire i traguardi condivisi.','accedere a scambi, assemblee e proposte.','guardare come cresce il paese.'],actions:[['Apri la Comunità','comunita']]},
+ mercato:{intro:'Metti in circolo oggetti, tempo e competenze.',features:['usare i Tumazzi per richiedere ricompense alla Putìa.','offrire una competenza o chiedere una mano nella Banca del tempo.'],actions:[['Apri la Putìa','putia'],['Banca del tempo','banca']]},
+ castello:{intro:'Ripercorri i tuoi progressi e scopri i prossimi traguardi.',features:['consultare i trofei ottenuti e quelli da sbloccare.','guardare visite, ore in sede, XP e competenze.'],actions:[['I miei trofei','trofei'],['Le mie statistiche','presenze']]},
+ albero:{intro:'Scegli una missione e dai una mano allo spazio.',features:['esplorare le missioni dei diversi percorsi.','prendere in carico una missione e chiedere la verifica.','partecipare alle imprese di squadra.'],actions:[['Scegli una missione','missioni']]},
+ riserva:{intro:'Dai un nome a ciò che stai imparando.',features:['annotare esperienze e riflessioni nel Diario Youthpass.','riconoscere e descrivere le competenze che stai sviluppando.'],actions:[['Apri il Diario Youthpass','profilo/diario']]},
+ antenne:{intro:'Preparati all’assemblea e segui le decisioni del gruppo.',features:['leggere convocazione e ordine del giorno.','consultare le decisioni condivise.'],actions:[['Assemblea e decisioni','assemblea']]},
+ piazza:{intro:'Porta un’idea e partecipa alle scelte.',features:['pubblicare una proposta per lo spazio.','leggere le idee delle altre persone.','votare le proposte aperte.'],actions:[['Proposte e voti','proposte']]}
+};
+function worldLinks(explain=false){return worldPlaces.map(([id,name,desc,route],i)=>`<a class="world-place-card" href="#${route}" data-world-place="${id}" ${explain?'data-world-preview aria-haspopup="dialog"':''}><span class="world-place-number">${i+1}</span><img src="art/edifici/${id}.svg" width="64" height="64" alt=""><span><strong>${name}</strong><small>${desc}</small></span></a>`).join('');}
+function worldMap(){
+ const last=worldPlaces.find(p=>p[0]===pref.get('world-place-'+(S.me?.id||'guest'),''));
+ const key=Object.hasOwn(animals,S.me?.avatarSpecies)?S.me.avatarSpecies:'mucca';
+ return section('Esplora il paese',`<div class="world-section"><p class="section-intro">Scegli un luogo per scoprire cosa puoi fare.</p><div class="world-map"><img class="scenery-day" src="art/paesaggi/borgo-v2-giorno.png" width="1536" height="1024" alt="Mappa di Cca Siemmu, tra borghi, boschi e pareti calcaree"><img class="scenery-night" src="art/paesaggi/borgo-v2-notte.png" width="1536" height="1024" alt="La mappa del paese di notte">${worldPlaces.map(([id,name,desc,route,x,y],i)=>`<button type="button" class="world-pin" data-world-place="${id}" style="left:${x}%;top:${y}%" aria-haspopup="dialog" aria-label="${name}: ${desc}. Scopri cosa puoi fare"><span>${i+1}</span><strong>${name}<small>${desc}</small></strong></button>`).join('')}<img class="world-player" style="left:${last?last[4]:49}%;top:${last?last[5]+6:68}%" src="art/micro/${key}.svg" width="48" height="48" alt="Il tuo minisprite sulla mappa"></div><div class="world-mobile-route">${worldLinks(true)}</div><div class="world-map-tools"><label class="world-walk-option"><input type="checkbox" data-world-walk ${pref.get('world-walk','false')==='true'?'checked':''}> Anima il minisprite</label><button type="button" class="secondary" data-world-menu>Menu rapido</button><a class="text-link" href="#paese">U paisi crisci →</a></div></div>`);
+}
+function openWorldPlace(id){
+ const place=worldPlaces.find(p=>p[0]===id),info=worldPlaceInfo[id];if(!place||!info)return;
+ let dialog=document.getElementById('world-place-info');
+ if(!dialog){dialog=document.createElement('dialog');dialog.id='world-place-info';document.body.append(dialog);}
+ dialog.setAttribute('aria-labelledby','world-place-title');dialog.setAttribute('aria-describedby','world-place-intro');
+ dialog.innerHTML=`<div class="world-info-heading"><img src="art/edifici/${id}.svg" width="64" height="64" alt=""><div><p class="eyebrow">LUOGO ${worldPlaces.indexOf(place)+1} · ${esc(place[2])}</p><h2 id="world-place-title">${esc(place[1])}</h2></div><form method="dialog"><button class="secondary" aria-label="Chiudi informazioni sul luogo">×</button></form></div><p id="world-place-intro">${esc(info.intro)}</p><h3>Qui puoi…</h3><ul class="world-info-features">${info.features.map(text=>`<li>${esc(text)}</li>`).join('')}</ul><div class="world-info-actions">${info.actions.map(([label,route],i)=>`<a class="btn ${i?'secondary':''}" href="#${route}" data-world-enter="${id}">${esc(label)} →</a>`).join('')}</div>`;
+ dialog.showModal();
+}
+let worldTravelTimer,worldStepTimer;
+function stopWorldTravel(){clearTimeout(worldTravelTimer);clearInterval(worldStepTimer);}
+function openWorldMenu(){
+ let dialog=document.getElementById('world-menu');if(!dialog){dialog=document.createElement('dialog');dialog.id='world-menu';document.body.append(dialog);}
+ dialog.innerHTML=`<div class="world-menu-head"><h2>Menu rapido</h2><form method="dialog"><button aria-label="Chiudi il menu rapido" class="secondary">×</button></form></div><div class="world-menu-grid">${worldLinks()}</div><div class="world-extra"><a href="#calendario">Calendario</a><a href="#banca">Banca del tempo</a><a href="#presenze">Statistiche personali</a>${isOrganizer()?'<a href="#referenti">Area referenti</a>':''}${!S.me?'<a href="#accedi">Accedi o richiedi le credenziali</a>':''}</div>`;
+ dialog.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>dialog.close()));
+ dialog.showModal();
+}
+document.addEventListener('click',event=>{
+ if(event.target.closest('[data-world-menu]')){openWorldMenu();return;}
+ const place=event.target.closest('.world-pin[data-world-place], [data-world-preview]');
+ if(place&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey){event.preventDefault();openWorldPlace(place.dataset.worldPlace);return;}
+ const enter=event.target.closest('[data-world-enter]');
+ if(enter&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey){
+  const destination=worldPlaces.find(p=>p[0]===enter.dataset.worldEnter);
+  if(destination){
+   document.getElementById('world-place-info')?.close();stopWorldTravel();
+   pref.set('world-place-'+(S.me?.id||'guest'),destination[0]);
+   const map=document.querySelector('.world-map'),player=map?.querySelector('.world-player');
+   if(player&&map.offsetParent!==null&&pref.get('world-walk','false')==='true'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    event.preventDefault();player.classList.add('is-walking');
+    player.style.left=destination[4]+'%';player.style.top=(destination[5]+6)+'%';
+    const species=Object.hasOwn(animals,S.me?.avatarSpecies)?S.me.avatarSpecies:'mucca';let frame=0;
+    worldStepTimer=setInterval(()=>{player.src=`art/micro/${species}-passo-${1+(frame++%2)}.svg`;},150);
+    worldTravelTimer=setTimeout(()=>{clearInterval(worldStepTimer);player.src=`art/micro/${species}.svg`;location.hash=enter.hash;},650);
+   }
+  }
+ }
+ const focus=event.target.closest('[data-village-focus]');if(!focus)return;
+ const group=focus.closest('.cozy-growth-panel');if(!group)return;
+ group.querySelectorAll('[data-village-focus]').forEach(b=>b.setAttribute('aria-pressed',String(b===focus)));
+ group.querySelectorAll('.cozy-village svg').forEach(svg=>{svg.setAttribute('viewBox',(villageFocus[focus.dataset.villageFocus]||[0,0,384,240]).join(' '));svg.setAttribute('preserveAspectRatio','xMidYMid slice');});
+ group.querySelector('.cozy-village').scrollIntoView({block:'center',behavior:'instant'});
+});
+document.addEventListener('change',event=>{if(event.target.matches('[data-world-walk]'))pref.set('world-walk',String(event.target.checked));});
+window.addEventListener('hashchange',()=>{stopWorldTravel();document.getElementById('world-menu')?.close();document.getElementById('world-place-info')?.close();});
+
 function homeIntro(){
  const artLabel='Cammarata e San Giovanni Gemini ai piedi di Monte Cammarata, in pixel art';
  return `<header class="hero home-hero ${S.me?'member-hero':''}"><div class="hero-copy"><span class="eyebrow">CAMMARATA + SAN GIOVANNI GEMINI</span><h1>CCA SIEMMU</h1>
- <p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio gratuito per incontrarsi, studiare e far nascere idee insieme.</p>
+ <p class="hero-motto">E boni siemmu</p><p class="hero-local">Uno spazio da vivere insieme: incontri, idee e piccoli gesti che fanno crescere la comunità.</p>
  <div class="row">${link('Apri il calendario','calendario')} ${link(S.me?'Vai alle missioni':'Accedi o chiedi un invito',S.me?'missioni':'accedi')}</div>
  ${S.me?'':'<p class="entry-hint">Il calendario si apre senza account.</p>'}</div>
- <div class="home-scenery"><img class="scenery-day" src="sicani.svg" alt="${artLabel}"><img class="scenery-night" src="sicani-notte.svg" alt="${artLabel} di notte"></div></header>
+ <div class="home-scenery"><img class="scenery-day" src="art/paesaggi/borgo-v2-giorno.png" alt="${artLabel}"><img class="scenery-night" src="art/paesaggi/borgo-v2-notte.png" alt="${artLabel} di notte"></div></header>
  ${!S.me?`<section class="space-signpost"><div><span class="eyebrow">LO SPAZIO GIOVANI</span><h2>Un posto da usare, uno spazio da fare insieme</h2>
  <p>Aula studio, laboratori tra pari e idee da portare in assemblea. Per chi ha dai 14 ai 30 anni a Cammarata e San Giovanni Gemini.</p></div>${link('Vieni per la prima volta?','spazio')}</section>`:''}`;
 }
-const wheelArt=`<div class="wheel-stage" aria-hidden="true"><svg class="wheel-disc" viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#111" d="M20 0h24v4h8v8h8v8h4v24h-4v8h-8v8h-8v4H20v-4h-8v-8H4v-8H0V20h4v-8h8V4h8z"/><path fill="#FFD400" d="M20 6h24v6h8v8h6v24h-6v8h-8v6H20v-6h-8v-8H6V20h6v-8h8z"/><path fill="#B30016" d="M30 6h4v24h24v4H34v24h-4V34H6v-4h24zM14 12l38 38-4 4-38-38zM48 10l6 6-38 38-6-6z"/><path fill="#111" d="M24 24h16v16H24z"/><path fill="#FFF" d="M28 28h8v8h-8z"/></svg><span class="wheel-pointer">▼</span></div>`;
+const wheelArt=`<div class="wheel-stage" aria-hidden="true"><svg class="wheel-disc" viewBox="0 0 64 64" shape-rendering="crispEdges">${window.CCAArt.interfaccia.ruota}</svg><span class="wheel-pointer"><img src="art/interfaccia/indicatore-ruota.svg" width="32" height="32" alt=""></span></div>`;
 const dailyText=p=>p.kind==='xp'?'Hai trovato 5 XP!':p.kind==='boost'?'Moltiplicatore XP ×2 attivo fino a mezzanotte.':'Una curiosità dai Sicani';
 async function dailyWheelPanel(){
  if(!S.me)return '';
@@ -542,7 +536,7 @@ async function teamPanel(staff=false){
    return card(`<span class="eyebrow">IMPRESA DI SQUADRA</span><h3>${esc(q.title)}</h3><p>${badge(teamStates[q.status])} · ${q.joined}/${q.needed} persone</p><progress value="${q.joined}" max="${q.needed}" aria-label="Iscrizioni per ${esc(q.title)}"></progress><details class="disclosure"><summary>Obiettivo e ricompensa</summary><p>${esc(q.description)}</p><p>Bonus per persona: ${q.xp} XP e trofeo «${esc(q.badge)}», dopo convalida di un referente esterno alla squadra.</p></details>${q.status==='ready'?'<p>La squadra è completa: concordate lo svolgimento con il referente. L’iscrizione non assegna punti.</p>':''}${q.mine?'<p class="muted">Sei nella squadra.</p>':''}${action}`);
   });
   const create=staff?`<details class="disclosure"><summary>Crea un’impresa di squadra</summary>${form('team-create',field('title','Titolo','text','required maxlength="100" placeholder="Pulizia straordinaria del cortile"')+textArea('description','Lavoro, luogo e indicazioni pratiche',600,'',true)+field('needed','Persone necessarie','number','required min="2" max="20" value="4"')+field('xp','Bonus XP per persona','number','required min="0" max="100" value="40"')+field('badge','Nome del trofeo squadra','text','required maxlength="60" placeholder="Mastri d’Ascia"'),'Pubblica impresa',{cls:'plain'})}</details>`:'';
-  return section(staff?'Gestisci imprese di squadra':'Imprese di squadra',`<p>Si attivano quando tutti i posti sono occupati da iscrizioni attive. Prima della convalida, un ritiro riapre la squadra. Premi solo dopo il lavoro reale.</p>${create}${cards.length?grid(cards,'two'):(staff?'':card('<p>Non ci sono imprese aperte.</p>'))}`);
+  return section(staff?'Gestisci imprese di squadra':'Imprese di squadra',`<p>Si attivano quando tutti i posti sono occupati da iscrizioni attive. Prima della convalida, un ritiro riapre la squadra. Premi solo dopo il lavoro reale. Alla convalida c’è il 20% di probabilità di una Festa di Paese: 5 Tumazzi extra a ogni componente, con un solo sorteggio per tutta la squadra.</p>${create}${cards.length?grid(cards,'two'):(staff?'':card('<p>Non ci sono imprese aperte.</p>'))}`);
  }catch{return card('<p>Le imprese non sono disponibili al momento. Riprova tra poco.</p>');}
 }
 async function teamTrophies(){
@@ -558,6 +552,7 @@ async function recordAppDay(){
 }
 function getStreaks(){return api('/my/streaks').catch(()=>null);}
 function streakPanel(d){
+ if(window.CCAJoy)return window.CCAJoy.weeklyPanel();
  return `<section class="card streak-compact" aria-labelledby="streak-title"><h2 id="streak-title">Giorni consecutivi</h2>${d?`<div class="streak-strip">
   <div>${pixelIcon(navIcons.calendario)}<strong>${d.app.current}</strong><span>App<small>Record ${d.app.best}</small></span></div>
   <div>${pixelIcon(navIcons.home)}<strong>${d.sede.current}</strong><span>In sede<small>Record ${d.sede.best}</small></span></div></div>
@@ -566,7 +561,7 @@ function streakPanel(d){
 function presenceCta(pres,mission=false){
  if(!pres)return card('<p>Presenza non disponibile. Riprova.</p>'+btn('Riprova','reload'));
  if(pres.inside)return `<section class="presence-focus is-inside"><div><strong>✓ Sei in sede</strong><span class="muted"> dalle ${fmt(pres.since,{hour:'2-digit',minute:'2-digit'})}</span></div>${mission?'':`<a class="btn presence-main" href="#missioni">Scegli una missione →</a>`}${btn('Registra uscita','checkout','',{secondary:true})}</section>`;
- return `<section class="presence-focus"><h2>Sei in sede?</h2>${btn('Fai il check-in in sede','checkin')}<p class="muted">Solo quando sei fisicamente in sede.</p></section>`;
+ return `<section class="presence-focus"><h2>Sei in sede?</h2>${btn('Registra il tuo ingresso','checkin')}<p class="muted">Solo quando sei fisicamente in sede.</p></section>`;
 }
 async function achievementBoard(){
  try{
@@ -576,7 +571,7 @@ async function achievementBoard(){
 }
 async function home(){
  const [st,community,details,acts]=await Promise.all([getStatus(),api('/community').catch(()=>null),visitInfo(),api('/activities').catch(()=>({activities:[]}))]);
- return homeIntro()+monthlyGoal(community?.monthlyGoal)+await achievementBoard()+firstVisit(st,details,nextActivity(acts.activities))+
+ return homeIntro()+worldMap()+monthlyGoal(community?.monthlyGoal)+await achievementBoard()+firstVisit(st,details,nextActivity(acts.activities))+
   section('Quando siamo aperti',openingCard(st))+
   section('Scambia tempo e competenze',timeBankCard())+
   section('Come funziona',grid([
@@ -615,19 +610,19 @@ async function homeMember(){
  if(isOrganizer()){
   const [inside,pending]=await Promise.all([api('/inside'),api('/chores?status=pending')]);
   const waiting=pending.chores.filter(c=>c.memberId!==S.me.id).length;
-  extra=`<section class="admin-compact"><h2>Da gestire</h2><div class="admin-chips"><a href="#referenti/presenze">${pixelIcon(navIcons.comunita)}<strong>${inside.presenti.length}</strong><span>In sede →</span></a><a href="#referenti/missioni">${pixelIcon(navIcons.missioni)}<strong>${waiting}</strong><span>Da verificare →</span></a></div></section>`;
+  extra=`<section class="admin-compact"><h2>Da gestire (per i referenti)</h2><div class="admin-chips"><a href="#referenti/presenze">${pixelIcon(navIcons.comunita)}<strong>${inside.presenti.length}</strong><span>In sede →</span></a><a href="#referenti/missioni">${pixelIcon(navIcons.missioni)}<strong>${waiting}</strong><span>Da verificare →</span></a></div></section>`;
  }
- return homeIntro()+presenceCta(pres)+
- `<div class="grid stats home-stats" aria-label="Personaggio, Tumazzi, orari e giorni consecutivi">${card(profileChip()+`<a class="profile-wallet" href="#putia" aria-label="${tumazzi(S.totals.cheese)} · apri A Putìa">${pixelIcon(cheese)}<span>Tumazzi</span><strong>${S.totals.cheese}</strong></a>`,'profile-stat')}
+ return homeIntro()+presenceCta(pres)+(window.CCAJoy?.homePanel()||'')+
+ `<div class="grid stats home-stats" aria-label="Personaggio, Tumazzi, orari e partecipazione settimanale">${card(profileChip()+`<a class="profile-wallet" href="#putia" aria-label="${tumazzi(S.totals.cheese)} · apri A Putìa">${pixelIcon(cheese)}<span>Tumazzi</span><strong>${S.totals.cheese}</strong></a>`,'profile-stat')}
  ${openingCard(st)}${streakPanel(streak)}</div>`+
- monthlyGoal(community?.monthlyGoal)+homeShortcuts()+extra+await dailyWheelPanel()+await achievementBoard()+
+ worldMap()+monthlyGoal(community?.monthlyGoal)+homeShortcuts()+extra+await dailyWheelPanel()+await achievementBoard()+
  (progress.firstVisitCompleted?'':firstVisit(st,details,nextActivity(acts.activities)))+
  section('Scambia tempo e competenze',timeBankCard())+
  section('Prossime attività',upcoming.length?grid(upcoming.map(a=>card(`<h3>${esc(a.name)}</h3><p>${activityDate(a.starts_at)}</p><p>${a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</p>${booked.has(a.id)?badge(statusText[booked.get(a.id)]):''}${activityDescription(a)}`)),'three')+link('Tutto il calendario','calendario'):card('<p>Non ci sono attività in calendario.</p>'))+mu('home',{streak});
 }
 
 async function calendario(){
- const [acts,mine]=await Promise.all([api('/activities'),S.me?api('/my/bookings'):{bookings:[]}]);
+ const [acts,mine,{meeting}]=await Promise.all([api('/activities'),S.me?api('/my/bookings'):{bookings:[]},api('/calendar/assembly')]);
  const booked=new Map(mine.bookings.map(b=>[b.activityId,b]));
  const list=acts.activities;
  const body=list.length?grid(list.map(a=>{
@@ -641,7 +636,8 @@ async function calendario(){
   const rec=S.me&&a.path&&(S.me.interests||[]).includes(a.path);
   return card(`${rec?`<p>${badge('Consigliata per te')}</p>`:''}<h3>${esc(a.name)}</h3><p><strong>${activityDate(a.starts_at)}</strong></p><p>${activityBadges(a)}</p>${a.access_mode==='open'?'':`<p>${Math.max(0,a.available)} posti liberi su ${a.capacity}</p>`}${activityDescription(a)}<p class="muted">${esc(a.verification_rule)}</p>${action}`);
  }),'two'):card('<h3>Ancora nulla in calendario</h3><p>I referenti pubblicheranno qui le prossime attività.</p>');
- return title('Calendario','Per le attività ad accesso libero puoi presentarti direttamente. Dove serve una prenotazione, un referente conferma il posto.')+section('Prossime attività',body)+
+ const assemblyCard=meeting?.startsAt>Date.now()/1000?section('Prossima assemblea',card(`<h3>Assemblea dei giovani</h3><p><strong>${dateLong(meeting.startsAt)}</strong></p><p>${esc(meeting.location)}</p><p class="meeting-notes">${esc(meeting.agenda)}</p>${S.me?link('Assemblea e decisioni','assemblea'):''}`)):section('Assemblea',card('<p>La prossima convocazione sarà pubblicata qui.</p>'));
+ return title('Calendario','Per le attività ad accesso libero puoi presentarti direttamente. Dove serve una prenotazione, un referente conferma il posto.')+assemblyCard+section('Prossime attività',body)+
   (S.me?section('Come funziona',card('<p>Quando prenoti, il posto resta riservato finché un referente decide. Alla fine il referente verifica di persona la tua presenza e ti assegna XP e Tumazzi.</p>')):'')+mu('calendario');
 }
 
@@ -694,22 +690,22 @@ const privacyLink='<a href="#privacy">Privacy e cookie</a>';
 function privacy(){
  const mail='spaziogiovanigenerazioni@gmail.com',contact=`<a href="mailto:${mail}">${mail}</a>`;
  return title('Privacy e cookie','Come Cca Siemmu usa i dati di chi visita il sito o partecipa alle attività.')+
- section('Chi gestisce il sito',card(`<p>Il titolare del trattamento è APS/ASD Spazio Giovani Generazioni. Per domande o richieste sui tuoi dati scrivi a ${contact}.</p>`))+
+ section('Chi gestisce il sito',card(`<p class="reading-copy">Il titolare del trattamento è APS/ASD Spazio Giovani Generazioni. Per domande o richieste sui tuoi dati scrivi a ${contact}.</p>`))+
  section('Quali dati usiamo e perché',grid([
-  card('<h3>Accesso e partecipazione</h3><p>Puoi consultare le pagine pubbliche e il calendario senza account. Per attivare il profilo e gestire prenotazioni, presenze, missioni e ricompense, trattiamo i dati necessari al servizio che richiedi. Usiamo nome, email, pseudonimo, ruolo e stato dell’account, oltre ai registri delle attività che svolgi. Telefono, interessi e tessera sono facoltativi. Le password sono conservate come impronte crittografiche.</p>'),
-  card('<h3>Comunità e Youthpass</h3><p>Se usi la Banca del tempo o pubblichi una proposta, gli altri soci vedono lo pseudonimo e ciò che pubblichi. Le note di uno scambio sono visibili alle persone coinvolte. Il diario Youthpass è accessibile dal tuo account e resta fuori dal pannello referenti. Puoi svuotarlo e salvare per cancellare il testo.</p>'),
-  card('<h3>Sicurezza</h3><p>Per proteggere gli account e limitare tentativi di accesso abusivi trattiamo le informazioni tecniche necessarie, compresi l’email e l’indirizzo IP usati nei tentativi di accesso falliti e nei tentativi di cambio password. I tentativi contano per 15 minuti; quelli più vecchi non vengono più considerati e si eliminano alla successiva operazione di accesso. Cloudflare, che ospita il sito, tratta l’indirizzo IP anche per erogare e proteggere il servizio.</p>'),
-  card('<h3>Notifiche sul telefono</h3><p>Se le attivi dal profilo, salviamo l’identificativo tecnico del tuo dispositivo fornito dal browser (indirizzo del servizio push e chiavi di cifratura) per inviarti i promemoria, per esempio «Sei ancora in sede?». Passano dal servizio push del tuo browser (Google, Apple o Mozilla). Puoi disattivarle in qualsiasi momento dal profilo e il dato viene cancellato. Chi non le attiva riceve gli stessi promemoria via email.</p>'),
-  card('<h3>Valutazioni e suggerimenti</h3><p>Dopo alcuni giorni d’uso ti chiediamo, in modo facoltativo, una valutazione da 1 a 5 con un commento. I referenti vedono voto e commento senza il tuo nome. Nella pagina «Suggerisci una modifica» puoi scrivere un suggerimento, una critica o un’idea: arriva nella bacheca dei referenti con il tuo pseudonimo, a meno che tu scelga l’invio anonimo. Anche i suggerimenti anonimi restano collegati al tuo account nel database, solo per limitarne l’abuso; i referenti non lo vedono. Non scrivere dati personali tuoi o di altri nel testo. Conserviamo valutazioni e suggerimenti per un anno, poi vengono cancellati; le copie in bacheca si eliminano dopo 90 giorni.</p>'),
-  card('<h3>Condivisione facoltativa</h3><p>La card dei progressi o dei trofei si crea sul tuo dispositivo. Contiene il traguardo scelto o il tuo livello e gli XP, con l’avatar selezionato. È priva di nome, email, diario e storico delle presenze. Sei tu a scegliere dove inviarla. Quando usi un’app esterna si applica l’informativa di quell’app.</p>')
+  card('<h3>Accesso e partecipazione</h3><p class="reading-copy">Puoi consultare le pagine pubbliche e il calendario senza account. Per attivare il profilo e gestire prenotazioni, presenze, missioni e ricompense, trattiamo i dati necessari al servizio che richiedi. Usiamo nome, email, pseudonimo, ruolo e stato dell’account, oltre ai registri delle attività che svolgi. Telefono, interessi e tessera sono facoltativi. Le password sono conservate come impronte crittografiche.</p>'),
+  card('<h3>Comunità e Youthpass</h3><p class="reading-copy">Se usi la Banca del tempo o pubblichi una proposta, gli altri soci vedono lo pseudonimo e ciò che pubblichi. Le note di uno scambio sono visibili alle persone coinvolte. Il diario Youthpass è accessibile dal tuo account e resta fuori dal pannello referenti. Puoi svuotarlo e salvare per cancellare il testo.</p>'),
+  card('<h3>Sicurezza</h3><p class="reading-copy">Per proteggere gli account e limitare tentativi di accesso abusivi trattiamo le informazioni tecniche necessarie, compresi l’email e l’indirizzo IP usati nei tentativi di accesso falliti e nei tentativi di cambio password. I tentativi contano per 15 minuti; quelli più vecchi non vengono più considerati e si eliminano alla successiva operazione di accesso. Cloudflare, che ospita il sito, tratta l’indirizzo IP anche per erogare e proteggere il servizio.</p>'),
+  card('<h3>Valutazioni e suggerimenti</h3><p class="reading-copy">Dopo alcuni giorni d’uso ti chiediamo, in modo facoltativo, una valutazione da 1 a 5 con un commento. I referenti vedono voto e commento senza il tuo nome. Nella pagina «Suggerisci una modifica» puoi scrivere un suggerimento, una critica o un’idea: arriva nella bacheca dei referenti con il tuo pseudonimo, a meno che tu scelga l’invio anonimo. Anche i suggerimenti anonimi restano collegati al tuo account nel database, solo per limitarne l’abuso; i referenti non lo vedono. Non scrivere dati personali tuoi o di altri nel testo. Conserviamo valutazioni e suggerimenti per un anno, poi vengono cancellati; le copie in bacheca si eliminano dopo 90 giorni.</p>'),
+  card('<h3>Notifiche sul telefono</h3><p class="reading-copy">Se le attivi dal profilo, salviamo l’identificativo tecnico del tuo dispositivo fornito dal browser (indirizzo del servizio push e chiavi di cifratura) per inviarti i promemoria, per esempio «Sei ancora in sede?». Passano dal servizio push del tuo browser (Google, Apple o Mozilla). Puoi disattivarle in qualsiasi momento dal profilo e il dato viene cancellato. Chi non le attiva riceve gli stessi promemoria via email.</p>'),
+  card('<h3>Condivisione facoltativa</h3><p class="reading-copy">La card dei progressi o dei trofei si crea sul tuo dispositivo. Contiene il traguardo scelto o il tuo livello e gli XP, con l’avatar selezionato. Salviamo personaggio e colore nel tuo profilo. È priva di nome, email, diario e storico delle presenze. Sei tu a scegliere dove inviarla. Quando usi un’app esterna si applica l’informativa di quell’app.</p>')
  ],'two'))+
- section('Su quale base usiamo i dati',card('<p>Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
- section('Chi può accedere ai dati',card('<p>I referenti autorizzati usano i dati di iscrizione e partecipazione per organizzare le attività. Il sito è ospitato su Cloudflare. Quando è configurato l’invio di email di servizio, i dati necessari alla consegna vengono trasmessi al fornitore di invio, Brevo o Resend. Le statistiche pubbliche sono aggregate.</p><p>Per informazioni sui fornitori, sui luoghi in cui trattano i dati e sulle garanzie applicate, contatta l’associazione.</p>'))+
- section('Per quanto tempo',card(`<p>La sessione dura fino a 30 giorni. Le notifiche in-app oltre 90 giorni vengono eliminate quando apri l’elenco. I dati di account e di attività sono conservati secondo il tempo necessario a gestire la partecipazione e gli eventuali obblighi di rendicontazione. Per conoscere i tempi applicati a un dato specifico o chiedere la cancellazione, scrivi a ${contact}.</p>`))+
- section('Imprese e ruota del giorno',card('<p>Per le missioni personali conserviamo presa in carico, eventuale abbandono, dichiarazione di completamento e decisione del referente. L’invio del completamento richiede un check-in attivo. Conserviamo le iscrizioni alle imprese, la convalida del referente, i bonus XP e i trofei assegnati. Solo i referenti vedono l’elenco degli iscritti; gli altri soci vedono il numero di posti occupati. La ruota è facoltativa: salviamo un esito per account e giorno, il bonus e la sua eventuale scadenza. Nessun pagamento o strumento di profilazione; l’esito non dipende dai dati personali.</p>'))+
- section('Serie e bacheca pubblica',card('<p>Con account attivo salviamo una sola apertura della webapp per giorno, per mostrarti la tua serie personale senza attribuire premi. Le serie in sede derivano dagli ingressi registrati. La bacheca pubblica è disattivata inizialmente: puoi attivarla nel Profilo per condividere pseudonimo e nuovi trofei legati ad attività reali. Puoi ritirare la scelta in ogni momento; il tuo traguardo non sarà più esposto. Non pubblichiamo email, orari, storico delle presenze o dati del diario.</p>'))+
- section('Cookie e dati nel browser',card('<p>Dopo l’accesso, il cookie tecnico <code>__Host-cca_session</code> mantiene la sessione. Scade entro 30 giorni e viene rimosso all’uscita dall’account. Il browser conserva anche le tue preferenze locali, come tema, suono e avatar, e può ricordare temporaneamente la pagina a cui tornare dopo l’accesso. Puoi eliminare questi dati dalle impostazioni del browser. Il sito non usa strumenti di analisi o profilazione pubblicitaria.</p>'))+
- section('I tuoi diritti',card(`<p>Puoi scrivere a ${contact} per chiedere accesso, rettifica, cancellazione o limitazione del trattamento e, quando applicabili, portabilità e opposizione. Se sei minorenne, puoi farti aiutare da un adulto di fiducia. Puoi presentare reclamo al <a href="https://www.garanteprivacy.it/">Garante per la protezione dei dati personali</a>.</p>`));
+ section('Su quale base usiamo i dati',card('<p class="reading-copy">Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
+ section('Chi può accedere ai dati',card('<p class="reading-copy">I referenti autorizzati usano i dati di iscrizione e partecipazione per organizzare le attività. Il sito è ospitato su Cloudflare. Quando è configurato l’invio di email di servizio, i dati necessari alla consegna vengono trasmessi al fornitore di invio, Brevo o Resend. Le statistiche pubbliche sono aggregate.</p><p class="reading-copy">Per informazioni sui fornitori, sui luoghi in cui trattano i dati e sulle garanzie applicate, contatta l’associazione.</p>'))+
+ section('Per quanto tempo',card(`<p class="reading-copy">La sessione dura fino a 30 giorni. Le notifiche in-app oltre 90 giorni vengono eliminate quando apri l’elenco. I dati di account e di attività sono conservati secondo il tempo necessario a gestire la partecipazione e gli eventuali obblighi di rendicontazione. Per conoscere i tempi applicati a un dato specifico o chiedere la cancellazione, scrivi a ${contact}.</p>`))+
+ section('Imprese e ruota del giorno',card('<p class="reading-copy">Per le missioni personali conserviamo presa in carico, eventuale abbandono, dichiarazione di completamento e decisione del referente. L’invio del completamento richiede un check-in attivo. Conserviamo le iscrizioni alle imprese, la convalida del referente, i bonus XP e i trofei assegnati. Solo i referenti vedono l’elenco degli iscritti; gli altri soci vedono il numero di posti occupati. La ruota è facoltativa: salviamo un esito per account e giorno, il bonus e la sua eventuale scadenza. Nessun pagamento o strumento di profilazione; l’esito non dipende dai dati personali.</p>'))+
+ section('Serie e bacheca pubblica',card('<p class="reading-copy">Con account attivo salviamo una sola apertura della webapp per giorno, per mostrarti la tua serie personale senza attribuire premi. Le serie in sede derivano dagli ingressi registrati. La bacheca pubblica è disattivata inizialmente: puoi attivarla nel Profilo per condividere pseudonimo e nuovi trofei legati ad attività reali. Puoi ritirare la scelta in ogni momento; il tuo traguardo non sarà più esposto. Non pubblichiamo email, orari, storico delle presenze o dati del diario.</p>'))+
+ section('Cookie e dati nel browser',card('<p class="reading-copy">Dopo l’accesso, il cookie tecnico <code>__Host-cca_session</code> mantiene la sessione. Scade entro 30 giorni e viene rimosso all’uscita dall’account. Il browser conserva anche le tue preferenze locali, come tema e suono, e può ricordare temporaneamente la pagina a cui tornare dopo l’accesso. Puoi eliminare questi dati dalle impostazioni del browser. Il sito non usa strumenti di analisi o profilazione pubblicitaria.</p>'))+
+ section('I tuoi diritti',card(`<p class="reading-copy">Puoi scrivere a ${contact} per chiedere accesso, rettifica, cancellazione o limitazione del trattamento e, quando applicabili, portabilità e opposizione. Se sei minorenne, puoi farti aiutare da un adulto di fiducia. Puoi presentare reclamo al <a href="https://www.garanteprivacy.it/">Garante per la protezione dei dati personali</a>.</p>`));
 }
 
 /* ---- accesso ---- */
@@ -717,7 +713,7 @@ function accedi(destination){
  if(S.me)return title('Sei già dentro',`Accesso effettuato come ${esc(S.me.pseudonym)}.`)+card(link('Vai alla Home','home'));
  return title('Accedi','Usa l’email con cui i referenti ti hanno registrato.')+
  grid([form('login',(destination==='banca'?'<input type="hidden" name="next" value="#banca">':'')+field('email','Email','email','required autocomplete="username"')+field('password','Password','password','required autocomplete="current-password"'),'Accedi'),
-  card('<h3>Prima volta?</h3><p>Non ti puoi iscrivere da solo: un referente ti registra in sede e ti invia un link per scegliere la password. Se non l’hai ricevuto, chiedi di rigenerarlo.</p><p>'+privacyLink+'</p>')],'two');
+  card('<h3>Non hai le credenziali?</h3><p>Chiedi di accedere a Cca Siemmu. Un referente esamina la richiesta e ti invia il link per scegliere la password.</p>'+form('request-access',field('fullName','Nome e cognome','text','required maxlength="80" autocomplete="name"')+field('email','Email','email','required maxlength="254" autocomplete="email"')+'<p>Usiamo questi dati per gestire la richiesta. '+privacyLink+'</p>','Richiedi le credenziali',{cls:'plain'})+'<p>Hai già ricevuto un invito? Apri il link nella tua email per impostare la password.</p>')],'two');
 }
 async function impostaPassword(token){
  if(!token)return title('Link non valido','')+card('<p>Il link è incompleto.</p>'+link('Accedi','accedi'));
@@ -740,7 +736,7 @@ function availableMissions(){
  choices.sort((a,b)=>Number(interests.includes(b.path))-Number(interests.includes(a.path))||a.name.localeCompare(b.name,'it'));
  const pages=Math.max(1,Math.ceil(choices.length/3));missionPage=Math.min(missionPage,pages-1);
  const cards=choices.slice(missionPage*3,missionPage*3+3).map(t=>`<article class="card mission-choice"><details><summary><h3>${esc(t.name)}</h3></summary><div class="mission-details">${art(pathInfo(t.path)[2])}<p>${esc(t.description||'Svolgi l’attività e chiedi la convalida in sede.')}</p><p class="muted">${esc(pathInfo(t.path)[1])} · ${t.xp} XP · ${tumazzi(t.cheese)}</p>${btn('Prendi in carico','assignment-take',t.id)}</div></details></article>`).join('');
- return (cards||'<p class="muted">Nessuna missione in questa categoria.</p>')+`<div class="mission-pager">${btn('←','mission-page','prev',{secondary:true,extra:missionPage===0?'disabled aria-label="Pagina precedente"':'aria-label="Pagina precedente"'})}<span>${missionPage+1}/${pages}</span>${btn('→','mission-page','next',{secondary:true,extra:missionPage>=pages-1?'disabled aria-label="Pagina successiva"':'aria-label="Pagina successiva"'})}</div>`;
+ return (cards||'<div class="joy-empty"><h3>Proviamo un altro percorso?</h3><p>Cambia categoria o svuota la ricerca per trovare una missione adatta.</p>'+btn('Mostra tutte le missioni','joy-all-missions')+'</div>')+`<div class="mission-pager">${btn('←','mission-page','prev',{secondary:true,extra:missionPage===0?'disabled aria-label="Pagina precedente"':'aria-label="Pagina precedente"'})}<span>${missionPage+1}/${pages}</span>${btn('→','mission-page','next',{secondary:true,extra:missionPage>=pages-1?'disabled aria-label="Pagina successiva"':'aria-label="Pagina successiva"'})}</div>`;
 }
 async function missioni(){
  if(!S.me)return needLogin();
@@ -752,7 +748,7 @@ async function missioni(){
  const doing=progress.map(j=>card(`<h3>${esc(j.name)}</h3><p class="muted">${j.xp} XP dopo convalida</p><details class="mission-note"><summary>Aggiungi una nota</summary><label>Nota per il referente<textarea id="assignment-note-${j.id}" maxlength="500"></textarea></label></details>${btn('✓ Missione completata','assignment-finish',j.id,{extra:pres.inside?'':'disabled aria-describedby="mission-checkin-note"'})}${!pres.inside?'<p class="muted">Se sei in sede, fai il check-in prima di completare.</p>'+btn('Fai il check-in','checkin'):''}${btn('Abbandona missione','assignment-abandon',j.id,{secondary:true})}`)).join('')||'<p class="muted">Prendi in carico una missione per iniziare.</p>';
  const waiting=[...submitted.map(j=>({name:j.name,note:j.note})),...legacy.map(j=>({name:j.choreName,note:j.note}))].map(j=>card(`${badge('✓ In attesa')}<h3>${esc(j.name)}</h3>${j.note?`<details><summary>La tua nota</summary><p>${esc(j.note)}</p></details>`:''}<p class="muted">Il referente verifica e assegna i premi.</p>`)).join('')||'<p class="muted">Nessuna richiesta in attesa.</p>';
  return title('Missioni','Scegli, svolgi in sede, chiedi la convalida.')+presenceCta(pres,true)+
- `<p class="muted" id="mission-checkin-note">Premi dopo verifica. Massimo ${tumazzi(WEEKLY_CHEESE)} a settimana dalle missioni ripetibili; gli XP restano permanenti.</p>
+ `<p class="muted" id="mission-checkin-note">Premi dopo verifica. Massimo ${tumazzi(WEEKLY_CHEESE)} a settimana dalle missioni ripetibili; gli XP restano permanenti. Dopo la convalida: 15% di probabilità di XP extra pari al premio base, fino a 50; il bonus non si somma a ruota o Fagotto.</p>
  <div class="mission-filters" aria-label="Categorie missioni">${[['recommended','Per te'],...PATHS.map(([id,name])=>[id,name.split(' ')[0]])].map(([id,name])=>`<button type="button" data-action="mission-category" data-id="${id}" aria-pressed="${missionCategory===id}">${name}</button>`).join('')}</div>
  <label class="mission-search">Cerca una missione<input type="search" id="mission-search" value="${esc(missionSearch)}" placeholder="Titolo…"></label>
  <div class="mission-board"><section class="mission-column"><h2>1 · Disponibili</h2><p class="muted">Tre alla volta, dai tuoi interessi.</p><div id="mission-available">${availableMissions()}</div></section>
@@ -775,11 +771,11 @@ async function presenze(){
  section('In breve',grid([
   card(`<span class="metric">${stats.visits}</span><h3>Visite</h3><p>${stats.insideNow?badge('Sei dentro adesso'):'Negli ultimi 12 mesi'}</p>`),
   card(`<span class="metric">${stats.hours}</span><h3>Ore in sede</h3><p>${stats.visits?`Media ${duration(stats.avgVisitMinutes)} a visita`:'Appena inizi a venire, le conteremo qui.'}</p>`),
-  card(`<span class="metric">${stats.streak.current}</span><h3>Serie di giorni</h3><p>Giorni di apertura consecutivi con una tua visita · record ${stats.streak.best}</p>`)
+  window.CCAJoy?.weeklyPanel()||card('<h3>Fiamma della Settimana</h3><p>Partecipa a un’attività o contribuisci una volta a settimana.</p>')
  ]))+
  section('I miei guadagni',grid([
   card(`<span class="metric">${t.xp}</span><h3>XP</h3><p>${stats.activitiesAttended} attività · ${stats.choresVerified} missioni verificate</p>`),
-  card(`<span class="metric">${t.cheese}</span><h3>Tumazzi guadagnati</h3><p>Il riscatto dei premi arriverà più avanti.</p>`)
+  card(`<span class="metric">${t.cheese}</span><h3>Tumazzi guadagnati</h3><p>Il saldo disponibile tiene conto dei premi già riscattati nella Putìa.</p>`)
  ],'two'))+
  section('Ore in sede per mese',stats.months.length?card(stats.months.map(m=>bar(m.hours,monthMax,m.month.slice(2),' h')).join('')):card('<p>Ancora nessun dato.</p>'))+
  section('Quando vieni',card(weekdayBars(stats.weekdays,'visits')))+
@@ -844,8 +840,7 @@ async function profilo(){
  const [prog,types,journal,streak]=await Promise.all([api('/my/progress').catch(()=>({counts:{}})),api('/chore-types').catch(()=>({types:[]})),journalCard(),getStreaks()]);
  const mine=S.me.interests||[];
  const interestsForm=`<h3>I miei interessi</h3><p class="muted">Scegli cosa ti piace: ti consigliamo missioni e attività.</p><fieldset><legend>Percorsi</legend>${PATHS.map(([id,name])=>`<label><input type="checkbox" name="interest" value="${id}" ${mine.includes(id)?'checked':''}> ${esc(name)}</label>`).join('')}</fieldset>`;
- const savedSpecies=pref.get('species','mucca');
- const species=Object.hasOwn(animals,savedSpecies)?savedSpecies:'mucca',color=pref.get('color','rosa');
+ const {avatarSpecies:species,avatarColor:color}=S.me;
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="swatch-name">${name}</span></label>`).join('')}</div></fieldset>`;
  return title('Profilo','Il tuo personaggio e il tuo account.')+
  section('Il mio personaggio',card(profileChip()+`<div class="stat-figure">${pixelIcon(cheese)}<strong>${tumazzi(S.totals.cheese)}</strong></div><div class="support-links"><a href="#presenze">Le mie statistiche →</a></div><details class="disclosure profile-sharing"><summary>Condividi il tuo percorso</summary>${btn('Crea la mia card ↗','share-progress','',{extra:'aria-label="Crea e condividi la mia card dei progressi"'})}<p class="muted">Crea una card chibi con il tuo avatar, il livello e gli XP. Nome ed email restano privati.</p></details>`,'profile-overview'))+
@@ -859,8 +854,8 @@ async function profilo(){
   form('changepw','<h3>Cambia password</h3>'+field('current','Password attuale','password','required autocomplete="current-password"')+field('next','Nuova password (almeno 10 caratteri)','password','required minlength="10" autocomplete="new-password"'),'Cambia password')
  ],'two')+'</details>')+
  section('Notifiche',await pushCard())+
- section('Personalizza il profilo',card(`<details class="disclosure"><summary>Cambia avatar e colore</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">L’avatar è salvato solo su questo dispositivo.</p></details>`))+
- section('Preferenze',card(`<label class="sound-setting"><input type="checkbox" id="sound-toggle" ${pref.get('sound','off')==='on'?'checked':''}> Suoni dei pulsanti</label><p class="muted">Breve suono pixel quando usi un pulsante o un link. La scelta vale su questo browser.</p>`))+
+ (window.CCAJoy?.decorations()||'')+section('Personalizza il profilo',card(`<details class="disclosure"><summary>Cambia avatar e colore</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">Personaggio e colore sono salvati nel tuo profilo.</p></details>`))+
+ section('Preferenze',card(`<label class="sound-setting"><input type="checkbox" id="sound-toggle" ${pref.get('sound','off')==='on'?'checked':''}> Suoni 8-bit</label><p class="muted">Suoni brevi per pulsanti, finestre e azioni completate. La scelta vale su questo browser.</p>${window.CCAJoy?.settings()||''}`))+
  mu('profilo',{streak});
 }
 
@@ -902,7 +897,7 @@ async function panSoci(){
   const self=m.id===S.me.id;
   return card(`<h3>${esc(m.fullName||m.pseudonym)}</h3><p>${esc(m.email)}</p><p>${badge(m.role==='organizer'?'Referente':'Socio')} ${badge(statusText[m.status])} ${m.hasPassword?badge('Profilo completo'):badge('Password da impostare')}</p><p class="muted">${m.xp} XP · ${tumazzi(m.cheese)}${m.phone?' · '+esc(m.phone):''}</p>
   <p class="muted">Tessera: ${m.uidTessera?`<code>${esc(m.uidTessera)}</code>`:'nessuna'}</p>
-  <div class="row">${btn(m.hasPassword?'Link reset password':'Nuovo link d’invito','invite',m.id,{secondary:true,extra:`data-phone="${esc(m.phone||'')}"`})}${m.uidTessera?btn('Togli tessera','cardRemove',m.id,{secondary:true}):''}${!self?btn(m.role==='organizer'?'Rendi socio':'Rendi referente','role',m.id,{secondary:true,extra:`data-role="${m.role==='organizer'?'participant':'organizer'}"`}):''}${!self?btn(m.status==='disabled'?'Riattiva':'Disattiva','status',m.id,{secondary:true,extra:`data-status="${m.status==='disabled'?'approved':'disabled'}"`}):''}</div>
+  <div class="row">${m.status==='pending'?btn('Approva e invia invito','approve-access',m.id):''}${btn(m.hasPassword?'Link reset password':'Nuovo link d’invito','invite',m.id,{secondary:true,extra:`data-phone="${esc(m.phone||'')}"`})}${m.uidTessera?btn('Togli tessera','cardRemove',m.id,{secondary:true}):''}${!self?btn(m.role==='organizer'?'Rendi socio':'Rendi referente','role',m.id,{secondary:true,extra:`data-role="${m.role==='organizer'?'participant':'organizer'}"`}):''}${!self?btn(m.status==='disabled'?'Riattiva':m.status==='pending'?'Rifiuta richiesta':'Disattiva','status',m.id,{secondary:true,extra:`data-status="${m.status==='disabled'?'approved':'disabled'}"`}):''}</div>
   ${form('card',field('uid','Codice tessera NFC','text','required maxlength="40" placeholder="Es. 04A1B2C3"'),m.uidTessera?'Cambia tessera':'Assegna tessera',{id:m.id,cls:'inline-form'})}`,m.status==='disabled'?'muted-card':'').replace('<article ',`<article data-member-search="${search}" `);
  });
  return (S.invite?section('Invito',inviteCard(S.invite)):'')+section(`Soci (${members.length})`,`<label>Cerca tra i soci<input type="search" id="member-search" placeholder="Nome, pseudonimo o email" autocomplete="off"></label><p id="member-search-status" class="muted" role="status" hidden></p>`+grid(cards,'two'))+section('Nuovo socio',newForm);
@@ -1059,23 +1054,37 @@ async function cartello(kind){
 const tvTips=['Prenota un posto dal calendario: ti aspettiamo!','Apri una missione per vedere i dettagli.','Hai un’idea per lo spazio? Scrivila nelle Proposte e fai votare il gruppo.','Un’ora del tuo tempo vale un’ora di un altro socio: guarda la Banca del tempo.','Inquadra il QR all’ingresso per segnare la tua presenza.','Ogni presenza fa crescere il paese. Grazie di esserci!'];
 const tvTime=()=>new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit'}).format(new Date());
 const tvDate=()=>new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',weekday:'long',day:'numeric',month:'long'}).format(new Date());
+// La bacheca TV non richiede tocchi: mostra soltanto informazioni pubbliche.
+const tvZoom=value=>Math.min(1.15,Math.max(.85,Number(value)||1));
+function tvActivity(a,withDescription){
+ const access=a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti';
+ return `<li><strong>${esc(a.name)}</strong><div class="tv-activity-date">${activityDate(a.starts_at)}</div>${withDescription&&a.description?`<p class="tv-activity-description">${esc(a.description)}</p>`:''}<div class="tv-activity-access">${esc(access)}</div></li>`;
+}
 async function tvPage(){
- const [st,metrics,acts]=await Promise.all([getStatus(),getCommunity(),api('/activities').catch(()=>({activities:[]})),loadQr().catch(()=>{})]);
- const next=acts.activities.filter(a=>a.starts_at>Date.now()/1000-3600).slice(0,3);
- const reached=(metrics||[]).filter(halfway).length;
+ const [st,metrics,acts]=await Promise.all([getStatus(),getCommunity(),api('/activities').catch(()=>({activities:[],unavailable:true})),loadQr().catch(()=>{})]);
+ const next=acts.activities.filter(a=>a.starts_at>Date.now()/1000-3600).sort((a,b)=>a.starts_at-b.starts_at).slice(0,3);
+ const reached=villageCount(metrics);
  const tip=st?.open&&Math.floor(Date.now()/60000)%3===0?'Siamo aperti: entra, ti aspettiamo!':tvTips[Math.floor(Date.now()/60000)%tvTips.length];
  try{navigator.wakeLock?.request('screen').catch(()=>{});}catch{}
- const z=Number(pref.get('tvzoom',1))||1;
- return `<div class="tv-frame"><div class="tv-screen" style="--tvz:${z}"><div class="tv-tools no-print">${btn('A−','tvzoom','down',{secondary:true})}${btn('A+','tvzoom','up',{secondary:true})}${btn('Tema','theme','',{secondary:true})}</div><div class="tv-top"><div class="tv-brand">CCA SIEMMU<small>e boni siemmu</small></div><div class="tv-clock"><strong id="tv-time">${tvTime()}</strong><span id="tv-date">${esc(tvDate())}</span></div></div>
- <div class="tv-main"><div class="tv-left"><div class="tv-live ${st?.open?'live-on':'live-off'}"><span class="live-dot" aria-hidden="true"></span>${st?.open?'Aperto ora':'Chiuso al momento'}</div><p class="tv-hours">${esc(st?.days||'Da lunedì a venerdì')} · ${esc(st?.hours||'16:00–20:00')}</p>
- <h2>Prossime attività</h2>${next.length?`<ul class="tv-acts">${next.map(a=>`<li><strong>${esc(a.name)}</strong><span>${activityDate(a.starts_at)}</span>${activityDescription(a)}<span>${a.access_mode==='open'?'Accesso libero':a.available>0?`${a.available} posti liberi`:'Posti esauriti'}</span></li>`).join('')}</ul>`:'<p class="tv-empty">Presto altre attività in calendario.</p>'}</div>
- <div class="tv-right">${villageScene(metrics)}<p class="tv-village">${reached} ${reached===1?'traguardo':'traguardi'} su ${(metrics||[]).length}: il paese cresce con le presenze, le attività e le missioni.</p></div></div>
- <div class="tv-foot">${cowMascot('curioso',tip,tvTips)}${window.qrcode?`<div class="tv-qr">${qrSvg(location.origin+'/#accedi','QR code per accedere al sito')}<span>Accedi al sito</span></div>`:''}</div></div></div>`;
+ const z=tvZoom(pref.get('tvzoom',1));
+ return `<div class="tv-frame"><div class="tv-screen" style="--tvz:${z}">
+ <div class="tv-tools no-print" aria-label="Impostazioni della schermata TV">${btn('A−','tvzoom','down',{secondary:true})}${btn('A+','tvzoom','up',{secondary:true})}${btn('Tema','theme','',{secondary:true})}</div>
+ <header class="tv-top"><div class="tv-brand"><img src="icon.svg" alt=""><div>CCA SIEMMU<small>e boni siemmu · Spazio Giovani Generazioni</small></div></div>
+ <div class="tv-opening"><div class="tv-live ${st?.open?'live-on':'live-off'}"><span class="live-dot" aria-hidden="true"></span>${st?st.open?'Aperto ora':'Chiuso al momento':'Stato non disponibile'}</div><p class="tv-hours"><strong>${esc(st?.hours||'16:00–20:00')}</strong><span>${esc(st?.days||'Da mercoledì a domenica · novembre 2026')}</span></p></div>
+ <div class="tv-clock"><strong id="tv-time">${tvTime()}</strong><span id="tv-date">${esc(tvDate())}</span></div></header>
+ <div class="tv-main"><section class="tv-left tv-panel" aria-labelledby="tv-activities-title"><h2 id="tv-activities-title">Prossime attività</h2>
+ ${next.length?`<ul class="tv-acts" data-count="${next.length}">${next.map(a=>tvActivity(a,next.length<3)).join('')}</ul>`:`<div class="tv-empty">${pixelIcon(shapes.calendario)}<p>${acts.unavailable?'Il calendario non è disponibile al momento.':'Presto altri appuntamenti da vivere insieme.'}</p><span>Inquadra il QR per consultare il sito.</span></div>`}
+ <p class="tv-calendar-note">Il calendario completo è sul tuo telefono.</p></section>
+ <section class="tv-right tv-panel" aria-labelledby="tv-village-title"><div class="tv-village-heading"><h2 id="tv-village-title">U paisi crisci</h2><span>${metrics?`${reached} / 12 trasformazioni`:'Il nostro borgo'}</span></div>
+ ${villageScene(metrics)}<p class="tv-village">${metrics?'Persone, luci, attività e verde: il borgo cresce con ciò che facciamo insieme.':'I progressi del borgo torneranno visibili al prossimo aggiornamento.'}</p></section></div>
+ <footer class="tv-foot"><aside class="tv-tip">${cowMascot('curioso',tip)}<span class="tv-territory">Cammarata + San Giovanni Gemini</span></aside>
+ <div class="tv-join">${window.qrcode?qrSvg(location.origin+'/#home','QR code per aprire Cca Siemmu'):''}<div><strong>Entra nella nostra piazza</strong><p>Inquadra e scopri attività, missioni e idee.</p><span>${esc(location.host)}</span></div></div></footer>
+ </div></div>`;
 }
 // La TV è 16:9: la scena è un riquadro fisso 1920×1080 che si adatta allo schermo senza deformarsi.
 function fitTv(){const st=document.querySelector('.tv-screen');if(!st)return;st.style.transform=`translate(-50%,-50%) scale(${Math.min(innerWidth/1920,innerHeight/1080)})`;}
 window.addEventListener('resize',fitTv);
-setInterval(()=>{if(location.hash!=='#tv'||document.hidden)return;const t=document.querySelector('#tv-time');if(t)t.textContent=tvTime();},15000);
+setInterval(()=>{if(location.hash!=='#tv'||document.hidden)return;const t=document.querySelector('#tv-time');if(t)t.textContent=tvTime();const d=document.querySelector('#tv-date');if(d)d.textContent=tvDate();},15000);
 setInterval(()=>{if(location.hash==='#tv'&&!document.hidden)render();},60000);
 
 /* ---- router ---- */
@@ -1091,10 +1100,11 @@ async function render(focus=false){
  if(!S.loaded)await loadSession();
  else if(S.me){await refreshTotals();checkLevelUp();}
  document.body.classList.toggle('tv',page==='tv');
- const known=['comunita','assemblea','trofei','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','suggerimenti','imposta-password'];
+ const known=['comunita','assemblea','trofei','mercato','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','suggerimenti','imposta-password'];
  const active=known.includes(page)?page:'';
  renderChrome(active);
  await recordAppDay();
+ if(!['tv','cartello'].includes(page)){await window.CCAJoy?.sync();renderChrome(active);}
  main.setAttribute('aria-busy','true');
  let html;
  try{
@@ -1106,6 +1116,7 @@ async function render(focus=false){
   else if(page==='comunita')html=await comunita();
   else if(page==='assemblea')html=await assemblea();
   else if(page==='trofei')html=await trofei();
+  else if(page==='mercato')html=mercato();
   else if(page==='putia')html=await putia();
   else if(page==='banca')html=await banca();
   else if(page==='proposte')html=await proposte();
@@ -1133,6 +1144,7 @@ async function render(focus=false){
  main.removeAttribute('aria-busy');
  if(!['tv','cartello','ingresso','imposta-password'].includes(page))feedbackPrompt();
  if(page==='tv')fitTv();
+ window.CCAJoy?.afterRender();
  if(focus){
   const target=page==='profilo'&&detail==='diario'?'learning-journal':page==='banca'&&(detail==='offri'?'time-offer':detail==='scambi'?'time-exchanges':null);
   const node=target&&document.getElementById(target);
@@ -1152,7 +1164,10 @@ function banner(level,message,{sticky=false}={}){
  clearTimeout(banner.t);
  if(!bad&&!sticky)banner.t=setTimeout(()=>{box.hidden=true;},6000);
 }
-function say(message,error=false){banner(error?'error':'ok',message);}
+function say(message,error=false){
+ banner(error?'error':'ok',message);
+ if(!error)playSound('success');
+}
 // Esito di un invio email, mostrato come banner e salvato anche nella bacheca.
 function emailBanner(invite,who){
  if(invite.emailSent)banner('ok',`Email inviata a ${who}.`);
@@ -1176,7 +1191,7 @@ function openTrophy(t){
  const left=Math.max(0,t.target-t.count),pct=Math.round(t.count/t.target*100);
  box.className='celebration';box.setAttribute('role','dialog');box.setAttribute('aria-label',`Trofeo: ${t.name}`);
  box.innerHTML=`<div class="celebration-card trophy-card ${t.earned?'trophy-on':'trophy-off'}">${t.earned?'<div class="confetti" aria-hidden="true">'+Array.from({length:14},(_,i)=>`<i style="left:${(i*41)%100}%;background:${['#B30016','#B30016','#bdd9da','#FFD400','#FFD400'][i%5]};animation-delay:${(i%6)*90}ms"></i>`).join('')+'</div>':''}
-  <span class="eyebrow">${esc(t.group.toUpperCase())}</span><div class="trophy-art ${t.earned?'':'locked'}">${art(t.icon)}</div><h2>${esc(t.name)}</h2>
+  <span class="eyebrow">${esc(t.group.toUpperCase())}</span><div class="trophy-art ${t.earned?'':'locked'}">${trophyArt(t)}</div><h2>${esc(t.name)}</h2>
   <p>${badge(t.earned?'Ottenuto':'Bloccato')}</p><p>${esc(t.desc)}</p>
   ${t.earned?`<p class="muted">Conquistato il ${dayLong(t.awardedAt)}. Bravə!</p>`:`<progress value="${t.count}" max="${t.target}" aria-label="Progresso"></progress><p><strong>${t.count} / ${t.target}</strong> · ${pct}%</p><p class="muted">${left===1?'Ti manca 1 passo':`Ti mancano ${left} passi`} per sbloccarlo.</p>`}
   <button type="button" class="btn">Chiudi</button></div>`;
@@ -1187,86 +1202,27 @@ function openTrophy(t){
  box.onclick=e=>{if(e.target===box)close();};
  const b=box.querySelector('button');b.onclick=close;b.focus();
 }
-function shareCardImage({kicker,headline,subtitle,trophy}){
- const canvas=document.createElement('canvas');
- canvas.width=1080;
- canvas.height=1080;
- const ctx=canvas.getContext('2d');
- if(!ctx)throw new Error('La card non è disponibile in questo browser.');
+async function shareCardImage({headline,subtitle,trophy,trophyId}){
+ await document.fonts.ready;
+ const night=document.documentElement.dataset.theme==='night';
+ const load=src=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('Impossibile caricare la grafica della card.'));im.src=src;});
+ const species=Object.hasOwn(animals,S.me?.avatarSpecies)?S.me.avatarSpecies:'mucca';
+ const tid=Object.hasOwn(window.CCAArt.trofei,trophyId)?trophyId:'cca';
+ const [scene,portrait]=await Promise.all([load(`art/paesaggi/borgo-v2-${night?'notte':'giorno'}.png`),load(trophy?`art/trofei/${tid}.svg`:`art/avatar-v2/${species}.svg`)]);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=1080;
+ const ctx=canvas.getContext('2d');if(!ctx)throw new Error('La card non è disponibile in questo browser.');
  ctx.imageSmoothingEnabled=false;
- const ink='#111111',cream='#FFFFFF',gold='#c6a55b',sky='#bdd9da';
- const block=(color,x,y,w,h)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
- const text=(value,x,y,size,color=ink,max=880)=>{
-  ctx.fillStyle=color;
-  ctx.font=`900 ${size}px system-ui,sans-serif`;
-  ctx.fillText(value,x,y,max);
- };
- function sprite(art,x,y,scale){
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.scale(scale,scale);
-  for(const [,fill,d] of art.matchAll(/<path(?: fill="([^"]+)")? d="([^"]+)"\/>/g)){
-   ctx.fillStyle=fill||ink;
-   ctx.fill(new Path2D(d));
-  }
-  ctx.restore();
- }
- block(sky,0,0,1080,1080);
- // Each graphic unit is aligned to an 8px tile.
- for(const [x,y] of [[72,104],[856,72],[936,336]]){
-  block('#FFFFFF',x,y,64,16);
-  block('#FFFFFF',x+16,y-16,32,16);
- }
- block(ink,56,40,984,1008);
- block(cream,40,24,984,1008);
- block(ink,40,24,984,8);
- block(ink,40,24,8,1008);
- block(ink,1016,24,8,1008);
- block(ink,40,1024,984,8);
- ctx.textAlign='center';
- text('CCA SIEMMU',532,113,58);
- text('E BONI SIEMMU',532,151,23,'#506052');
- block(ink,104,198,856,62);
- block(trophy?gold:'#B30016',96,190,856,62);
- text(kicker,524,232,24);
- // A pixel stage frames the character like an RPG portrait.
- block('#F5F5F5',112,282,840,320);
- block('#96c3b0',112,530,840,72);
- block('#66937a',112,562,840,40);
- for(const [x,y,w] of [[112,506,128],[240,482,112],[352,522,104],[648,514,120],[768,490,184]]){
-  block('#3e6b62',x,y,w,64);
-  block('#85ac87',x+16,y+16,w-32,32);
- }
- block(ink,400,298,264,264);
- block(trophy?gold:'#F5F5F5',392,290,264,264);
- block(cream,408,306,232,232);
- const saved=pref.get('species','mucca');
- const species=Object.hasOwn(animals,saved)?saved:'mucca';
- sprite(trophy?navIcons.missioni:animals[species].art,428,318,12);
- if(!trophy)sprite(chibiFace(species),428,318,12);
- for(const [x,y] of [[288,344],[744,392],[680,300]]){
-  block('#c6a55b',x-8,y-24,16,48);
-  block('#c6a55b',x-24,y-8,48,16);
-  block('#FFFFFF',x-4,y-12,8,24);
- }
- ctx.font='900 62px system-ui,sans-serif';
- const lines=[];
- let line='';
- for(const word of headline.split(' ')){
-  const next=line?line+' '+word:word;
-  if(line&&ctx.measureText(next).width>800){lines.push(line);line=word;}
-  else line=next;
- }
- if(line)lines.push(line);
- lines.slice(0,3).forEach((value,i)=>text(value,532,686+i*64,62));
- const subtitleY=Math.max(794,710+(lines.length-1)*64);
- text(subtitle,532,subtitleY,30);
- const l=level(S.totals.xp);
- for(let i=0;i<16;i++){
-  block(ink,148+i*48,866,40,24);
-  block(trophy||l.top||i<Math.floor(l.progress/l.range*16)?'#c6a55b':'#c9c4ba',152+i*48,870,32,16);
- }
- text('CAMMARATA + SAN GIOVANNI GEMINI',532,960,21,'#506052');
+ const bg=night?'#253841':'#FFF1CB',ink=night?'#FFF1CB':'#29251F';
+ const block=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h);};
+ const text=(value,x,y,size,max)=>{ctx.fillStyle=ink;ctx.font=`700 ${size}px "Atkinson Hyperlegible Next",sans-serif`;ctx.fillText(value,x,y,max);};
+ block(bg,0,0,1080,1080);ctx.strokeStyle=ink;ctx.lineWidth=8;ctx.strokeRect(24,24,1032,1032);
+ const crop=scene.height-(scene.width*470/1024);ctx.drawImage(scene,0,Math.max(0,crop/2),scene.width,scene.width*470/1024,28,28,1024,470);
+ block(bg,60,60,402,100);ctx.lineWidth=6;ctx.strokeRect(60,60,402,100);text('CCA SIEMMU',88,123,47,360);
+ block('#E4D3A4',76,544,288,288);ctx.lineWidth=8;ctx.strokeRect(76,544,288,288);ctx.drawImage(portrait,92,560,256,256);
+ text(trophy?'TRAGUARDO RAGGIUNTO':'IL TUO PERCORSO',414,587,28,570);
+ text(headline,414,657,46,570);text(subtitle,414,719,29,570);
+ block('#423A2C',414,764,570,30);const l=level(S.totals.xp);block('#E6B94D',418,768,Math.max(0,Math.min(562,trophy||l.top?562:562*l.progress/l.range)),22);
+ text('E boni siemmu.',78,921,47,900);text('Cammarata + San Giovanni Gemini',78,974,27,930);
  return canvas.toDataURL('image/png');
 }
 
@@ -1274,9 +1230,9 @@ async function shareProgress(trophy){
  if(!S.me)return;
  const l=level(S.totals.xp);
  try{
-  const png=shareCardImage(trophy
-   ?{kicker:'TROFEO SBLOCCATO',headline:trophy.name,subtitle:'E boni siemmu!',trophy:true}
-   :{kicker:'IL MIO PERCORSO',headline:l.name,subtitle:`Livello ${l.number} · ${l.xp} XP`});
+  const png=await shareCardImage(trophy
+   ?{kicker:'TROFEO SBLOCCATO',headline:trophy.name,subtitle:'E boni siemmu!',trophy:true,trophyId:trophy.id}
+   :{kicker:'IL MIO PERCORSO',headline:`Livello ${l.number} · ${l.name}`,subtitle:`${l.xp} XP permanenti`});
   const filename=trophy?'cca-siemmu-trofeo.png':'cca-siemmu-progressi.png';
   if(typeof File==='function'&&navigator.share&&navigator.canShare){
    const bytes=Uint8Array.from(atob(png.split(',')[1]),c=>c.charCodeAt(0));
@@ -1302,7 +1258,7 @@ function taskFeedback(title,message,offer=false){
  const dialog=document.createElement('dialog');dialog.className='mu-task-dialog';
  dialog.setAttribute('aria-labelledby','mu-task-title');dialog.innerHTML=`<h2 id="mu-task-title">${esc(title)}</h2>${cowMascot('felice',message)}${offer?'<a href="#missioni" class="btn">Scegli una missione →</a>':''}<form method="dialog"><button>${offer?'Non ora':'Va bene'}</button></form>`;
  dialog.addEventListener('close',()=>{const next=dialog.dataset.focusTarget&&document.getElementById(dialog.dataset.focusTarget);dialog.remove();if(next){next.focus({preventScroll:true});next.scrollIntoView({block:'start'});}else main.focus({preventScroll:true});},{once:true});
- dialog.querySelector('a')?.addEventListener('click',()=>dialog.close());document.body.append(dialog);dialog.showModal();return dialog;
+ dialog.querySelector('a')?.addEventListener('click',()=>dialog.close());document.body.append(dialog);dialog.showModal();playSound('open');return dialog;
 }
 function refreshMissionChoices(){const el=document.querySelector('#mission-available');if(el)el.innerHTML=availableMissions();main.querySelectorAll('[data-action="mission-category"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===missionCategory)));}
 main.addEventListener('input',event=>{
@@ -1321,6 +1277,14 @@ main.addEventListener('input',event=>{
  status.textContent=shown===0?'Nessun socio trovato.':shown===1?'1 socio trovato.':`${shown} soci trovati.`;
 });
 const actions={
+ 'joy-all-missions'(){missionSearch='';missionCategory='recommended';missionPage=0;const input=document.querySelector('#mission-search');if(input)input.value='';refreshMissionChoices();},
+ async 'joy-greeting'(){await run(()=>api('/my/joy/greeting',{method:'POST',body:{}}),'Un saluto dalla piazza: +1 Tumazzu.');},
+ async 'joy-bundle'(_id,el){await window.CCAJoy?.openBundle(el);},
+ async 'joy-equip'(id){await run(()=>api('/my/joy/decoration',{method:'PUT',body:{decoration:id}}),'Cornice salvata nel tuo account.');},
+ async 'joy-interest'(id){await run(()=>api('/auth/profile',{method:'PATCH',body:{interests:[...new Set([...(S.me.interests||[]),id])]}}),'Interesse salvato: i consigli si adattano a te.');},
+ async 'approve-access'(id){
+  await run(async()=>{const d=await api('/members/'+encodeURIComponent(id)+'/approve',{method:'POST',body:{}});S.invite=d.invite;emailBanner(d.invite,'il nuovo socio');},null);
+ },
  async 'push-toggle'(){let msg='';if(await run(async()=>{msg=await togglePush();},null))say(msg);},
  'mission-category'(id){missionCategory=id;missionPage=0;refreshMissionChoices();},
  'mission-page'(id){missionPage=Math.max(0,missionPage+(id==='next'?1:-1));refreshMissionChoices();},
@@ -1333,13 +1297,17 @@ const actions={
   const ok=await run(async()=>{try{await api('/my/assignments/'+encodeURIComponent(id)+'/finish',{method:'POST',body:{note:document.querySelector('#assignment-note-'+id)?.value||''}});}catch(e){failure=e.status===0?'Non ho ricevuto conferma dal server. Aggiorna la pagina prima di riprovare.':e.message;throw e;}},null,{rerender:false});
   popup.querySelector('h2').textContent=ok?'✓ Richiesta inviata':'Controlla la richiesta';
   popup.querySelector('.mascot p').textContent=ok?'Richiesta salvata. Ora il referente verifica il lavoro. XP e Tumazzi arrivano dopo la convalida.':failure||'Non ho ricevuto conferma. Aggiorna la pagina prima di riprovare.';
-  if(ok){await render();popup.dataset.focusTarget='mission-waiting';}else{el.innerHTML=original;el.classList.remove('completion-tapped');}
+  if(ok){playSound('success');window.CCAJoy?.stamp('IN VERIFICA',false);await render();popup.dataset.focusTarget='mission-waiting';}else{el.innerHTML=original;el.classList.remove('completion-tapped');}
  },
  async 'spin-wheel'(){
   main.querySelector('.wheel-stage')?.classList.add('wheel-spinning');
   let prize;
-  await run(async()=>{const [d]=await Promise.all([api('/my/daily-wheel',{method:'POST',body:{}}),new Promise(r=>setTimeout(r,matchMedia('(prefers-reduced-motion: reduce)').matches?0:900))]);prize=d.prize;},null);
-  if(prize)say(dailyText(prize));
+  await run(async()=>{const [d]=await Promise.all([api('/my/daily-wheel',{method:'POST',body:{}}),new Promise(r=>setTimeout(r,matchMedia('(prefers-reduced-motion: reduce)').matches?0:1600))]);prize=d.prize;},null);
+  if(prize){
+   say(dailyText(prize));
+   const wheel=main.querySelector('.daily-wheel');
+   if(wheel&&!matchMedia('(prefers-reduced-motion: reduce)').matches)wheel.classList.add('wheel-result');
+  }
  },
  async 'team-join'(id){await run(()=>api('/team-quests/'+encodeURIComponent(id)+'/join',{method:'POST',body:{}}),'Iscrizione alla squadra salvata.');},
  async 'team-leave'(id){await run(()=>api('/team-quests/'+encodeURIComponent(id)+'/leave',{method:'POST',body:{}}),'Iscrizione ritirata. Nessuna penalità.');},
@@ -1354,15 +1322,15 @@ const actions={
  reload:()=>render(),
  trophy(id){const t=(S.trophies||[]).find(x=>x.id===id);if(t)openTrophy(t);},
  theme(){document.querySelector('#theme-toggle').click();render();},
- tvzoom(id){const z=Math.min(1.6,Math.max(.6,Number(pref.get('tvzoom',1))+(id==='up'?.1:-.1)));pref.set('tvzoom',z.toFixed(2));const el=document.querySelector('.tv-screen');if(el)el.style.setProperty('--tvz',z);},
- async checkin(){const ok=await run(()=>api('/checkin',{method:'POST',body:{direction:'IN'}}),'Check-in registrato.');if(ok)taskFeedback('✓ Sei in sede!', 'Ti va di dare una mano? Scegli una missione: i premi arrivano dopo la verifica.',true);},
+ tvzoom(id){const z=tvZoom(tvZoom(pref.get('tvzoom',1))+(id==='up'?.05:-.05));pref.set('tvzoom',z.toFixed(2));const el=document.querySelector('.tv-screen');if(el)el.style.setProperty('--tvz',z);},
+ async checkin(){const ok=await run(()=>api('/checkin',{method:'POST',body:{direction:'IN'}}),'Check-in registrato.');if(ok){taskFeedback('✓ Sei in sede!', 'Ti va di dare una mano? Scegli una missione: i premi arrivano dopo la verifica.',true);window.CCAJoy?.stamp('INGRESSO REGISTRATO',false);}},
  print:()=>window.print(),
  async copy(id){try{await navigator.clipboard.writeText(id);say('Link copiato.');}catch{window.prompt('Copia il link:',id);}},
  async checkout(){await run(()=>api('/checkout',{method:'POST',body:{}}),'Uscita registrata. A presto!');},
  async rotate(){if(!await confirmAction('Il vecchio QR smetterà di funzionare e dovrai ristampare il cartello. Continuare?'))return;await run(()=>api('/checkin-code/rotate',{method:'POST',body:{}}),'Codice cambiato: ristampa il cartello.');},
  async redeem(id){let r;await run(async()=>{r=await api(`/rewards/${encodeURIComponent(id)}/redeem`,{method:'POST',body:{}});},null,{rerender:false})&&(say(`Premio riscattato! ${r.emailSent?'Ti abbiamo scritto una email con le istruzioni.':'Passa in sede per ritirarlo.'}`),await render());},
  async redeemCancel(id){await run(()=>api(`/redemptions/${encodeURIComponent(id)}/cancel`,{method:'POST',body:{}}),'Riscatto annullato: i Tumazzi sono tornati.');},
- async redDeliver(id){await run(()=>api(`/redemptions/${encodeURIComponent(id)}/deliver`,{method:'POST',body:{}}),'Premio consegnato. Il socio è stato avvisato anche via email.');},
+ async redDeliver(id){await run(()=>api(`/redemptions/${encodeURIComponent(id)}/deliver`,{method:'POST',body:{}}),'Premio consegnato. Il socio trova la conferma nelle notifiche.');},
  async rewardActive(id,el){await run(()=>api(`/rewards/${encodeURIComponent(id)}`,{method:'PATCH',body:{active:el.dataset.active==='1'}}),'Vetrina aggiornata.');},
  async xAccept(id){await run(()=>api(`/time-exchanges/${encodeURIComponent(id)}/accept`,{method:'POST',body:{}}),'Richiesta accettata.');},
  async xDecline(id){await run(()=>api(`/time-exchanges/${encodeURIComponent(id)}/decline`,{method:'POST',body:{}}),'Richiesta rifiutata.');},
@@ -1406,7 +1374,7 @@ function confirmAction(message){
   dialog.setAttribute('aria-labelledby','confirm-title');dialog.setAttribute('aria-describedby','confirm-message');
   dialog.innerHTML=`<h2 id="confirm-title">Confermi l’operazione?</h2><p id="confirm-message">${esc(message)}</p><form method="dialog"><button value="cancel" class="secondary" autofocus>Torna indietro</button><button value="confirm">Conferma</button></form>`;
   dialog.addEventListener('close',()=>{const ok=dialog.returnValue==='confirm';dialog.remove();resolve(ok);},{once:true});
-  document.body.append(dialog);dialog.showModal();
+  document.body.append(dialog);dialog.showModal();playSound('open');
  });
 }
 const destructiveActions={
@@ -1445,10 +1413,13 @@ main.addEventListener('click',async event=>{
 });
 
 const submits={
+ async 'joy-idea'(f,v){await run(()=>api('/proposals',{method:'POST',body:{title:v('title'),description:''}}),'La tua idea è in piazza: ora il gruppo può votarla.');},
+ async 'joy-goal'(f,v){await run(async()=>{const {entry}=await api('/my/learning-journal');await api('/my/learning-journal',{method:'PUT',body:{...entry,goal:v('goal')}});},'Obiettivo salvato nel Diario Youthpass.');},
  async 'team-create'(f,v){await run(()=>api('/team-quests',{method:'POST',body:{title:v('title'),description:v('description'),needed:Number(v('needed')),xp:Number(v('xp')),badge:v('badge')}}),'Impresa pubblicata.');},
  async 'team-complete'(f,v,id){
   if(!await confirmAction('Convalidare il lavoro di tutta la squadra? XP e trofeo saranno assegnati a tutti gli iscritti.'))return;
-  await run(()=>api('/team-quests/'+encodeURIComponent(id)+'/complete',{method:'POST',body:{verified:f.elements.verified.checked}}),'Impresa completata: bonus e trofei assegnati alla squadra.');
+  let result;const ok=await run(async()=>{result=await api('/team-quests/'+encodeURIComponent(id)+'/complete',{method:'POST',body:{verified:f.elements.verified.checked}});},'Impresa completata: bonus e trofei assegnati alla squadra.');
+  if(ok&&result.party){window.CCAJoy?.stamp('FESTA DI PAESE');say('Festa di Paese! 5 Tumazzi extra a ogni componente della squadra.');}
  },
  async 'achievement-sharing'(f){await run(()=>api('/my/achievement-sharing',{method:'PUT',body:{enabled:f.elements.enabled.checked}}),'Scelta bacheca salvata.');},
  async visit(_f,v){
@@ -1468,7 +1439,8 @@ const submits={
   await run(()=>api(`/activities/${encodeURIComponent(id)}/attendance`,{method:'POST',body:{memberId:v('memberId')}}),'Presenza registrata.');
  },
  async learning(_f,v){
-  await run(()=>api('/my/learning-journal',{method:'PUT',body:{goal:v('goal'),evidence:v('evidence'),reflection:v('reflection')}}),'Riflessione salvata nel tuo account.',{rerender:false});
+  const ok=await run(()=>api('/my/learning-journal',{method:'PUT',body:{goal:v('goal'),evidence:v('evidence'),reflection:v('reflection')}}),'Riflessione salvata nel tuo account.',{rerender:false});
+  if(ok){await window.CCAJoy?.sync();window.CCAJoy?.afterRender();}
  },
  async request(f,v){await run(()=>api(`/time-offers/${encodeURIComponent(f.dataset.id)}/request`,{method:'POST',body:{note:v('note')}}),'Richiesta inviata: chi offre l’ora riceve un avviso.');},
  async offer(f,v){await run(()=>api('/time-offers',{method:'POST',body:{title:v('title'),description:v('description')}}),'Offerta pubblicata.');},
@@ -1478,6 +1450,10 @@ const submits={
  async schedule(f,v){await run(()=>api(`/proposals/${encodeURIComponent(f.dataset.id)}/schedule`,{method:'POST',body:{startsAt:Math.floor(new Date(v('startsAt')).getTime()/1000)}}),'Proposta in calendario (bozza): completala in Referenti → Attività. Chi l’ha proposta è stato avvisato.');},
  async reward(f,v){await run(()=>api('/rewards',{method:'POST',body:{name:v('name'),description:v('description'),cost:Number(v('cost')),quantity:v('quantity')===''?null:Number(v('quantity')),art:v('art')}}),'Premio aggiunto alla vetrina.');},
  async rewardedit(f,v){await run(()=>api(`/rewards/${encodeURIComponent(f.dataset.id)}`,{method:'PATCH',body:{cost:Number(v('cost')),quantity:v('quantity')===''?null:Number(v('quantity'))}}),'Premio aggiornato.');},
+ async 'request-access'(f,v){
+  const ok=await run(async()=>{const d=await api('/auth/request-access',{method:'POST',body:{fullName:v('fullName'),email:v('email')}});say(d.message);},null,{rerender:false});
+  if(ok)f.reset();
+ },
  async login(f,v){
   const ok=await run(async()=>{const d=await api('/auth/login',{method:'POST',body:{email:v('email'),password:v('password')}});S.me=d.member;},null,{rerender:false});
   if(ok){await refreshTotals();let next=v('next')==='#banca'?'#banca':'#home';try{if(next==='#home')next=sessionStorage.getItem('cca-after-login')||next;sessionStorage.removeItem('cca-after-login');}catch{}location.hash=next;await render(true);say('Bentornatə!');}
@@ -1490,7 +1466,7 @@ const submits={
  async nick(f,v){await run(async()=>{const d=await api('/auth/profile',{method:'PATCH',body:{pseudonym:v('pseudonym')}});S.me=d.member;},'Nome utente aggiornato.');},
  async interests(f,v){const list=[...f.querySelectorAll('input[name=interest]:checked')].map(i=>i.value);await run(async()=>{const d=await api('/auth/profile',{method:'PATCH',body:{interests:list}});S.me=d.member;},'Interessi salvati.');},
  async changepw(f,v){if(await run(()=>api('/auth/change-password',{method:'POST',body:{current:v('current'),next:v('next')}}),'Password cambiata.',{rerender:false}))f.reset();},
- avatar(f,v){pref.set('species',v('species')||'mucca');pref.set('color',v('color')||'rosa');say('Avatar salvato.');return render();},
+ async avatar(f,v){await run(async()=>{const d=await api('/auth/profile',{method:'PATCH',body:{avatarSpecies:v('species'),avatarColor:v('color')}});S.me=d.member;},'Avatar salvato.');},
  async chore(f,v,id){if(await run(()=>api('/chores',{method:'POST',body:{typeId:id,note:v('note')}}),'Richiesta inviata: un referente la verificherà.'))return;},
  async member(f,v){
   let out;
@@ -1525,23 +1501,30 @@ main.addEventListener('submit',async event=>{
  try{await handler(f,v,f.dataset.id);}finally{if(submit)submit.disabled=false;}
 });
 let audio;
-function playClick(){
+const soundNotes = {
+ click: [660],
+ open: [440, 587],
+ success: [523, 659, 784]
+};
+function playSound(cue){
+ if(pref.get('sound','off')!=='on')return;
  const Audio=window.AudioContext||window.webkitAudioContext;
  if(!Audio)return;
  try{
   audio??=new Audio();
   const play=()=>{
-   const time=audio.currentTime;
-   const oscillator=audio.createOscillator();
-   const gain=audio.createGain();
-   oscillator.type='triangle';
-   oscillator.frequency.setValueAtTime(660,time);
-   oscillator.frequency.setValueAtTime(480,time+.03);
-   gain.gain.setValueAtTime(.055,time);
-   gain.gain.exponentialRampToValueAtTime(.001,time+.075);
-   oscillator.connect(gain).connect(audio.destination);
-   oscillator.start(time);
-   oscillator.stop(time+.08);
+   soundNotes[cue].forEach((frequency,index)=>{
+    const time=audio.currentTime+index*.055;
+    const oscillator=audio.createOscillator();
+    const gain=audio.createGain();
+    oscillator.type='square';
+    oscillator.frequency.setValueAtTime(frequency,time);
+    gain.gain.setValueAtTime(.025,time);
+    gain.gain.exponentialRampToValueAtTime(.001,time+.05);
+    oscillator.connect(gain).connect(audio.destination);
+    oscillator.start(time);
+    oscillator.stop(time+.055);
+   });
   };
   if(audio.state==='running')play();
   else audio.resume().then(play).catch(()=>{});
@@ -1549,7 +1532,9 @@ function playClick(){
 }
 document.addEventListener('click',event=>{
  const control=event.target.closest('button, a[href], summary');
- if(control&&!control.matches(':disabled,[aria-disabled="true"]')&&pref.get('sound','off')==='on')playClick();
+ if(!control||control.matches(':disabled,[aria-disabled="true"]'))return;
+ const opensDetails=control.matches('summary')&&control.parentElement.matches('details:not([open])');
+ playSound(opensDetails?'open':'click');
 },true);
 main.addEventListener('change',event=>{
  if(event.target.matches('form[data-form="avatar"] input[name="color"]')){
@@ -1561,7 +1546,7 @@ main.addEventListener('change',event=>{
 
  if(event.target.id!=='sound-toggle')return;
  pref.set('sound',event.target.checked?'on':'off');
- if(event.target.checked)playClick();
+ if(event.target.checked)playSound('click');
 });
 
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){updateDateIndicators();if(S.me)recordAppDay();}});

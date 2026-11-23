@@ -19,11 +19,18 @@ import * as putia from './routes/putia.mjs';
 import * as banca from './routes/banca.mjs';
 import * as proposte from './routes/proposte.mjs';
 import * as feedback from './routes/feedback.mjs';
+import * as joy from './routes/joy.mjs';
 import * as push from './routes/push.mjs';
 import {runDaily, runFrequent} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
 const routes = [
+ ['GET','/api/my/joy','member',joy.state],
+ ['POST','/api/my/joy/greeting','member',joy.greet],
+ ['POST','/api/my/joy/weekly','member',joy.claimWeek],
+ ['POST','/api/my/joy/bundle','member',joy.bundle],
+ ['POST','/api/my/joy/seen','member',joy.seen],
+ ['PUT','/api/my/joy/decoration','member',joy.equip],
  ['GET','/api/my/assignments','member',assignments.list],
  ['POST','/api/my/assignments','member',assignments.take],
  ['POST','/api/my/assignments/:id/finish','member',assignments.finish],
@@ -47,6 +54,7 @@ const routes = [
  ['GET', '/api/community', 'public', stats.community],
  ['GET', '/api/space/visit', 'public', space.visit],
  ['PUT', '/api/space/visit', 'organizer', space.saveVisit],
+ ['GET', '/api/calendar/assembly', 'public', space.calendarAssembly],
  ['GET', '/api/assembly', 'member', space.assembly],
  ['PUT', '/api/assembly/meeting', 'organizer', space.saveAssembly],
  ['POST', '/api/assembly/decisions', 'organizer', space.saveDecision],
@@ -56,6 +64,8 @@ const routes = [
  ['POST', '/api/auth/change-password', 'member', auth.changePassword],
  ['PATCH', '/api/auth/profile', 'member', auth.updateProfile],
 
+ ['POST', '/api/auth/request-access', 'public', members.requestAccess],
+ ['POST', '/api/members/:id/approve', 'organizer', members.approve],
  ['GET', '/api/members', 'organizer', members.list],
  ['POST', '/api/members', 'organizer', members.create],
  ['PATCH', '/api/members/:id', 'organizer', members.update],

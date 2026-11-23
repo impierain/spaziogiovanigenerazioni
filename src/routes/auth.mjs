@@ -1,3 +1,4 @@
+import {microAward} from './joy.mjs';
 import {fail, json, readJson, email, text} from '../lib/http.mjs';
 import {hashPassword, passwordProblem, verifyPassword} from '../lib/password.mjs';
 import {EXPIRED_COOKIE, endSession, startSession} from '../lib/session.mjs';
@@ -11,6 +12,7 @@ const WINDOW_SECONDS = 15 * 60;
 export const publicMember = member => ({
  id: member.id, email: member.email, pseudonym: member.pseudonym,
  fullName: member.full_name, role: member.role,
+ avatarSpecies: member.avatar_species, avatarColor: member.avatar_color,
  interests: String(member.interests || '').split(',').filter(Boolean)
 });
 
@@ -29,7 +31,7 @@ export async function login({request, db}) {
   FROM auth_attempts WHERE email = ? AND at > ?`).bind(ip, address, since).first();
  if (failed.mine >= MAX_FAILED || failed.total >= MAX_FAILED_EMAIL) fail(429, 'Troppi tentativi. Riprova tra qualche minuto.');
 
- const member = await db.prepare(`SELECT id, email, pseudonym, full_name, role, status, interests, password_hash
+ const member = await db.prepare(`SELECT id, email, pseudonym, full_name, role, status, interests, avatar_species, avatar_color, password_hash
   FROM members WHERE email = ?`).bind(address).first();
  const valid = await verifyPassword(password, member?.password_hash);
  if (!member || !valid || member.status !== 'approved') {
@@ -88,7 +90,7 @@ export async function setPassword({request, db}) {
  ]);
  if (!updated.meta.changes) fail(404, 'Il link non è valido o è scaduto.');
  const cookie = await startSession(db, row.member_id);
- const member = await db.prepare('SELECT id, email, pseudonym, full_name, role, interests FROM members WHERE id = ?').bind(row.member_id).first();
+ const member = await db.prepare('SELECT id, email, pseudonym, full_name, role, interests, avatar_species, avatar_color FROM members WHERE id = ?').bind(row.member_id).first();
  return json({member: publicMember(member)}, 200, {'Set-Cookie': cookie});
 }
 
@@ -116,7 +118,9 @@ export async function changePassword({request, db, member}) {
  return json({ok: true});
 }
 
-// Il socio cambia da solo il proprio nome utente e i propri interessi.
+// Il socio può aggiornare le preferenze del proprio profilo.
+const AVATAR_SPECIES = new Set(['mucca', 'pecora', 'gallina', 'asino', 'maiale', 'capra', 'ricotta', 'ficodindia', 'torre', 'serpente', 'cane', 'civetta', 'leone', 'dinosauro', 'esploratrice', 'mago', 'cavaliere', 'artigiana']);
+const AVATAR_COLORS = new Set(['rosa', 'verde', 'blu', 'sole', 'terracotta', 'viola', 'ottanio', 'crema', 'rosso', 'bosco', 'cobalto', 'prugna', 'arcobaleno']);
 const INTEREST_PATHS = ['studio', 'creativita', 'socialita', 'cittadinanza', 'solidarieta'];
 export async function updateProfile({request, db, member}) {
  const body = await readJson(request);
@@ -127,8 +131,17 @@ export async function updateProfile({request, db, member}) {
   if (!Array.isArray(body.interests) || body.interests.some(i => !INTEREST_PATHS.includes(i))) fail(400, 'Interessi non validi.');
   sets.push('interests = ?'); values.push([...new Set(body.interests)].join(','));
  }
+ if ('avatarSpecies' in body || 'avatarColor' in body) {
+  if (!AVATAR_SPECIES.has(body.avatarSpecies) || !AVATAR_COLORS.has(body.avatarColor)) {
+   fail(400, 'Avatar o colore non valido.');
+  }
+  sets.push('avatar_species = ?', 'avatar_color = ?');
+  values.push(body.avatarSpecies, body.avatarColor);
+ }
  if (!sets.length) fail(400, 'Nessuna modifica indicata.');
  await db.prepare(`UPDATE members SET ${sets.join(', ')} WHERE id = ?`).bind(...values, member.id).run();
- const row = await db.prepare('SELECT id, email, pseudonym, full_name, role, interests FROM members WHERE id = ?').bind(member.id).first();
+ if ('avatarSpecies' in body) await db.prepare("INSERT OR IGNORE INTO joy_marks(member_id,mark) VALUES(?,'avatar')").bind(member.id).run();
+ if (Array.isArray(body.interests)&&body.interests.length&&[...new Set(body.interests)].join(',')!==member.interests) await microAward(db,member.id,'interesse');
+ const row = await db.prepare('SELECT id, email, pseudonym, full_name, role, interests, avatar_species, avatar_color FROM members WHERE id = ?').bind(member.id).first();
  return json({member: publicMember(row)});
 }

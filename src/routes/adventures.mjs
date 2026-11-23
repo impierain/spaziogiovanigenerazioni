@@ -56,7 +56,8 @@ export async function complete({db,member,params,request}){
  }catch(e){if(String(e).includes('team_not_verifiable'))fail(409,'Squadra incompleta, socio non attivo oppure stai verificando una tua impresa.');throw e;}
  const {results}=await db.prepare('SELECT member_id FROM team_signups WHERE quest_id=?').bind(params.id).all();
  await Promise.all(results.map(r=>notify(db,r.member_id,{kind:'impresa',title:'Impresa completata!',body:'Hai ricevuto il bonus XP e il trofeo di squadra. Li trovi nel Profilo e nei Trofei.'})));
- return json({completed:true});
+ const party=await db.prepare('SELECT won FROM team_party_roll WHERE quest_id=?').bind(params.id).first();
+ return json({completed:true,party:!!party?.won,partyCheese:party?.won?5:0});
 }
 export async function cancel({db,params}){
  const r=await db.prepare("UPDATE team_quests SET status='cancelled' WHERE id=? AND status IN ('forming','ready')").bind(params.id).run();

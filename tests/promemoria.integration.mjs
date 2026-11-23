@@ -151,6 +151,7 @@ const st2=await (await call('/push/status',{actor:'c'})).json();assert.equal(st2
 const ov2=await (await call('/push/overview',{actor:'b'})).json();const rowC=ov2.members.find(m=>m.name==='Terza');assert.equal(rowC.received,true);assert.equal(rowC.verified,false);
 const okc=await call('/push/confirm',{actor:'c',method:'POST',body:{}});assert.equal(okc.status,200);assert.deepEqual((await okc.json()).reward,{cheese:1});
 assert.equal((await (await call('/push/status',{actor:'c'})).json()).confirmed,true);
+const again2=await call('/push/confirm',{actor:'c',method:'POST',body:{}});assert.equal(again2.status,200);assert.equal((await again2.json()).reward,null);   // seconda chiamata: nessun errore
 globalThis.fetch=origFetch;
 assert.equal(typeof (await (await call('/push/key',{actor:'a'})).json()).publicKey,'string');
 let pushed=0,mails=0;const realFetch=globalThis.fetch;

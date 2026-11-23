@@ -696,7 +696,7 @@ function privacy(){
   card('<h3>Comunità e Youthpass</h3><p class="reading-copy">Se usi la Banca del tempo o pubblichi una proposta, gli altri soci vedono lo pseudonimo e ciò che pubblichi. Le note di uno scambio sono visibili alle persone coinvolte. Il diario Youthpass è accessibile dal tuo account e resta fuori dal pannello referenti. Puoi svuotarlo e salvare per cancellare il testo.</p>'),
   card('<h3>Sicurezza</h3><p class="reading-copy">Per proteggere gli account e limitare tentativi di accesso abusivi trattiamo le informazioni tecniche necessarie, compresi l’email e l’indirizzo IP usati nei tentativi di accesso falliti e nei tentativi di cambio password. I tentativi contano per 15 minuti; quelli più vecchi non vengono più considerati e si eliminano alla successiva operazione di accesso. Cloudflare, che ospita il sito, tratta l’indirizzo IP anche per erogare e proteggere il servizio.</p>'),
   card('<h3>Valutazioni e suggerimenti</h3><p class="reading-copy">Dopo alcuni giorni d’uso ti chiediamo, in modo facoltativo, una valutazione da 1 a 5 con un commento. I referenti vedono voto e commento senza il tuo nome. Nella pagina «Suggerisci una modifica» puoi scrivere un suggerimento, una critica o un’idea: arriva nella bacheca dei referenti con il tuo pseudonimo, a meno che tu scelga l’invio anonimo. Anche i suggerimenti anonimi restano collegati al tuo account nel database, solo per limitarne l’abuso; i referenti non lo vedono. Non scrivere dati personali tuoi o di altri nel testo. Conserviamo valutazioni e suggerimenti per un anno, poi vengono cancellati; le copie in bacheca si eliminano dopo 90 giorni.</p>'),
-  card('<h3>Notifiche sul telefono</h3><p class="reading-copy">Se le attivi dal profilo, salviamo l’identificativo tecnico del tuo dispositivo fornito dal browser (indirizzo del servizio push e chiavi di cifratura) per inviarti i promemoria, per esempio «Sei ancora in sede?». Passano dal servizio push del tuo browser (Google, Apple o Mozilla). Puoi disattivarle in qualsiasi momento dal profilo e il dato viene cancellato. Chi non le attiva riceve gli stessi promemoria via email.</p>'),
+  card('<h3>Notifiche sul telefono</h3><p class="reading-copy">Se le attivi dal profilo, salviamo l’identificativo tecnico del tuo dispositivo fornito dal browser (indirizzo del servizio push e chiavi di cifratura) per inviarti i promemoria, per esempio «Sei ancora in sede?». Ti mandiamo una notifica di prova e registriamo se l’hai confermata. I referenti vedono il tuo pseudonimo, se hai attivato le notifiche e se la prova è riuscita, ma non l’identificativo del dispositivo. Passano dal servizio push del tuo browser (Google, Apple o Mozilla). Puoi disattivarle in qualsiasi momento dal profilo e il dato viene cancellato. Chi non le attiva riceve gli stessi promemoria via email.</p>'),
   card('<h3>Condivisione facoltativa</h3><p class="reading-copy">La card dei progressi o dei trofei si crea sul tuo dispositivo. Contiene il traguardo scelto o il tuo livello e gli XP, con l’avatar selezionato. Salviamo personaggio e colore nel tuo profilo. È priva di nome, email, diario e storico delle presenze. Sei tu a scegliere dove inviarla. Quando usi un’app esterna si applica l’informativa di quell’app.</p>')
  ],'two'))+
  section('Su quale base usiamo i dati',card('<p class="reading-copy">Per gestire l’account e le funzioni di partecipazione usiamo i dati necessari a fornire il servizio richiesto. Per proteggere il sito e gli account, il trattamento si basa sul legittimo interesse alla sicurezza del servizio. Quando la legge impone di conservare o comunicare dati, il trattamento si basa su quell’obbligo.</p>'))+
@@ -813,11 +813,23 @@ async function pushOn(){
  try{return !!await (await navigator.serviceWorker.ready).pushManager.getSubscription();}catch{return false;}
 }
 const iosNotInstalled=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)&&!(navigator.standalone||matchMedia('(display-mode: standalone)').matches);
+async function notificheOk(token){
+ if(!S.me)return needLogin();
+ try{
+  const d=await api('/push/confirm',{method:'POST',body:{token:token||''}});
+  if(d.reward)await refreshTotals();
+  return title('Notifiche verificate!','Ti è arrivata la notifica: funziona.')+card(`<p>${d.reward?'Ti abbiamo regalato <strong>1 Tumazzu</strong>. Grazie!':'Le notifiche su questo dispositivo sono verificate.'}</p>${link('Vai alla home','#home')}`);
+ }catch(e){return title('Conferma non riuscita','')+card(`<p>${esc(e.message)}</p>${link('Vai al profilo','#profilo')}`);}
+}
 async function pushCard(){
  if(iosNotInstalled())return card('<h3>Notifiche sul telefono</h3><p class="muted">Su iPhone funzionano dopo aver aggiunto il sito alla schermata Home: in Safari tocca Condividi → «Aggiungi alla schermata Home», poi apri CCA SIEMMU da lì.</p>');
  if(!pushSupported())return card('<h3>Notifiche sul telefono</h3><p class="muted">Questo browser non supporta le notifiche. Continuerai a ricevere i promemoria via email.</p>');
  const on=await pushOn();
- return card(`<h3>Notifiche sul telefono</h3><p>${on?'Sono attive su questo dispositivo: il promemoria «Sei ancora in sede?» arriva qui, senza email.':'Vuoi ricevere notifiche dall’app? Attivale e ricevi 1 Tumazzu in regalo (una sola volta). I promemoria arrivano direttamente sul telefono, senza email, e puoi disattivarle quando vuoi.'}</p>${btn(on?'Disattiva le notifiche':'Attiva le notifiche','push-toggle','',{secondary:on})}`);
+ const st=on?await api('/push/status').catch(()=>({confirmed:true})):{confirmed:false};
+ const text=!on?'Vuoi ricevere notifiche dall’app? Attivale: ti mandiamo una notifica di prova e, se ti arriva e la confermi, ricevi 1 Tumazzu in regalo (una sola volta). Poi i promemoria arrivano sul telefono, senza email, e puoi disattivarle quando vuoi.'
+  :st.confirmed?'Sono attive e verificate su questo dispositivo: il promemoria «Sei ancora in sede?» arriva qui, senza email.'
+  :'Sono attive, ma non ancora verificate. Cerca la notifica di prova: toccala (o premi «Sì, tutto ok») per confermare e ricevere 1 Tumazzu. Non l’hai ricevuta? Rimandala.';
+ return card(`<h3>Notifiche sul telefono</h3><p>${text}</p>${btn(on?'Disattiva le notifiche':'Attiva le notifiche','push-toggle','',{secondary:on})}${on&&!st.confirmed?' '+btn('Rimanda la notifica di prova','push-resend'):''}`);
 }
 async function togglePush(){
  const reg=await navigator.serviceWorker.ready;
@@ -831,8 +843,7 @@ async function togglePush(){
  const {publicKey}=await api('/push/key');
  const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:keyBytes(publicKey)});
  const done=await api('/push/subscribe',{method:'POST',body:sub.toJSON()});
- if(done.reward)await refreshTotals();
- return done.reward?'Notifiche attivate! Ti abbiamo regalato 1 Tumazzu.':'Notifiche attivate su questo dispositivo.';
+ return done.testSent?'Notifiche attivate. Ti abbiamo mandato una notifica di prova: toccala per ricevere 1 Tumazzu.':done.confirmed?'Notifiche attivate su questo dispositivo.':'Notifiche attivate, ma la prova non è partita. Riprova con «Rimanda la notifica di prova».';
 }
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
@@ -1016,7 +1027,9 @@ async function notifiche(){
  const items=d.notifications;
  const fb=isOrganizer()?await api('/feedback/summary').catch(()=>null):null;
  const fbCard=fb&&fb.count?section('Valutazioni della webapp',card(`<p><strong>${String(fb.average).replace('.',',')}</strong> su 5 · ${fb.count} ${fb.count===1?'valutazione':'valutazioni'} (anonime)</p>${[5,4,3,2,1].map(n=>bar(fb.spread[n]||0,Math.max(...Object.values(fb.spread)),n+' stelle')).join('')}${fb.comments.length?`<h3>Ultimi commenti</h3><ul>${fb.comments.map(c=>`<li>${c.rating}/5 · ${esc(c.message)} <span class="muted">${dateShort(c.createdAt)}</span></li>`).join('')}</ul>`:''}`)):'';
- const html=title('Notifiche','Esiti delle operazioni e avvisi che ti riguardano.')+fbCard+
+ const pv=isOrganizer()?await api('/push/overview').catch(()=>null):null;
+ const pvCard=pv?section('Notifiche sul telefono',card(`<p><strong>${pv.members.length}</strong> su ${pv.totalMembers} soci hanno attivato le notifiche (${pv.members.filter(m=>m.verified).length} verificate).</p>${pv.members.length?`<ul>${pv.members.map(m=>`<li>${esc(m.name)} · ${m.verified?'✓ verificata':'in attesa di conferma'}${m.devices>1?' · '+m.devices+' dispositivi':''}</li>`).join('')}</ul>`:''}`)):'';
+ const html=title('Notifiche','Esiti delle operazioni e avvisi che ti riguardano.')+fbCard+pvCard+
   section('Bacheca',items.length?`<div class="notice-list">${items.map(n=>`<article class="card notice-item notice-${n.level} ${n.read?'':'notice-unread'}"><span class="notice-icon" aria-hidden="true">${levelIcon[n.level]||'ℹ'}</span><div><h3>${esc(missionWording(n.title))}${n.read?'':' '+badge('Nuova')}</h3>${n.body?`<p>${esc(missionWording(n.body))}</p>`:''}<p class="muted">${dateShort(n.createdAt)}</p></div></article>`).join('')}</div>`:card('<p>Nessuna notifica per ora. Qui compariranno gli esiti degli invii email e gli avvisi su prenotazioni e missioni.</p>'));
  if(d.unread){api('/notifications/read',{method:'POST',body:{all:true}}).then(r=>{S.unread=r.unread??0;renderChrome('');}).catch(()=>{});}
  return html;
@@ -1101,7 +1114,7 @@ async function render(focus=false){
  if(!S.loaded)await loadSession();
  else if(S.me){await refreshTotals();checkLevelUp();}
  document.body.classList.toggle('tv',page==='tv');
- const known=['comunita','assemblea','trofei','mercato','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','suggerimenti','imposta-password'];
+ const known=['comunita','assemblea','trofei','mercato','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','suggerimenti','notifiche-ok','imposta-password'];
  const active=known.includes(page)?page:'';
  renderChrome(active);
  await recordAppDay();
@@ -1123,6 +1136,7 @@ async function render(focus=false){
   else if(page==='proposte')html=await proposte();
   else if(page==='privacy')html=privacy();
   else if(page==='suggerimenti')html=await suggerimenti();
+  else if(page==='notifiche-ok')html=await notificheOk(detail);
   else if(page==='tv')html=await tvPage();
   else if(page==='ingresso')html=await ingressoPage(detail);
   else if(page==='cartello')html=await cartello(detail);
@@ -1286,6 +1300,7 @@ const actions={
  async 'approve-access'(id){
   await run(async()=>{const d=await api('/members/'+encodeURIComponent(id)+'/approve',{method:'POST',body:{}});S.invite=d.invite;emailBanner(d.invite,'il nuovo socio');},null);
  },
+ async 'push-resend'(){let msg='';if(await run(async()=>{const sub=await (await navigator.serviceWorker.ready).pushManager.getSubscription();if(!sub)throw new Error('Attiva prima le notifiche.');const d=await api('/push/subscribe',{method:'POST',body:sub.toJSON()});msg=d.testSent?'Notifica di prova inviata: toccala per confermare.':'Non siamo riusciti a mandare la prova. Riprova tra poco.';},null))say(msg);},
  async 'push-toggle'(){let msg='';if(await run(async()=>{msg=await togglePush();},null))say(msg);},
  'mission-category'(id){missionCategory=id;missionPage=0;refreshMissionChoices();},
  'mission-page'(id){missionPage=Math.max(0,missionPage+(id==='next'?1:-1));refreshMissionChoices();},

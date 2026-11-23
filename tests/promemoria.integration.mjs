@@ -105,12 +105,38 @@ assert.equal(wp.allowedEndpoint('https://fcm.googleapis.com.evil.com/x'),false);
 sessions.a??=null;
 const subBody={endpoint:'https://fcm.googleapis.com/fcm/send/xyz',keys:{p256dh:wp.b64u.enc(ua.getPublicKey()),auth:wp.b64u.enc(authSecret)}};
 assert.equal((await call('/push/subscribe',{actor:'a',method:'POST',body:{endpoint:'https://evil.example.com/x',keys:subBody.keys}})).status,400);
+// Attivazione: notifica di prova con codice; il Tumazzu arriva solo alla conferma.
+let sentPayloads=0;const origFetch=globalThis.fetch;
+let lastBody=null;
+globalThis.fetch=async(url,opt)=>{if(String(url).includes('fcm.googleapis.com')){sentPayloads++;lastBody=Buffer.from(opt.body);return new Response('',{status:201});}return new Response('{}',{status:200});};
 const first=await call('/push/subscribe',{actor:'a',method:'POST',body:subBody});
-assert.equal(first.status,201);assert.deepEqual((await first.json()).reward,{cheese:1});
+assert.equal(first.status,201);const fj=await first.json();assert.equal(fj.testSent,true);assert.equal(fj.confirmed,false);assert.equal(sentPayloads,1);
+assert.equal(query("SELECT COUNT(*) AS n FROM joy_rewards WHERE member_id='a' AND ref='notifiche'",[],'first').n,0);   // niente premio senza conferma
+assert.equal(query("SELECT COUNT(*) AS n FROM notifications WHERE member_id='a' AND title LIKE 'Notifiche attive%'",[],'first').n,0); // la prova non va in bacheca
+assert.equal((await call('/push/confirm',{actor:'a',method:'POST',body:{token:'0'.repeat(64)}})).status,400);          // codice inventato
+assert.equal((await call('/push/confirm',{actor:'a',method:'POST',body:{}})).status,400);
+// Il dispositivo decifra il messaggio (implementazione indipendente) e legge il codice di conferma.
+const decrypt=(buf)=>{const salt=buf.subarray(0,16),idl=buf[20],asP=buf.subarray(21,21+idl),ct=buf.subarray(21+idl);
+ const prk2=Buffer.from(nc.hkdfSync('sha256',ua.computeSecret(asP),authSecret,Buffer.concat([Buffer.from('WebPush: info\0'),ua.getPublicKey(),asP]),32));
+ const k=Buffer.from(nc.hkdfSync('sha256',prk2,salt,Buffer.from('Content-Encoding: aes128gcm\0'),16)),n=Buffer.from(nc.hkdfSync('sha256',prk2,salt,Buffer.from('Content-Encoding: nonce\0'),12));
+ const dd=nc.createDecipheriv('aes-128-gcm',k,n);dd.setAuthTag(ct.subarray(ct.length-16));
+ return JSON.parse(Buffer.concat([dd.update(ct.subarray(0,ct.length-16)),dd.final()]).toString('utf8').replace(/\u0002$/,''));};
+const pushed1=decrypt(lastBody);const knownToken=pushed1.token;
+assert.match(knownToken,/^[0-9a-f]{64}$/);assert.equal(pushed1.url,'/#notifiche-ok/'+knownToken);assert.equal(pushed1.actions[0].action,'ok');
+assert.equal((await call('/push/status',{actor:'a'})).status,200);
+assert.equal((await (await call('/push/status',{actor:'a'})).json()).confirmed,false);
+assert.equal((await call('/push/confirm',{actor:'b',method:'POST',body:{token:knownToken}})).status,400);               // il codice vale solo per chi l'ha ricevuto
+const ok=await call('/push/confirm',{actor:'a',method:'POST',body:{token:knownToken}});
+assert.equal(ok.status,200);assert.deepEqual((await ok.json()).reward,{cheese:1});
 assert.equal(query("SELECT cheese FROM joy_rewards WHERE member_id='a' AND kind='micro' AND ref='notifiche'",[],'first').cheese,1);
-const again=await call('/push/subscribe',{actor:'a',method:'POST',body:subBody});            // riattivare non rida il premio
-assert.equal(again.status,201);assert.equal((await again.json()).reward,null);
-assert.equal(query("SELECT COUNT(*) AS n FROM joy_rewards WHERE member_id='a' AND ref='notifiche'",[],'first').n,1);
+assert.equal((await call('/push/confirm',{actor:'a',method:'POST',body:{token:knownToken}})).status,400);               // codice monouso
+assert.equal((await (await call('/push/status',{actor:'a'})).json()).confirmed,true);
+const again=await call('/push/subscribe',{actor:'a',method:'POST',body:subBody});                                       // già verificato: niente nuova prova
+assert.equal((await again.json()).testSent,false);assert.equal(sentPayloads,1);
+assert.equal((await call('/push/overview',{actor:'a'})).status,403);
+const ov=await (await call('/push/overview',{actor:'b'})).json();
+assert.equal(ov.members.length,1);assert.equal(ov.members[0].verified,true);assert.equal(JSON.stringify(ov).includes('fcm.googleapis'),false);
+globalThis.fetch=origFetch;
 assert.equal(typeof (await (await call('/push/key',{actor:'a'})).json()).publicKey,'string');
 let pushed=0,mails=0;const realFetch=globalThis.fetch;
 globalThis.fetch=async(url,opt)=>{if(String(url).includes('fcm.googleapis.com')){pushed++;return new Response('',{status:201});}mails++;return new Response('{}',{status:200});};

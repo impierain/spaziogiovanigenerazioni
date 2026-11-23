@@ -59,6 +59,11 @@ export async function confirm({request, db, member}) {
  } else {
   row = await db.prepare('SELECT id FROM push_subscriptions WHERE member_id = ? AND received_at IS NOT NULL AND confirmed_at IS NULL ORDER BY received_at DESC LIMIT 1').bind(member.id).first();
  }
+ if (!row && !token) {
+  // Seconda chiamata dopo una conferma già riuscita (es. pagina aperta dal tocco + pulsante nell'app): non è un errore.
+  const done = await db.prepare('SELECT id FROM push_subscriptions WHERE member_id = ? AND confirmed_at IS NOT NULL LIMIT 1').bind(member.id).first();
+  if (done) return json({ok: true, reward: null});
+ }
  if (!row) fail(400, token ? 'Conferma non valida o già usata. Dal profilo puoi rimandare la notifica di prova.' : 'La notifica di prova non risulta ancora arrivata su questo dispositivo. Rimandala dal profilo.');
  await db.prepare('UPDATE push_subscriptions SET confirmed_at = unixepoch(), test_token = NULL WHERE id = ?').bind(row.id).run();
  // Un Tumazzu una sola volta in assoluto (chiave: socio + tipo + riferimento).

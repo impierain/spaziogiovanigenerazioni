@@ -21,6 +21,7 @@ import * as proposte from './routes/proposte.mjs';
 import * as feedback from './routes/feedback.mjs';
 import * as joy from './routes/joy.mjs';
 import * as push from './routes/push.mjs';
+import * as aula from './routes/aula.mjs';
 import {runDaily, runFrequent} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
@@ -124,6 +125,8 @@ const routes = [
  ['POST', '/api/proposals/:id/schedule', 'organizer', proposte.schedule],
  ['POST', '/api/proposals/:id/decline', 'organizer', proposte.decline],
 
+ ['GET', '/api/aula/preferenza', 'member', aula.get],
+ ['PUT', '/api/aula/preferenza', 'member', aula.set],
  ['GET', '/api/push/key', 'member', push.key],
  ['POST', '/api/push/subscribe', 'member', push.subscribe],
  ['POST', '/api/push/received', 'member', push.received],

@@ -612,7 +612,7 @@ async function homeMember(){
   const waiting=pending.chores.filter(c=>c.memberId!==S.me.id).length;
   extra=`<section class="admin-compact"><h2>Da gestire (per i referenti)</h2><div class="admin-chips"><a href="#referenti/presenze">${pixelIcon(navIcons.comunita)}<strong>${inside.presenti.length}</strong><span>In sede →</span></a><a href="#referenti/missioni">${pixelIcon(navIcons.missioni)}<strong>${waiting}</strong><span>Da verificare →</span></a></div></section>`;
  }
- return homeIntro()+presenceCta(pres)+(window.CCAJoy?.homePanel()||'')+
+ return homeIntro()+presenceCta(pres)+await aulaCard(false)+(window.CCAJoy?.homePanel()||'')+
  `<div class="grid stats home-stats" aria-label="Personaggio, Tumazzi, orari e partecipazione settimanale">${card(profileChip()+`<a class="profile-wallet" href="#putia" aria-label="${tumazzi(S.totals.cheese)} · apri A Putìa">${pixelIcon(cheese)}<span>Tumazzi</span><strong>${S.totals.cheese}</strong></a>`,'profile-stat')}
  ${openingCard(st)}${streakPanel(streak)}</div>`+
  worldMap()+monthlyGoal(community?.monthlyGoal)+homeShortcuts()+extra+await dailyWheelPanel()+await achievementBoard()+
@@ -821,6 +821,13 @@ async function notificheOk(token){
   return title('Notifiche verificate!','Ti è arrivata la notifica: funziona.')+card(`<p>${d.reward?'Ti abbiamo regalato <strong>1 Tumazzu</strong>. Grazie!':'Le notifiche su questo dispositivo sono verificate.'}</p>${link('Vai alla home','#home')}`);
  }catch(e){return title('Conferma non riuscita','')+card(`<p>${esc(e.message)}</p>${link('Vai al profilo','#profilo')}`);}
 }
+async function aulaCard(always){
+ if(!S.me)return '';
+ const d=await api('/aula/preferenza').catch(()=>null);
+ if(!d||(!always&&!d.ask))return '';
+ if(always)return card(`<h3>Avviso «aula studio aperta»</h3><p>${d.enabled?'Ricevi una notifica quando in sede arriva qualcuno e l’aula studio è aperta (da lunedì a venerdì pomeriggio, una volta al giorno).':'Vuoi sapere quando l’aula studio è aperta? Ti mandiamo una notifica sul telefono quando arriva qualcuno in sede.'}</p>${btn(d.enabled?'Disattiva l’avviso':'Attiva l’avviso',d.enabled?'aula-no':'aula-si','',{secondary:d.enabled})}`);
+ return card(`<h3>Vuoi sapere quando l’aula studio è aperta? 📚</h3><p>Appena arriva qualcuno in sede nel pomeriggio ti mandiamo una notifica sul telefono: una al giorno, mai di più. Puoi cambiare idea dal profilo.</p>${btn('Sì, avvisami','aula-si')} ${btn('Non ora','aula-no','',{secondary:true})}`,'aula-ask');
+}
 async function pushCard(){
  if(iosNotInstalled())return card('<h3>Notifiche sul telefono</h3><p class="muted">Su iPhone funzionano dopo aver aggiunto il sito alla schermata Home: in Safari tocca Condividi → «Aggiungi alla schermata Home», poi apri CCA SIEMMU da lì.</p>');
  if(!pushSupported())return card('<h3>Notifiche sul telefono</h3><p class="muted">Questo browser non supporta le notifiche. Continuerai a ricevere i promemoria via email.</p>');
@@ -869,7 +876,7 @@ async function profilo(){
   card(`<h3>${esc(S.me.fullName||S.me.pseudonym)}</h3><p>${esc(S.me.email)}</p><p>${badge(isOrganizer()?'Referente':'Socio')}</p>${btn('Esci','logout','',{secondary:true})}`),
   form('changepw','<h3>Cambia password</h3>'+field('current','Password attuale','password','required autocomplete="current-password"')+field('next','Nuova password (almeno 10 caratteri)','password','required minlength="10" autocomplete="new-password"'),'Cambia password')
  ],'two')+'</details>')+
- section('Notifiche',await pushCard())+
+ section('Notifiche',await pushCard()+await aulaCard(true))+
  (window.CCAJoy?.decorations()||'')+section('Personalizza il profilo',card(`<details class="disclosure"><summary>Cambia avatar e colore</summary>${form('avatar',picker,'Salva avatar',{cls:'plain'})}<p class="muted">Personaggio e colore sono salvati nel tuo profilo.</p></details>`))+
  section('Preferenze',card(`<label class="sound-setting"><input type="checkbox" id="sound-toggle" ${pref.get('sound','off')==='on'?'checked':''}> Suoni 8-bit</label><p class="muted">Suoni brevi per pulsanti, finestre e azioni completate. La scelta vale su questo browser.</p>${window.CCAJoy?.settings()||''}`))+
  mu('profilo',{streak});
@@ -1305,6 +1312,8 @@ const actions={
  },
  async 'push-confirm'(){let msg='';if(await run(async()=>{const d=await api('/push/confirm',{method:'POST',body:{}});if(d.reward)await refreshTotals();msg=d.reward?'Notifiche verificate! Ti abbiamo regalato 1 Tumazzu.':'Notifiche verificate.';},null))say(msg);},
  async 'push-resend'(){let msg='';if(await run(async()=>{const sub=await (await navigator.serviceWorker.ready).pushManager.getSubscription();if(!sub)throw new Error('Attiva prima le notifiche.');const d=await api('/push/subscribe',{method:'POST',body:sub.toJSON()});msg=d.testSent?'Notifica di prova inviata: toccala per confermare.':'Non siamo riusciti a mandare la prova. Riprova tra poco.';},null))say(msg);},
+ async 'aula-si'(){let msg='';if(await run(async()=>{await api('/aula/preferenza',{method:'PUT',body:{enabled:true}});msg='Fatto: ti avvisiamo quando l’aula studio è aperta.';if(pushSupported()&&!iosNotInstalled()&&!await pushOn()){try{msg=await togglePush()+' '+msg;}catch{msg+=' Per riceverla sul telefono attiva le notifiche dal profilo.';}}},null,{rerender:true}))say(msg);},
+ async 'aula-no'(){await run(()=>api('/aula/preferenza',{method:'PUT',body:{enabled:false}}),'Va bene: l’avviso è disattivato.',{rerender:true});},
  async 'push-toggle'(){let msg='';if(await run(async()=>{msg=await togglePush();},null))say(msg);},
  'mission-category'(id){missionCategory=id;missionPage=0;refreshMissionChoices();},
  'mission-page'(id){missionPage=Math.max(0,missionPage+(id==='next'?1:-1));refreshMissionChoices();},

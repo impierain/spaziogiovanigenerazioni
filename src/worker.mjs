@@ -71,8 +71,6 @@ const routes = [
  ['POST', '/api/members', 'organizer', members.create],
  ['PATCH', '/api/members/:id', 'organizer', members.update],
  ['POST', '/api/members/:id/invite', 'organizer', members.reinvite],
- ['PUT', '/api/members/:id/card', 'organizer', members.setCard],
- ['DELETE', '/api/members/:id/card', 'organizer', members.removeCard],
 
  ['POST', '/api/access', 'organizer', accessi.create],
  ['GET', '/api/checkin', 'member', ingresso.mine],

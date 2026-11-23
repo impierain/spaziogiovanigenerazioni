@@ -1,4 +1,4 @@
-import {fail, json, readJson, email, text, uid} from '../lib/http.mjs';
+import {fail, json, readJson, email, text} from '../lib/http.mjs';
 import {inviteEmail, sendEmail} from '../lib/email.mjs';
 import {newToken} from '../tokens.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
@@ -29,7 +29,7 @@ async function issueInvite(env, db, request, member, actorId) {
 }
 
 const listSql = `SELECT m.id, m.email, m.pseudonym, m.full_name AS fullName, m.phone, m.role, m.status,
-  m.uid_tessera AS uidTessera, m.password_hash IS NOT NULL AS hasPassword, m.created_at AS createdAt,
+  m.password_hash IS NOT NULL AS hasPassword, m.created_at AS createdAt,
   t.xp, t.cheese_earned AS cheese
   FROM members m JOIN member_totals t ON t.member_id = m.id`;
 
@@ -109,25 +109,6 @@ export async function update({request, db, member, params}) {
   throw error;
  }
  return json({member: shape(await db.prepare(`${listSql} WHERE m.id = ?`).bind(target.id).first())});
-}
-
-export async function setCard({request, db, params}) {
- const body = await readJson(request);
- const code = uid(body.uid);
- try {
-  const result = await db.prepare('UPDATE members SET uid_tessera = ? WHERE id = ?').bind(code, params.id).run();
-  if (!result.meta.changes) fail(404, 'Socio non trovato.');
- } catch (error) {
-  if (String(error).includes('UNIQUE')) fail(409, 'Questa tessera è già assegnata a un altro socio.');
-  throw error;
- }
- return json({uidTessera: code});
-}
-
-export async function removeCard({db, params}) {
- const result = await db.prepare('UPDATE members SET uid_tessera = NULL WHERE id = ?').bind(params.id).run();
- if (!result.meta.changes) fail(404, 'Socio non trovato.');
- return json({uidTessera: null});
 }
 
 

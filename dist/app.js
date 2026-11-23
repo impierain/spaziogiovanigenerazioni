@@ -647,7 +647,7 @@ async function spazio(){
  firstVisit(st,details,nextActivity(acts.activities))+
  section('Chi può partecipare',grid([
   card('<h3>A chi si rivolge</h3><p>Il progetto si rivolge principalmente a chi ha tra 14 e 30 anni e vive nei due paesi. Puoi venire per studiare, incontrare altre persone o proporre un’attività.</p>'+link(S.me?'Apri il calendario':'Prima volta?',S.me?'calendario':'accedi')),
-  card(`<h3>Come entri</h3><p>All’ingresso e all’uscita puoi usare il QR. Un referente può aiutarti o registrare la tua presenza con la tessera.</p>${link(S.me?'Le mie presenze':'Accedi',S.me?'presenze':'accedi')}`,'green')
+  card(`<h3>Come entri</h3><p>All’ingresso e all’uscita puoi usare il QR. Puoi anche avvicinare il telefono al tag NFC. Un referente può aiutarti se hai dimenticato di registrarti.</p>${link(S.me?'Le mie presenze':'Accedi',S.me?'presenze':'accedi')}`,'green')
  ],'space-visit'))+
  section('Come si partecipa',card('<h3>Dall’idea all’assemblea</h3><p>Puoi proporre un laboratorio, dare una mano con le missioni o portare una questione all’assemblea in sede. Ascolta chi usa lo spazio, rispetta le differenze e lascia in ordine i materiali comuni.</p>'))+
  section('Il paese',card(`<p>Guarda come cresce il borgo con le attività dello spazio.</p>${link('U paisi crisci','paese')}`))+
@@ -912,22 +912,21 @@ async function panSoci(){
   const search=esc([m.fullName,m.pseudonym,m.email].filter(Boolean).join(' '));
   const self=m.id===S.me.id;
   return card(`<h3>${esc(m.fullName||m.pseudonym)}</h3><p>${esc(m.email)}</p><p>${badge(m.role==='organizer'?'Referente':'Socio')} ${badge(statusText[m.status])} ${m.hasPassword?badge('Profilo completo'):badge('Password da impostare')}</p><p class="muted">${m.xp} XP · ${tumazzi(m.cheese)}${m.phone?' · '+esc(m.phone):''}</p>
-  <p class="muted">Tessera: ${m.uidTessera?`<code>${esc(m.uidTessera)}</code>`:'nessuna'}</p>
-  <div class="row">${m.status==='pending'?btn('Approva e invia invito','approve-access',m.id):''}${btn(m.hasPassword?'Link reset password':'Nuovo link d’invito','invite',m.id,{secondary:true,extra:`data-phone="${esc(m.phone||'')}"`})}${m.uidTessera?btn('Togli tessera','cardRemove',m.id,{secondary:true}):''}${!self?btn(m.role==='organizer'?'Rendi socio':'Rendi referente','role',m.id,{secondary:true,extra:`data-role="${m.role==='organizer'?'participant':'organizer'}"`}):''}${!self?btn(m.status==='disabled'?'Riattiva':m.status==='pending'?'Rifiuta richiesta':'Disattiva','status',m.id,{secondary:true,extra:`data-status="${m.status==='disabled'?'approved':'disabled'}"`}):''}</div>
-  ${form('card',field('uid','Codice tessera NFC','text','required maxlength="40" placeholder="Es. 04A1B2C3"'),m.uidTessera?'Cambia tessera':'Assegna tessera',{id:m.id,cls:'inline-form'})}`,m.status==='disabled'?'muted-card':'').replace('<article ',`<article data-member-search="${search}" `);
+  <div class="row">${m.status==='pending'?btn('Approva e invia invito','approve-access',m.id):''}${btn(m.hasPassword?'Link reset password':'Nuovo link d’invito','invite',m.id,{secondary:true,extra:`data-phone="${esc(m.phone||'')}"`})}${!self?btn(m.role==='organizer'?'Rendi socio':'Rendi referente','role',m.id,{secondary:true,extra:`data-role="${m.role==='organizer'?'participant':'organizer'}"`}):''}${!self?btn(m.status==='disabled'?'Riattiva':m.status==='pending'?'Rifiuta richiesta':'Disattiva','status',m.id,{secondary:true,extra:`data-status="${m.status==='disabled'?'approved':'disabled'}"`}):''}</div>`,m.status==='disabled'?'muted-card':'').replace('<article ',`<article data-member-search="${search}" `);
  });
  return (S.invite?section('Invito',inviteCard(S.invite)):'')+section(`Soci (${members.length})`,`<label>Cerca tra i soci<input type="search" id="member-search" placeholder="Nome, pseudonimo o email" autocomplete="off"></label><p id="member-search-status" class="muted" role="status" hidden></p>`+grid(cards,'two'))+section('Nuovo socio',newForm);
 }
 async function panPresenze(){
  const [inside,members,acc,codeInfo]=await Promise.all([api('/inside'),api('/members'),api('/access?from='+(Math.floor(Date.now()/1000)-3*86400)+'&limit=60'),api('/checkin-code'),loadQr().catch(()=>{})]);
- const qrCard=window.qrcode?card(`${qrSvg(checkinUrl(codeInfo.code),'QR code d’ingresso')}<p>Stampalo e attaccalo all’ingresso: i soci lo inquadrano per registrare ingresso e uscita.</p><p class="muted">Se il codice finisce in mani sbagliate, cambialo: il vecchio QR smette subito di funzionare e va ristampato.</p><div class="row">${link('Stampa il cartello','cartello')}${btn('Cambia il codice','rotate','',{secondary:true})}</div>`):card('<p>Non riesco a creare il QR in questo momento.</p>');
+ const qrCard=window.qrcode?card(`${qrSvg(checkinUrl(codeInfo.code),'QR code d’ingresso')}<p>Stampalo e attaccalo all’ingresso: i soci lo inquadrano per registrare ingresso e uscita.</p><p class="muted">Se il codice finisce in mani sbagliate, cambialo: il vecchio QR e i tag NFC smettono subito di funzionare: vanno ristampati e riscritti.</p><div class="row">${link('Stampa il cartello','cartello')}${btn('Cambia il codice','rotate','',{secondary:true})}</div>`):card('<p>Non riesco a creare il QR in questo momento.</p>');
+ const nfcCard=card(`<p>Scrivi sul tag NFC un record di tipo <strong>URL</strong> con questo indirizzo (è lo stesso del QR):</p><p><input readonly value="${esc(checkinUrl(codeInfo.code))}" aria-label="Indirizzo da scrivere sul tag NFC"></p><div class="row">${btn('Copia l’indirizzo','copy',checkinUrl(codeInfo.code))}</div><ol class="reading-copy"><li>Apri un’app come «NFC Tools» (gratis, iPhone e Android) → Scrivi → Aggiungi un record → URL.</li><li>Incolla l’indirizzo, scegli «Scrivi» e avvicina il telefono al tag.</li><li>Prova: avvicina il telefono, si apre il sito e registra ingresso o uscita.</li><li>Quando funziona, blocca il tag in sola lettura («Altro» → «Blocca il tag»): non si potrà più riscrivere.</li></ol><p class="muted">Se cambi il codice qui sopra, i tag già scritti vanno riscritti.</p>`);
  const active=members.members.filter(m=>m.status==='approved');
  const insideIds=new Set(inside.presenti.map(p=>p.id));
 const siteUrl=location.origin+'/#home';
  const siteCard=window.qrcode?card(`${qrSvg(siteUrl,'QR code del sito')}<p>Per chiunque: apre il sito senza account e mostra calendario, spazio, orari e attività. Chi ha un account può accedere da lì.</p><p class="muted">${esc(siteUrl)}</p><div class="row">${link('Stampa il cartello','cartello/sito')}${btn('Copia il link','copy',siteUrl,{secondary:true})}</div>`):card('<p>Non riesco a creare il QR in questo momento.</p>');
- return section('QR d’ingresso',qrCard)+section('QR del sito, per tutti',siteCard)+section('In sede adesso',inside.presenti.length?grid(inside.presenti.map(p=>card(`<h3>${esc(p.name)}</h3><p>Dentro dalle ${fmt(p.since,{hour:'2-digit',minute:'2-digit'})}</p>${btn('Registra uscita','out',p.id)}`)),'three'):card('<p>Nessuno è registrato dentro.</p>'))+
+ return section('QR d’ingresso',qrCard)+section('Tag NFC all’ingresso',nfcCard)+section('QR del sito, per tutti',siteCard)+section('In sede adesso',inside.presenti.length?grid(inside.presenti.map(p=>card(`<h3>${esc(p.name)}</h3><p>Dentro dalle ${fmt(p.since,{hour:'2-digit',minute:'2-digit'})}</p>${btn('Registra uscita','out',p.id)}`)),'three'):card('<p>Nessuno è registrato dentro.</p>'))+
  section('Registra un movimento',form('access',`<label>Socio<select name="memberId" required>${active.map(m=>`<option value="${esc(m.id)}">${esc(m.pseudonym)}${insideIds.has(m.id)?' (dentro)':''}</option>`).join('')}</select></label><p class="muted">Il sistema alterna da solo ingresso e uscita.</p><label>Orario (vuoto = adesso)<input name="at" type="datetime-local" max="${datetimeLocal(Math.floor(Date.now()/1000))}"></label>`,'Registra'))+
- section('Ultimi tre giorni',acc.accessi.length?card(`<ul class="list">${acc.accessi.map(a=>`<li>${esc(a.name)} · ${a.direction==='IN'?'ingresso':'uscita'} · ${dateShort(a.at)}${a.source==='dispositivo'?' · lettore':''}</li>`).join('')}</ul>`):card('<p>Nessun movimento recente.</p>'));
+ section('Ultimi tre giorni',acc.accessi.length?card(`<ul class="list">${acc.accessi.map(a=>`<li>${esc(a.name)} · ${a.direction==='IN'?'ingresso':'uscita'} · ${dateShort(a.at)}</li>`).join('')}</ul>`):card('<p>Nessun movimento recente.</p>'));
 }
 const pathSelect=cur=>`<label>Percorso<select name="path">${PATHS.map(([id,name])=>`<option value="${id}" ${id===cur?'selected':''}>${name}</option>`).join('')}</select></label>`;
 async function panFaccende(){
@@ -1372,7 +1371,6 @@ const actions={
  },
  async role(id,el){await run(()=>api(`/members/${encodeURIComponent(id)}`,{method:'PATCH',body:{role:el.dataset.role}}),'Ruolo aggiornato.');},
  async status(id,el){await run(()=>api(`/members/${encodeURIComponent(id)}`,{method:'PATCH',body:{status:el.dataset.status}}),'Stato aggiornato.');},
- async cardRemove(id){await run(()=>api(`/members/${encodeURIComponent(id)}/card`,{method:'DELETE'}),'Tessera rimossa.');},
  async out(id){await run(()=>api('/access',{method:'POST',body:{memberId:id,direction:'OUT'}}),'Uscita registrata.');},
  async verify(id){let r;await run(async()=>{r=await api(`/chores/${encodeURIComponent(id)}/verify`,{method:'POST',body:{}});},null,{rerender:false})&&(say(r.outcome.cheeseCapped?'Confermata. I Tumazzi sono stati ridotti per il limite settimanale.':'Missione confermata.'),await render());},
  async reject(id){await run(()=>api(`/chores/${encodeURIComponent(id)}/reject`,{method:'POST',body:{}}),'Missione respinta.');},
@@ -1408,7 +1406,6 @@ const destructiveActions={
  xCancel:'Annullare questo scambio?', xDecline:'Rifiutare questa richiesta di scambio?',
  offerClose:'Chiudere questa offerta della Banca del tempo?',
  pdecline:'Segnare la proposta come non accolta?',
- cardRemove:'Rimuovere la tessera associata a questo socio?',
  reject:'Respingere questa richiesta di verifica?',
  'bk-decline':'Rifiutare la prenotazione?',
  redeem:'Confermare il riscatto? I Tumazzi indicati verranno spesi.',
@@ -1494,7 +1491,6 @@ const submits={
   const ok=await run(async()=>{out=await api('/members',{method:'POST',body:{fullName:v('fullName'),email:v('email'),pseudonym:v('pseudonym')||undefined,phone:v('phone')||undefined,role:v('role')}});},null,{rerender:false});
   if(ok){const who=out.member.fullName||out.member.pseudonym;S.invite={...out.invite,phone:out.member.phone,who};await render();window.scrollTo(0,0);emailBanner(out.invite,who);}
  },
- async card(f,v,id){await run(()=>api(`/members/${encodeURIComponent(id)}/card`,{method:'PUT',body:{uidTessera:v('uid')}}),'Tessera assegnata.');},
  async access(f,v){
   const body={memberId:v('memberId')};
   if(v('at'))body.at=Math.floor(new Date(v('at')).getTime()/1000);

@@ -1,6 +1,5 @@
 // Trofei: si assegnano da soli quando i dati verificati raggiungono la soglia.
 import {notify} from './notify.mjs';
-import {mailMember, trophyEmail} from './emails.mjs';
 
 export const TROPHIES = [
  ['cca', 'Cca sugnu!', 'Esplorazione', 'Prima visita registrata in sede.', 1, 'visits', 'star'],
@@ -59,7 +58,6 @@ export async function checkTrophies(env, db, memberId) {
   }
   if (!fresh.length) return [];
   for (const t of fresh) await notify(db, memberId, {kind: 'trofeo', level: 'ok', title: `Nuovo trofeo: ${t.name}`, body: t.desc});
-  await mailMember(env, db, memberId, name => trophyEmail(name, fresh));
   return fresh;
  } catch {
   return [];

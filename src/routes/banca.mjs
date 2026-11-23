@@ -1,7 +1,6 @@
 import {tumazzi, fail, json, readJson, text} from '../lib/http.mjs';
 import {romeWeekStart} from '../lib/time.mjs';
 import {notify} from '../lib/notify.mjs';
-import {mailMember, exchangeEmail} from '../lib/emails.mjs';
 import {checkTrophies} from '../lib/trophies.mjs';
 
 // Banca del tempo: un'ora offerta da un socio a un altro. A scambio concluso entrambi ricevono un piccolo premio,
@@ -73,7 +72,6 @@ export async function decide(verdict, {env, db, member, params}) {
  if (!res.meta.changes) fail(409, 'Questa richiesta non è più in attesa.');
  const title = status === 'accepted' ? `${x.ownerName} ha accettato: ${x.title}` : `${x.ownerName} non può questa volta: ${x.title}`;
  await notify(db, x.requesterId, {kind: 'banca', level: status === 'accepted' ? 'ok' : 'info', title, body: status === 'accepted' ? 'Accordatevi su quando incontrarvi. Alla fine conferma di aver ricevuto l’ora.' : ''});
- if (status === 'accepted') await mailMember(env, db, x.requesterId, name => exchangeEmail(name, {title: 'La tua richiesta è stata accettata', text: `${x.ownerName} ti darà un’ora: ${x.title}. Accordatevi su quando incontrarvi.`}));
  return json({status});
 }
 

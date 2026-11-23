@@ -200,10 +200,11 @@ export async function socio({db, member, params}) {
 export async function community({db, env = {}}) {
  const now = Math.floor(Date.now() / 1000);
  const weekStart = romeWeekStart(now * 1000);
- const rows = await loadRows(db, weekStart);
+ const {results: rows} = await db.prepare('SELECT id, member_id, direction, at FROM accessi WHERE at <= ? ORDER BY at, id').bind(now).all();
  const {sessions} = buildSessions(rows, now);
- const merged = mergeIntervals(sessions);
- const hoursWeek = merged.reduce((sum, [a, b]) => sum + (b - a), 0) / 3600;
+ const merged = mergeIntervals(sessions.map(s=>({...s,end:Math.min(s.end,s.start+STALE_SECONDS)})));
+ const hoursWeek = merged.reduce((sum, [a, b]) => sum + Math.max(0, b - Math.max(a, weekStart)), 0) / 3600;
+ const hoursTotal = merged.reduce((sum, [a, b]) => sum + (b - a), 0) / 3600;
  const one = async sql => (await db.prepare(sql).first())?.n ?? 0;
  const month = romeMonth(now * 1000);
  const midnight = Date.parse(month + '-01');
@@ -224,15 +225,26 @@ export async function community({db, env = {}}) {
  const targetHours = Number(env.COMMUNITY_GOAL_HOURS);
  const target = Number.isFinite(targetHours) && targetHours >= 1 ? Math.round(targetHours * 3600) : 360000;
  const seconds = presence.seconds;
- return json({monthlyGoal: {
-  month, seconds, target, reached: seconds >= target,
-  benefit: env.COMMUNITY_GOAL_BENEFIT?.trim() || null
- }, metrics: [
-  {key: 'giovani', label: 'Giovani coinvolti', value: youngs, target: 120, note: 'Obiettivo del primo anno', icon: 'heart'},
-  {key: 'apertura', label: 'Ore di apertura questa settimana', value: round(hoursWeek), target: 20, note: 'Obiettivo settimanale', icon: 'book'},
-  {key: 'attivita', label: 'Attività svolte', value: activities, target: 18, note: 'Obiettivo del primo anno', icon: 'star'},
-  {key: 'missioni', label: 'Missioni verificate', value: chores, target: 50, note: 'Cura dello spazio, fatta insieme', icon: 'plant'}
- ]});
+ const metrics = [
+  {key:'giovani',label:'Giovani coinvolti',value:youngs,target:120,note:'Obiettivo del primo anno',icon:'heart'},
+  {key:'apertura',label:'Ore di apertura questa settimana',value:round(hoursWeek),target:20,note:'Obiettivo settimanale. Il borgo cresce con le ore cumulative: obiettivo 100 ore.',icon:'book'},
+  {key:'attivita',label:'Attività svolte',value:activities,target:18,note:'Obiettivo del primo anno',icon:'star'},
+  {key:'missioni',label:'Missioni verificate',value:chores,target:50,note:'Cura dello spazio, fatta insieme',icon:'plant'}
+ ];
+ const thresholds = [.25,.5,1];
+ await db.batch(metrics.map(m=>{
+  const growthValue=m.key==='apertura'?hoursTotal:m.value;
+  const growthTarget=m.key==='apertura'?100:m.target;
+  const stage=thresholds.filter(t=>growthValue>=Math.ceil(growthTarget*t)).length;
+  return db.prepare('INSERT INTO village_growth(key,stage) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET stage=excluded.stage WHERE excluded.stage>village_growth.stage').bind(m.key,stage);
+ }));
+ const {results:growth}=await db.prepare('SELECT key,stage FROM village_growth').all();
+ const stages=Object.fromEntries(growth.map(row=>[row.key,row.stage]));
+ return json({monthlyGoal:{
+  month,seconds,target,reached:seconds>=target,
+  benefit:env.COMMUNITY_GOAL_BENEFIT?.trim()||null
+ },metrics:metrics.map(m=>({...m,growthStage:stages[m.key]||0,
+  growthValue:m.key==='apertura'?round(hoursTotal):m.value,growthTarget:m.key==='apertura'?100:m.target}))});
 }
 
 // Percorso delle competenze: esperienze verificate per percorso. Le attività

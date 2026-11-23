@@ -1,8 +1,7 @@
 import {tumazzi, fail, json, readJson, integer, text} from '../lib/http.mjs';
 import {notify, notifyOrganizers} from '../lib/notify.mjs';
-import {mailMember, redemptionEmail} from '../lib/emails.mjs';
 
-const ARTS = ['star', 'pin', 'book', 'bag', 'shirt', 'heart', 'plant', 'camera'];
+const ARTS = ['star', 'pin', 'book', 'bag', 'shirt', 'heart', 'plant', 'camera', 'cup'];
 const slug = name => name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'premio';
 
 export async function balance(db, memberId) {
@@ -68,8 +67,7 @@ export async function redeem({env, db, member, params}) {
  const bal = await balance(db, member.id);
  await notify(db, member.id, {kind: 'putia', level: 'ok', title: `Premio riscattato: ${reward.name}`, body: `Passa in sede per ritirarlo. Ti restano ${tumazzi(bal.balance)}.`});
  await notifyOrganizers(db, member.id, {kind: 'putia', level: 'info', title: `Premio da consegnare: ${reward.name}`, body: `Richiesto da ${member.pseudonym}. Vai in Referenti → Putìa.`});
- const mail = await mailMember(env, db, member.id, name => redemptionEmail(name, {reward: reward.name, cost: reward.cost, balance: bal.balance, status: 'pending'}));
- return json({redemption: {rewardId: reward.id, cost: reward.cost}, balance: bal.balance, emailSent: !!mail.sent}, 201);
+ return json({redemption: {rewardId: reward.id, cost: reward.cost}, balance: bal.balance, emailSent: false}, 201);
 }
 
 const redSql = `SELECT x.id, x.reward_id AS rewardId, r.name AS rewardName, x.member_id AS memberId, m.pseudonym AS memberName,
@@ -103,7 +101,6 @@ export async function deliver({env, db, member, params}) {
   throw error;
  }
  await notify(db, row.memberId, {kind: 'putia', level: 'ok', title: `Premio consegnato: ${row.rewardName}`, body: 'Goditelo!'});
- await mailMember(env, db, row.memberId, name => redemptionEmail(name, {reward: row.rewardName, cost: row.cost, status: 'delivered'}));
  return json({status: 'delivered'});
 }
 

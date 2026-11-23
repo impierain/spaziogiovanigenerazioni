@@ -1,3 +1,4 @@
+import {microAward} from './routes/joy.mjs';
 import {tumazzi} from './lib/http.mjs';
 import {sessionToken, tokenHash} from './tokens.mjs';
 import {notify} from './lib/notify.mjs';
@@ -38,11 +39,12 @@ export async function handleParticipation(request,db,env={}){
 
  if(action==='reserve'){
   try {
-   await query(db,`INSERT INTO bookings (activity_id,member_id,status)
+   const inserted=await query(db,`INSERT INTO bookings (activity_id,member_id,status)
     SELECT ?,?,'pending' WHERE EXISTS (SELECT 1 FROM activities WHERE id=? AND access_mode='booking')
     AND NOT EXISTS (SELECT 1 FROM bookings WHERE activity_id=? AND member_id=? AND status IN ('pending','confirmed'))
     ON CONFLICT(activity_id,member_id) DO UPDATE SET status='pending',updated_at=unixepoch()
     WHERE bookings.status IN ('declined','cancelled')`,activity,actor.id,activity,activity,actor.id).run();
+   if(inserted.meta.changes)await microAward(db,actor.id,'prenotazione');
   } catch(error){
    if(String(error).includes('booking_unavailable'))return json({error:'La prenotazione non è disponibile.'},409);
    throw error;

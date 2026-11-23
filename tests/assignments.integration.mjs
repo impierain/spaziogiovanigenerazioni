@@ -39,6 +39,7 @@ const db={prepare(sql){
  const build=(params=[])=>({bind:(...values)=>build(values),first:()=>query(sql,params,'first'),all:()=>query(sql,params,'all'),run:()=>query(sql,params)});
  return build();
 }};
+db.batch=async statements=>statements.map(statement=>statement.run());
 const env={DB:db,ASSETS:{fetch(request){
  const path=new URL(request.url).pathname;
  const mime={html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',css:'text/css; charset=utf-8',svg:'image/svg+xml',png:'image/png'};
@@ -116,4 +117,36 @@ try {
  assert.equal(reached.benefit,'Festa sociale');
 } finally {
  Date.now = realNow;
+}
+
+
+// Village growth survives a lower live count and the start of a new week.
+Date.now = () => Date.parse('2031-01-06T08:00:00Z');
+try {
+ query('DELETE FROM accessi');
+ query('DELETE FROM village_growth');
+ for(let i=0;i<58;i++)query("INSERT INTO members(id,email,pseudonym,status) VALUES(?,?,?,'approved')",['growth-'+i,'growth-'+i+'@example.test','Socio']);
+ for(const memberId of ['a','b']){
+  for(let i=0;i<5;i++){
+   const start=Date.parse('2030-12-16T10:00:00Z')/1000+i*86400;
+   query("INSERT INTO accessi(member_id,direction,at,source) VALUES(?,'IN',?,'pannello')",[memberId,start]);
+   query("INSERT INTO accessi(member_id,direction,at,source) VALUES(?,'OUT',?,'pannello')",[memberId,start+5*3600]);
+  }
+ }
+ const first=(await (await request('/community')).json()).metrics;
+ const opening=first.find(m=>m.key==='apertura');
+ assert.equal(opening.value,0);
+ assert.equal(opening.growthValue,25);
+ assert.equal(opening.growthTarget,100);
+ assert.equal(opening.growthStage,1);
+ assert.equal(first.find(m=>m.key==='giovani').growthStage,2);
+ query("UPDATE members SET status='disabled' WHERE id LIKE 'growth-%'");
+ Date.now=()=>Date.parse('2031-01-13T08:00:00Z');
+ const later=(await (await request('/community')).json()).metrics;
+ assert.equal(later.find(m=>m.key==='giovani').growthStage,2);
+ assert.equal(later.find(m=>m.key==='apertura').growthStage,1);
+ assert.equal(later.find(m=>m.key==='apertura').value,0);
+ console.log('OK: crescita permanente, ore cumulative senza duplicazioni e indicatore settimanale separato.');
+} finally {
+ Date.now=realNow;
 }

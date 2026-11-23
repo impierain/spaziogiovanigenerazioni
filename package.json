@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node server.js",
     "seed-admin": "node scripts/seed-admin.js",
-    "deploy": "wrangler deploy",
+    "deploy": "node scripts/publish.mjs",
     "dev": "wrangler dev"
   },
   "dependencies": {

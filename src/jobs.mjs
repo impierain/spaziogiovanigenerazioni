@@ -2,7 +2,7 @@
 import {notify} from './lib/notify.mjs';
 import {sendPush} from './lib/webpush.mjs';
 import {recordAccess} from './routes/accessi.mjs';
-import {layout, mailMember, reminderEmail, stillInsideEmail, weeklyEmail, SITE} from './lib/emails.mjs';
+import {mailMember, stillInsideEmail} from './lib/emails.mjs';
 import {romeDay, romeWeekday} from './lib/time.mjs';
 
 const when = sec => new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(sec * 1000));
@@ -20,7 +20,6 @@ export async function sendReminders(env, nowMs = Date.now()) {
   if (!res.meta.changes) continue;
   sent++;
   await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: `Domani o oggi: ${r.name}`, body: when(r.startsAt)});
-  await mailMember(env, db, r.memberId, name => reminderEmail(name, {activity: r.name, when: when(r.startsAt)}));
  }
  return sent;
 }
@@ -50,13 +49,12 @@ export async function sendWeeklySummary(env, nowMs = Date.now()) {
    {title: `${proposals} ${proposals === 1 ? 'proposta aperta' : 'proposte aperte'} da guardare`}
   ];
   await notify(db, id, {kind: 'riepilogo', level: 'info', title: 'Riepilogo della settimana', body: lines.map(l => l.title).join(' · ')});
-  await mailMember(env, db, id, name => weeklyEmail(name, lines));
  }
  return sent;
 }
 
 // La chiave del servizio email (Brevo) scade dopo 90 giorni senza invii: a 85 giorni avvisiamo i referenti.
-// L'email di avviso è essa stessa un invio, quindi rimette a zero il conteggio.
+// L'avviso viene mostrato soltanto ai referenti nella webapp.
 export const MAIL_IDLE_DAYS = 85;
 export async function checkMailIdle(env, nowMs = Date.now()) {
  const db = env.DB;
@@ -74,12 +72,7 @@ export async function checkMailIdle(env, nowMs = Date.now()) {
   const {results: organizers} = await db.prepare(`SELECT id FROM members WHERE role = 'organizer' AND status = 'approved'`).all();
   for (const {id} of organizers) {
    await notify(db, id, {kind: 'riepilogo', level: 'error', title: 'Le email rischiano di fermarsi', body: `Nessuna email inviata da ${days} giorni: la chiave del servizio email scade dopo 90 giorni di inattività.`});
-   await mailMember(env, db, id, name => layout({
-    subject: 'Attenzione: la chiave email sta per scadere · CCA SIEMMU', title: 'La chiave email sta per scadere',
-    intro: `Ciao ${name}, da ${days} giorni il sito non invia email. Il servizio (Brevo) disattiva la chiave API dopo 90 giorni di inattività.`,
-    itemsTitle: 'Cosa fare', items: [{title: 'Niente, se leggi questa email', text: 'questo avviso è già un invio e azzera il conteggio.'}, {title: 'Se non arriva più nulla', text: 'crea una nuova chiave su Brevo e aggiornala nei segreti del Worker (BREVO_API_KEY).'}],
-    button: 'Apri il sito', url: SITE
-   }));
+
   }
   return organizers.length;
  } catch {

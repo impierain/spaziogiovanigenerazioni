@@ -1,4 +1,5 @@
 name = "spaziogiovanigenerazioni"
+account_id = "666eeaf44505ab9c3138e8a97803857d"
 main = "src/worker.mjs"
 compatibility_date = "2026-01-01"
 

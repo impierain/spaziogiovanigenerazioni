@@ -88,3 +88,8 @@ export async function saveDecision({request, db, params}) {
  if (!result.meta.changes) fail(404, 'Decisione non trovata.');
  return json({saved: true});
 }
+
+
+export async function calendarAssembly({db}) {
+ return json({meeting: await getSetting(db, 'next_assembly')});
+}

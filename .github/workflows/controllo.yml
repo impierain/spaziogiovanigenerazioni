@@ -16,7 +16,7 @@ jobs:
       - name: Sintassi di codice e interfaccia
         run: |
           for f in $(git ls-files 'src/**/*.mjs' 'src/*.mjs'); do node --check "$f"; done
-          node --check dist/app.js
+          for f in $(git ls-files 'dist/*.js' 'scripts/*.mjs'); do node --check "$f"; done
       - name: Migrazioni su database di prova
         run: |
           npm install --no-save wrangler@4.159.0
@@ -24,6 +24,7 @@ jobs:
       - name: Prove di integrazione
         run: |
           for t in tests/*.integration.mjs; do node "$t"; done
+          node --test tests/*.test.mjs
 
   # Se il controllo passa, unisce da solo le PR aperte da Piero su rami di questo repository.
   unione-automatica:

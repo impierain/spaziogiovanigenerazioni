@@ -1,7 +1,7 @@
 import {fail, json, readJson, email, text, uid} from '../lib/http.mjs';
 import {inviteEmail, sendEmail} from '../lib/email.mjs';
 import {newToken} from '../tokens.mjs';
-import {notify} from '../lib/notify.mjs';
+import {notify, notifyOrganizers} from '../lib/notify.mjs';
 
 const INVITE_SECONDS = 7 * 24 * 3600;
 const ROLES = ['participant', 'organizer'];
@@ -128,4 +128,28 @@ export async function removeCard({db, params}) {
  const result = await db.prepare('UPDATE members SET uid_tessera = NULL WHERE id = ?').bind(params.id).run();
  if (!result.meta.changes) fail(404, 'Socio non trovato.');
  return json({uidTessera: null});
+}
+
+
+export async function requestAccess({request, db}) {
+ const body = await readJson(request, 2048);
+ const fullName = text(body.fullName, 'Nome e cognome', {max: 80});
+ const address = email(body.email);
+ const result = await db.prepare(`INSERT INTO members (id, email, pseudonym, full_name, role, status)
+  VALUES (?, ?, ?, ?, 'participant', 'pending') ON CONFLICT(email) DO NOTHING`)
+  .bind(crypto.randomUUID(), address, fullName.slice(0,28), fullName).run();
+ if (result.meta.changes) await notifyOrganizers(db, null, {
+  kind:'accesso', title:'Nuova richiesta di accesso',
+  body:'Una persona chiede di partecipare. Controlla Referenti → Soci.'
+ });
+ return json({ok:true, message:'Richiesta ricevuta. Per un nuovo accesso, un referente esaminerà la richiesta e ti invierà il link per scegliere la password. Se hai già un account, puoi accedere oppure chiedere ai referenti un nuovo link.'});
+}
+
+export async function approve({request, db, env, params, member: actor}) {
+ const result = await db.prepare("UPDATE members SET status = 'approved' WHERE id = ? AND status = 'pending' AND role = 'participant'")
+  .bind(params.id).run();
+ if (!result.meta.changes) fail(409, 'La richiesta è già stata gestita. Puoi inviare un nuovo invito dalla scheda del socio.');
+ const target = await db.prepare('SELECT id, email, full_name, pseudonym, password_hash IS NOT NULL AS has_password FROM members WHERE id = ?')
+  .bind(params.id).first();
+ return json({invite:await issueInvite(env, db, request, target, actor.id)});
 }

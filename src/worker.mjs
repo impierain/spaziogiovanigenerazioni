@@ -128,6 +128,7 @@ const routes = [
 
  ['GET', '/api/push/key', 'member', push.key],
  ['POST', '/api/push/subscribe', 'member', push.subscribe],
+ ['POST', '/api/push/received', 'member', push.received],
  ['POST', '/api/push/confirm', 'member', push.confirm],
  ['GET', '/api/push/status', 'member', push.status],
  ['GET', '/api/push/overview', 'organizer', push.overview],

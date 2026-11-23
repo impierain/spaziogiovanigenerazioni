@@ -136,6 +136,21 @@ assert.equal((await again.json()).testSent,false);assert.equal(sentPayloads,1);
 assert.equal((await call('/push/overview',{actor:'a'})).status,403);
 const ov=await (await call('/push/overview',{actor:'b'})).json();
 assert.equal(ov.members.length,1);assert.equal(ov.members[0].verified,true);assert.equal(JSON.stringify(ov).includes('fcm.googleapis'),false);
+// Percorso senza toccare la notifica: il dispositivo segnala la ricezione e il socio conferma dall'app.
+const {tokenHash}=await import(pathToFileURL(join(root,'src/tokens.mjs')));
+{const t2=await newToken();query('INSERT INTO sessions (token_hash, member_id, expires_at) VALUES (?,?,unixepoch()+1800)',[t2.hash,'c']);sessions.c=t2.token;}
+const ua2=nc.createECDH('prime256v1');ua2.generateKeys();
+const sub2={endpoint:'https://fcm.googleapis.com/fcm/send/second',keys:{p256dh:wp.b64u.enc(ua2.getPublicKey()),auth:wp.b64u.enc(nc.randomBytes(16))}};
+assert.equal((await call('/push/subscribe',{actor:'c',method:'POST',body:sub2})).status,201);
+assert.equal((await call('/push/confirm',{actor:'c',method:'POST',body:{}})).status,400);                  // senza ricezione non si conferma a mano
+const tok2='cd'.repeat(32);query("UPDATE push_subscriptions SET test_token=? WHERE member_id='c'",[await tokenHash(tok2)]);
+assert.equal((await call('/push/received',{actor:'c',method:'POST',body:{token:'ef'.repeat(32)}})).status,400);  // codice sbagliato
+assert.equal((await call('/push/received',{actor:'b',method:'POST',body:{token:tok2}})).status,400);            // codice di un altro socio
+assert.equal((await call('/push/received',{actor:'c',method:'POST',body:{token:tok2}})).status,200);
+const st2=await (await call('/push/status',{actor:'c'})).json();assert.equal(st2.received,true);assert.equal(st2.confirmed,false);
+const ov2=await (await call('/push/overview',{actor:'b'})).json();const rowC=ov2.members.find(m=>m.name==='Terza');assert.equal(rowC.received,true);assert.equal(rowC.verified,false);
+const okc=await call('/push/confirm',{actor:'c',method:'POST',body:{}});assert.equal(okc.status,200);assert.deepEqual((await okc.json()).reward,{cheese:1});
+assert.equal((await (await call('/push/status',{actor:'c'})).json()).confirmed,true);
 globalThis.fetch=origFetch;
 assert.equal(typeof (await (await call('/push/key',{actor:'a'})).json()).publicKey,'string');
 let pushed=0,mails=0;const realFetch=globalThis.fetch;
@@ -151,7 +166,7 @@ assert.equal(mails-mailsBefore,1);             // chi non l'ha attivata riceve l
 globalThis.fetch=async()=>new Response('',{status:410});
 ins('a','OUT',T+20000);ins('a','IN',T+20100);
 await jobs.sendStillInsideReminders(env,(T+20100+7300)*1000);
-assert.equal(query("SELECT COUNT(*) AS n FROM push_subscriptions",[],'first').n,0);  // dispositivo scaduto rimosso
+assert.equal(query("SELECT COUNT(*) AS n FROM push_subscriptions WHERE member_id='a'",[],'first').n,0);  // dispositivo scaduto rimosso
 globalThis.fetch=realFetch;
 
 // Uscita automatica: un'ora dopo il promemoria, registrata alla fine delle due ore, solo se il promemoria è partito.

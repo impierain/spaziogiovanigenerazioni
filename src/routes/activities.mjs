@@ -1,4 +1,5 @@
 import {fail, json, readJson, integer, text} from '../lib/http.mjs';
+import {pushAllMembers} from '../lib/notify.mjs';
 
 const STATUSES = ['draft', 'published', 'cancelled'];
 const PATH_IDS = ['studio', 'creativita', 'socialita', 'cittadinanza', 'solidarieta'];
@@ -29,6 +30,13 @@ function startsAt(value) {
  return seconds;
 }
 
+// Nuova attività pubblicata: avviso push ai soci che hanno le notifiche attive (una sola volta, al passaggio a «pubblicata»).
+async function announceActivity(env, db, actorId, a) {
+ if (!a || a.startsAt * 1000 < Date.now()) return;
+ const when = new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(a.startsAt * 1000));
+ await pushAllMembers(env, db, actorId, {title: `Nuova attività: ${a.name}`, body: when, url: '/#calendario'});
+}
+
 // Promemoria: fino a due, in minuti prima dell'inizio (da 5 minuti a 14 giorni); vuoto = nessuno.
 function reminderMinutes(value) {
  if (value === null || value === undefined || value === '') return null;
@@ -55,7 +63,7 @@ export async function manage({db}) {
  return json({activities: results});
 }
 
-export async function create({request, db}) {
+export async function create({request, env, db, member}) {
  const body = await readJson(request);
  const id = crypto.randomUUID();
  const status = body.status ?? 'draft';
@@ -71,11 +79,14 @@ export async function create({request, db}) {
   const [r1, r2] = reminderPair(body.reminders);
   await db.prepare('UPDATE activities SET reminder1_min = ?, reminder2_min = ? WHERE id = ?').bind(r1, r2, id).run();
  }
- return json({activity: await db.prepare(`${manageSql} WHERE a.id = ?`).bind(id).first()}, 201);
+ const created = await db.prepare(`${manageSql} WHERE a.id = ?`).bind(id).first();
+ if (status === 'published') await announceActivity(env, db, member.id, created);
+ return json({activity: created}, 201);
 }
 
-export async function update({request, db, params}) {
+export async function update({request, env, db, member, params}) {
  const body = await readJson(request);
+ const before = await db.prepare('SELECT status FROM activities WHERE id = ?').bind(params.id).first();
  const sets = [];
  const values = [];
  const put = (column, value) => { sets.push(`${column} = ?`); values.push(value); };
@@ -107,7 +118,9 @@ export async function update({request, db, params}) {
   if (String(error).includes('capacity_below_bookings')) fail(409, 'I posti non possono essere meno delle prenotazioni attive.');
   throw error;
  }
- return json({activity: await db.prepare(`${manageSql} WHERE a.id = ?`).bind(params.id).first()});
+ const updated = await db.prepare(`${manageSql} WHERE a.id = ?`).bind(params.id).first();
+ if (body.status === 'published' && before && before.status !== 'published') await announceActivity(env, db, member.id, updated);
+ return json({activity: updated});
 }
 
 export async function bookings({db, params}) {

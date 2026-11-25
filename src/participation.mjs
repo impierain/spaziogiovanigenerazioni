@@ -1,7 +1,7 @@
 import {microAward} from './routes/joy.mjs';
 import {tumazzi} from './lib/http.mjs';
 import {sessionToken, tokenHash} from './tokens.mjs';
-import {notify} from './lib/notify.mjs';
+import {notify, pushMember} from './lib/notify.mjs';
 import {checkTrophies} from './lib/trophies.mjs';
 
 const romeDate = new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Rome', year:'numeric', month:'2-digit', day:'2-digit'});
@@ -74,6 +74,7 @@ export async function handleParticipation(request,db,env={}){
    status,activity,member,actor.id,activity).run();
   if(!result.meta.changes)return json({error:'La richiesta non è più in attesa o l’attività non è prenotabile.'},409);
   await notifyMember(db,member,status==='confirmed'?'ok':'info',status==='confirmed'?'Prenotazione confermata':'Prenotazione non accettata',await activityName(db,activity));
+  await pushMember(env,db,member,{title:status==='confirmed'?'Prenotazione confermata':'Prenotazione non accettata',body:await activityName(db,activity),url:'/#calendario'});
   return json({status});
  }
 

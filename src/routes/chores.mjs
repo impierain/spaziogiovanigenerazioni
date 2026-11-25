@@ -1,7 +1,7 @@
 import {tumazzi, fail, json, readJson, integer, text} from '../lib/http.mjs';
 import {lastAccess} from './accessi.mjs';
 import {romeWeekStart} from '../lib/time.mjs';
-import {notify, notifyOrganizers} from '../lib/notify.mjs';
+import {notify, notifyOrganizers, pushMember} from '../lib/notify.mjs';
 import {checkTrophies} from '../lib/trophies.mjs';
 
 // Come per le missioni ripetibili: al massimo 12 Tumazzi a settimana dalle missioni.
@@ -99,6 +99,9 @@ async function decide(db, logId, organizerId, verdict, env = {}) {
  await notify(db, log.member_id, verdict === 'verified'
   ? {kind: 'faccenda', level: 'ok', title: `Missione confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${tumazzi(cheese)}.${boostXp ? ` Bonus ruota: +${boostXp} XP.` : ''}${cheeseCapped ? ' I Tumazzi sono ridotti per il limite settimanale.' : ''}`}
   : {kind: 'faccenda', level: 'info', title: `Missione non confermata: ${log.name}`, body: 'Un referente non l’ha convalidata. Chiedi a lui il motivo.'});
+ await pushMember(env, db, log.member_id, verdict === 'verified'
+  ? {title: `Missione confermata: ${log.name}`, body: `Hai ricevuto ${xp} XP e ${tumazzi(cheese)}.`, url: '/#missioni'}
+  : {title: `Missione non confermata: ${log.name}`, body: 'Un referente non l’ha convalidata.', url: '/#missioni'});
  if (verdict === 'verified') await checkTrophies(env, db, log.member_id);
  return {id: logId, status: verdict, xp, cheese, cheeseCapped, boostXp};
 }
@@ -139,6 +142,6 @@ export async function verify({env, db, member, params}) {
  return json({outcome: await decide(db, choreId(params), member.id, 'verified', env)});
 }
 
-export async function reject({db, member, params}) {
- return json({outcome: await decide(db, choreId(params), member.id, 'rejected')});
+export async function reject({env, db, member, params}) {
+ return json({outcome: await decide(db, choreId(params), member.id, 'rejected', env)});
 }

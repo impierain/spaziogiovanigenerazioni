@@ -1,5 +1,5 @@
 import {tumazzi, fail, json, readJson, integer, text} from '../lib/http.mjs';
-import {notify, notifyOrganizers} from '../lib/notify.mjs';
+import {notify, notifyOrganizers, pushOrganizers, pushMember} from '../lib/notify.mjs';
 
 const ARTS = ['star', 'pin', 'book', 'bag', 'shirt', 'heart', 'plant', 'camera', 'cup'];
 const slug = name => name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'premio';
@@ -67,6 +67,7 @@ export async function redeem({env, db, member, params}) {
  const bal = await balance(db, member.id);
  await notify(db, member.id, {kind: 'putia', level: 'ok', title: `Premio riscattato: ${reward.name}`, body: `Passa in sede per ritirarlo. Ti restano ${tumazzi(bal.balance)}.`});
  await notifyOrganizers(db, member.id, {kind: 'putia', level: 'info', title: `Premio da consegnare: ${reward.name}`, body: `Richiesto da ${member.pseudonym}. Vai in Referenti → Putìa.`});
+ await pushOrganizers(env, db, member.id, {title: `Premio da consegnare: ${reward.name}`, body: `Richiesto da ${member.pseudonym}.`, url: '/#referenti'});
  return json({redemption: {rewardId: reward.id, cost: reward.cost}, balance: bal.balance, emailSent: false}, 201);
 }
 
@@ -101,6 +102,7 @@ export async function deliver({env, db, member, params}) {
   throw error;
  }
  await notify(db, row.memberId, {kind: 'putia', level: 'ok', title: `Premio consegnato: ${row.rewardName}`, body: 'Goditelo!'});
+ await pushMember(env, db, row.memberId, {title: `Premio consegnato: ${row.rewardName}`, body: 'Goditelo!', url: '/#putia'});
  return json({status: 'delivered'});
 }
 

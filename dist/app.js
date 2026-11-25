@@ -985,6 +985,14 @@ function activityAccessFields(a={}){
  <label class="sound-setting"><input name="publicEvent" type="checkbox"${a.publicEvent?' checked':''}> Mostra come evento pubblico</label>`;
 }
 
+function reminderFields(a={}){
+ const row=(n,minutes)=>{
+  const unit=minutes&&minutes%1440===0?1440:(minutes&&minutes%60===0?60:(minutes?1:60));
+  const value=minutes?minutes/unit:'';
+  return `<label>Promemoria ${n}<span class="row"><input name="reminder${n}" type="number" min="1" max="20160" inputmode="numeric" value="${value}" placeholder="vuoto = nessuno" aria-label="Promemoria ${n}: quanto tempo prima"><select name="reminder${n}Unit" aria-label="Unità"><option value="1"${unit===1?' selected':''}>minuti</option><option value="60"${unit===60?' selected':''}>ore</option><option value="1440"${unit===1440?' selected':''}>giorni</option></select></span></label>`;
+ };
+ return `<p class="muted">Un promemoria arriva ai soci con la prenotazione confermata, prima dell’inizio. Se non ne imposti nessuno, resta quello automatico del giorno prima.</p>${row(1,a.reminder1)}${row(2,a.reminder2)}`;
+}
 async function panAttivita(id){
  if(id){
   const [{bookings},{activities}]=await Promise.all([api(`/activities/manage/${encodeURIComponent(id)}/bookings`),api('/activities/manage')]);
@@ -1000,7 +1008,7 @@ async function panAttivita(id){
     'Registra presenza',{id:a.id}));
   }
   return section(esc(a.name),card(`<p>${activityDate(a.startsAt)} · ${statusText[a.status]} · ${a.capacity} posti</p><p class="muted">${esc(a.verificationRule)}</p><p>${a.xp} XP · ${tumazzi(a.cheese)} a chi partecipa</p>${activityDescription(a)}`)+`<p>${link('Tutte le attività','referenti/attivita')}</p>`)+
-  section('Dettagli dell’attività',form('activity-access',textArea('description','Descrizione visibile nel calendario',1600,a.description)+activityAccessFields(a),'Salva dettagli',{id:a.id}))+walkIn+
+  section('Dettagli dell’attività',form('activity-access',textArea('description','Descrizione visibile nel calendario',1600,a.description)+activityAccessFields(a),'Salva dettagli',{id:a.id}))+section('Promemoria',form('activity-reminders',reminderFields(a),'Salva promemoria',{id:a.id}))+walkIn+
   (a.accessMode==='open'?'':section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended&&b.memberId!==S.me.id?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>')));
  }
  const {activities}=await api('/activities/manage');
@@ -1458,6 +1466,10 @@ const submits={
  async decision(_f,v,id){
   const body={decidedOn:v('decidedOn'),title:v('title'),decision:v('decision'),reason:v('reason'),responsible:v('responsible'),status:v('status')};
   await run(()=>api(id?`/assembly/decisions/${encodeURIComponent(id)}`:'/assembly/decisions',{method:id?'PUT':'POST',body}),id?'Decisione aggiornata.':'Decisione pubblicata.');
+ },
+ async 'activity-reminders'(f,v,id){
+  const minutes=n=>{const raw=v('reminder'+n).trim();return raw===''?null:Math.round(Number(raw)*Number(v('reminder'+n+'Unit')));};
+  await run(()=>api(`/activities/manage/${encodeURIComponent(id)}`,{method:'PATCH',body:{reminders:[minutes(1),minutes(2)]}}),'Promemoria salvati.');
  },
  async 'activity-access'(f,v,id){
   await run(()=>api(`/activities/manage/${encodeURIComponent(id)}`,{method:'PATCH',body:{accessMode:v('accessMode'),publicEvent:f.elements.publicEvent.checked,description:v('description')}}),'Dettagli dell’attività aggiornati.');

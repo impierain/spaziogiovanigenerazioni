@@ -16,6 +16,7 @@ function query(sql,params=[],mode='run') {
  const result=spawnSync('python3',['-c',`
 import sqlite3,sys,json
 con=sqlite3.connect(sys.argv[1])
+con.create_function('random',0,lambda:2147483647)  # niente colpi critici a caso nei test (15% di probabilità)
 con.execute('PRAGMA foreign_keys=ON')
 con.row_factory=sqlite3.Row
 sql,params,mode=json.load(sys.stdin)

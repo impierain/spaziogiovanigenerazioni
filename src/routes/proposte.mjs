@@ -1,6 +1,6 @@
 import {microAward} from './joy.mjs';
 import {tumazzi, fail, json, readJson, text, integer} from '../lib/http.mjs';
-import {notify, notifyOrganizers} from '../lib/notify.mjs';
+import {notify, notifyOrganizers, pushOrganizers} from '../lib/notify.mjs';
 import {checkTrophies} from '../lib/trophies.mjs';
 
 const MAX_OPEN = 3;
@@ -24,6 +24,7 @@ export async function create({request, env, db, member}) {
  const res = await db.prepare('INSERT INTO proposals (member_id, title, description) VALUES (?, ?, ?)').bind(
   member.id, text(body.title, 'Titolo', {max: 100}), text(body.description, 'Descrizione', {max: 600, optional: true}) ?? '').run();
  await notifyOrganizers(db, member.id, {kind: 'proposta', level: 'info', title: `Nuova proposta: ${String(body.title).slice(0, 60)}`, body: `Di ${member.pseudonym}. Il gruppo può votarla.`});
+ await pushOrganizers(env, db, member.id, {title: `Nuova proposta: ${String(body.title).slice(0, 60)}`, body: `Di ${member.pseudonym}. Il gruppo può votarla.`, url: '/#proposte'});
  await checkTrophies(env, db, member.id);
  return json({id: res.meta.last_row_id}, 201);
 }

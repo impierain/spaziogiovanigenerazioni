@@ -1,7 +1,7 @@
 import {fail, json, readJson, email, text} from '../lib/http.mjs';
 import {inviteEmail, sendEmail} from '../lib/email.mjs';
 import {newToken} from '../tokens.mjs';
-import {notify, notifyOrganizers} from '../lib/notify.mjs';
+import {notify, notifyOrganizers, pushOrganizers} from '../lib/notify.mjs';
 
 const INVITE_SECONDS = 7 * 24 * 3600;
 const ROLES = ['participant', 'organizer'];
@@ -112,17 +112,20 @@ export async function update({request, db, member, params}) {
 }
 
 
-export async function requestAccess({request, db}) {
+export async function requestAccess({request, db, env}) {
  const body = await readJson(request, 2048);
  const fullName = text(body.fullName, 'Nome e cognome', {max: 80});
  const address = email(body.email);
  const result = await db.prepare(`INSERT INTO members (id, email, pseudonym, full_name, role, status)
   VALUES (?, ?, ?, ?, 'participant', 'pending') ON CONFLICT(email) DO NOTHING`)
   .bind(crypto.randomUUID(), address, fullName.slice(0,28), fullName).run();
- if (result.meta.changes) await notifyOrganizers(db, null, {
-  kind:'accesso', title:'Nuova richiesta di accesso',
-  body:'Una persona chiede di partecipare. Controlla Referenti → Soci.'
- });
+ if (result.meta.changes) {
+  await notifyOrganizers(db, null, {
+   kind:'accesso', title:'Nuova richiesta di accesso',
+   body:'Una persona chiede di partecipare. Controlla Referenti → Soci.'
+  });
+  await pushOrganizers(env, db, null, {title:'Nuova richiesta di accesso', body:'Una persona chiede di partecipare. Controlla Referenti → Soci.', url:'/#referenti'});
+ }
  return json({ok:true, message:'Richiesta ricevuta. Per un nuovo accesso, un referente esaminerà la richiesta e ti invierà il link per scegliere la password. Se hai già un account, puoi accedere oppure chiedere ai referenti un nuovo link.'});
 }
 

@@ -29,7 +29,21 @@ function startsAt(value) {
  return seconds;
 }
 
-const manageSql = `SELECT a.id, a.name, a.description, a.starts_at AS startsAt, a.capacity, a.status, a.verification_rule AS verificationRule,
+// Promemoria: fino a due, in minuti prima dell'inizio (da 5 minuti a 14 giorni); vuoto = nessuno.
+function reminderMinutes(value) {
+ if (value === null || value === undefined || value === '') return null;
+ const minutes = Number(value);
+ if (!Number.isInteger(minutes) || minutes < 5 || minutes > 20160) fail(400, 'Il promemoria deve essere tra 5 minuti e 14 giorni prima.');
+ return minutes;
+}
+function reminderPair(list) {
+ if (!Array.isArray(list) || list.length > 2) fail(400, 'Puoi impostare al massimo due promemoria.');
+ const [a, b] = [reminderMinutes(list[0]), reminderMinutes(list[1])];
+ if (a !== null && a === b) fail(400, 'I due promemoria devono essere a orari diversi.');
+ return [a, b];
+}
+
+const manageSql = `SELECT a.id, a.name, a.reminder1_min AS reminder1, a.reminder2_min AS reminder2, a.description, a.starts_at AS startsAt, a.capacity, a.status, a.verification_rule AS verificationRule,
   a.xp, a.cheese, a.path, a.access_mode AS accessMode, a.public_event AS publicEvent,
   (SELECT COUNT(*) FROM bookings b WHERE b.activity_id = a.id AND b.status = 'pending') AS pending,
   (SELECT COUNT(*) FROM bookings b WHERE b.activity_id = a.id AND b.status = 'confirmed') AS confirmed,
@@ -53,6 +67,10 @@ export async function create({request, db}) {
   integer(body.xp ?? 0, 'XP', {max: 500}), integer(body.cheese ?? 0, 'Tumazzi', {max: 200}), activityPath(body.path),
   accessMode(body.accessMode ?? 'booking'), publicFlag(body.publicEvent ?? false), description(body.description)
  ).run();
+ if ('reminders' in body) {
+  const [r1, r2] = reminderPair(body.reminders);
+  await db.prepare('UPDATE activities SET reminder1_min = ?, reminder2_min = ? WHERE id = ?').bind(r1, r2, id).run();
+ }
  return json({activity: await db.prepare(`${manageSql} WHERE a.id = ?`).bind(id).first()}, 201);
 }
 
@@ -71,6 +89,11 @@ export async function update({request, db, params}) {
  if ('path' in body) put('path', activityPath(body.path));
  if ('accessMode' in body) put('access_mode', accessMode(body.accessMode));
  if ('publicEvent' in body) put('public_event', publicFlag(body.publicEvent));
+ if ('reminders' in body) {
+  const [r1, r2] = reminderPair(body.reminders);
+  put('reminder1_min', r1);
+  put('reminder2_min', r2);
+ }
  if ('status' in body) {
   if (!STATUSES.includes(body.status)) fail(400, 'Stato non valido.');
   put('status', body.status);

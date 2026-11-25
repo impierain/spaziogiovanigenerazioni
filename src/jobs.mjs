@@ -14,13 +14,50 @@ export async function sendReminders(env, nowMs = Date.now()) {
  const {results} = await db.prepare(`SELECT a.id AS activityId, a.name, a.starts_at AS startsAt, b.member_id AS memberId
   FROM activities a JOIN bookings b ON b.activity_id = a.id AND b.status = 'confirmed'
   JOIN members m ON m.id = b.member_id AND m.status = 'approved'
-  WHERE a.status = 'published' AND a.starts_at > ? AND a.starts_at <= ?`).bind(now, now + 36 * 3600).all();
+  WHERE a.status = 'published' AND a.starts_at > ? AND a.starts_at <= ?
+   AND a.reminder1_min IS NULL AND a.reminder2_min IS NULL`).bind(now, now + 36 * 3600).all();
  let sent = 0;
  for (const r of results) {
   const res = await db.prepare(`INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id) VALUES ('activity', ?, ?)`).bind(r.activityId, r.memberId).run();
   if (!res.meta.changes) continue;
   sent++;
   await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: `Domani o oggi: ${r.name}`, body: when(r.startsAt)});
+ }
+ return sent;
+}
+
+const MISSED_AFTER = 3600; // un promemoria già scaduto da più di un'ora (es. impostato tardi) non parte
+
+const lead = minutes => {
+ if (minutes % 1440 === 0) { const d = minutes / 1440; return d === 1 ? 'tra 1 giorno' : `tra ${d} giorni`; }
+ if (minutes % 60 === 0) { const h = minutes / 60; return h === 1 ? 'tra 1 ora' : `tra ${h} ore`; }
+ return `tra ${minutes} minuti`;
+};
+
+// Promemoria personalizzati dai referenti (fino a due per attività), ai soci con prenotazione confermata.
+export async function sendActivityReminders(env, nowMs = Date.now()) {
+ const db = env.DB;
+ const now = Math.floor(nowMs / 1000);
+ const {results: activities} = await db.prepare(`SELECT id, name, starts_at AS startsAt, reminder1_min AS r1, reminder2_min AS r2
+  FROM activities WHERE status = 'published' AND starts_at > ? AND (reminder1_min IS NOT NULL OR reminder2_min IS NOT NULL)`).bind(now).all();
+ let sent = 0;
+ for (const a of activities) {
+  for (const [slot, minutes] of [[1, a.r1], [2, a.r2]]) {
+   if (minutes === null) continue;
+   const fireAt = a.startsAt - minutes * 60;
+   if (fireAt > now || now - fireAt > MISSED_AFTER) continue;
+   const {results: people} = await db.prepare(`SELECT b.member_id AS memberId FROM bookings b JOIN members m ON m.id = b.member_id
+    WHERE b.activity_id = ? AND b.status = 'confirmed' AND m.status = 'approved'`).bind(a.id).all();
+   for (const {memberId} of people) {
+    // La chiave comprende l'orario di inizio: se l'attività viene spostata, i promemoria ripartono.
+    const res = await db.prepare(`INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id, sent_at) VALUES ('activity-custom', ?, ?, ?)`).bind(`${a.id}:${slot}:${a.startsAt}`, memberId, now).run();
+    if (!res.meta.changes) continue;
+    sent++;
+    const title = `${a.name}: inizia ${lead(minutes)}`;
+    await notify(db, memberId, {kind: 'promemoria', level: 'info', title, body: when(a.startsAt)});
+    await sendPush(env, db, memberId, {title, body: when(a.startsAt), url: '/#home'});
+   }
+  }
  }
  return sent;
 }
@@ -133,7 +170,7 @@ export async function autoCheckouts(env, nowMs = Date.now()) {
 
 // Cron ogni 15 minuti.
 export async function runFrequent(env, nowMs = Date.now()) {
- return {stillInside: await sendStillInsideReminders(env, nowMs), autoOut: await autoCheckouts(env, nowMs), aula: await announceIfAlreadyOpen(env, nowMs)};
+ return {stillInside: await sendStillInsideReminders(env, nowMs), autoOut: await autoCheckouts(env, nowMs), aula: await announceIfAlreadyOpen(env, nowMs), custom: await sendActivityReminders(env, nowMs)};
 }
 
 export async function runDaily(env, nowMs = Date.now()) {

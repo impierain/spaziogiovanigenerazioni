@@ -1,7 +1,27 @@
-// Riceve le notifiche push e apre l'app quando si tocca la notifica. Versione 3.
+// Riceve le notifiche push, apre l'app quando si tocca la notifica e tiene una copia delle pagine per usarle senza rete. Versione 4.
 // La nuova versione si attiva subito, senza aspettare che tutte le finestre dell'app si chiudano (su iPhone restano aperte a lungo).
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
+
+// Senza rete: prima si prova la rete (dati sempre aggiornati), se manca si usa l'ultima copia salvata.
+// Solo richieste GET dello stesso sito; i dati personali (/api) restano sul telefono e si cancellano all'uscita dall'account.
+const PAGES = 'cca-pagine', DATA = 'cca-dati';
+const NO_COPY = ['/api/push/', '/api/auth/check', '/api/auth/token', '/api/ingresso', '/api/client-error', '/api/me/export'];
+self.addEventListener('fetch', event => {
+ const req = event.request;
+ if (req.method !== 'GET') return;
+ const url = new URL(req.url);
+ if (url.origin !== self.location.origin || NO_COPY.some(p => url.pathname.startsWith(p))) return;
+ const store = url.pathname.startsWith('/api/') ? DATA : PAGES;
+ event.respondWith(fetch(req).then(res => {
+  if (res.ok && res.type === 'basic') { const copy = res.clone(); caches.open(store).then(c => c.put(req, copy)).catch(() => {}); }
+  return res;
+ }).catch(async () => {
+  const hit = await caches.match(req, {ignoreSearch: store === PAGES && !url.pathname.startsWith('/api/')}) || (req.mode === 'navigate' ? await caches.match('/', {ignoreSearch: true}) : null);
+  if (hit) return hit;
+  return store === DATA ? new Response(JSON.stringify({error: 'Sei offline: questi dati non sono ancora salvati sul telefono.'}), {status: 503, headers: {'Content-Type': 'application/json'}}) : Response.error();
+ }));
+});
 const post = (path, token) => fetch(path, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({token})});
 self.addEventListener('push', event => {
  let data = {};

@@ -22,6 +22,8 @@ import * as feedback from './routes/feedback.mjs';
 import * as joy from './routes/joy.mjs';
 import * as push from './routes/push.mjs';
 import * as aula from './routes/aula.mjs';
+import * as errori from './routes/errori.mjs';
+import * as privacy from './routes/privacy.mjs';
 import {runDaily, runFrequent} from './jobs.mjs';
 
 // access: 'public' = senza accesso, 'member' = socio o referente, 'organizer' = solo referenti.
@@ -52,6 +54,7 @@ const routes = [
  ['POST', '/api/auth/logout', 'public', auth.logout],
  ['GET', '/api/auth/me', 'public', auth.me],
  ['GET', '/api/status', 'public', accessi.status],
+ ['POST', '/api/client-error', 'public', errori.report],
  ['GET', '/api/community', 'public', stats.community],
  ['GET', '/api/space/visit', 'public', space.visit],
  ['PUT', '/api/space/visit', 'organizer', space.saveVisit],
@@ -64,6 +67,8 @@ const routes = [
  ['POST', '/api/auth/set-password', 'public', auth.setPassword],
  ['POST', '/api/auth/change-password', 'member', auth.changePassword],
  ['PATCH', '/api/auth/profile', 'member', auth.updateProfile],
+ ['GET', '/api/me/export', 'member', privacy.exportData],
+ ['POST', '/api/me/delete', 'member', privacy.deleteAccount],
 
  ['POST', '/api/auth/request-access', 'public', members.requestAccess],
  ['POST', '/api/members/:id/approve', 'organizer', members.approve],

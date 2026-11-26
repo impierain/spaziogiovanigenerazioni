@@ -25,6 +25,16 @@ jobs:
         run: |
           for t in tests/*.integration.mjs; do node "$t"; done
           node --test tests/*.test.mjs
+      - name: Compattazione per la pubblicazione (prova su una copia)
+        run: |
+          mkdir -p /tmp/copia && cp -r dist /tmp/copia/
+          node --input-type=module -e "import {minifyDist} from './scripts/minify.mjs'; await minifyDist('/tmp/copia');"
+          for f in /tmp/copia/dist/*.js /tmp/copia/dist/app/*.js; do node --check "$f"; done
+      - name: Prove delle pagine nel browser
+        run: |
+          pip install --quiet playwright
+          python3 -m playwright install --with-deps chromium
+          python3 tests/pagine.e2e.py
 
   # Se il controllo passa, unisce da solo le PR aperte da Piero su rami di questo repository.
   unione-automatica:

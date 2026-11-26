@@ -3,7 +3,7 @@ import {runInNewContext} from 'node:vm';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 
-const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8');
+const source=(await import('node:fs')).readdirSync(new URL('../dist/app/',import.meta.url)).sort().map(f=>readFileSync(new URL('../dist/app/'+f,import.meta.url),'utf8')).join('\n');
 const code=source.slice(source.indexOf('const tvTips='),source.indexOf('// La TV è 16:9:'));
 const escaping=source.slice(source.indexOf('const esc=value'),source.indexOf('const S='));
 async function renderTV({activities=[],failed=false,metrics=[],status={open:true},qr=true}={}){

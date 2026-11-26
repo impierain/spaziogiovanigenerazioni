@@ -87,7 +87,9 @@ window.CCAJoy=(()=>{
  const settings=()=>`<label><input type="checkbox" id="joy-effects" ${pref.get('effects','on')==='on'?'checked':''}> Effetti di ricompensa e numeri animati</label><label><input type="checkbox" id="joy-haptic" ${pref.get('haptic','off')==='on'?'checked':''}> Micro-vibrazioni, se supportate dal telefono</label><p class="muted">Le animazioni ridotte del dispositivo hanno sempre la precedenza. Le vibrazioni non sono disponibili su tutti i browser.</p>`;
  function showGreeting(){
   if(!state?.greeting||location.hash!=='#home'||document.querySelector('dialog[open],.celebration:not([hidden])'))return;
-  const key='greeting-dismiss-'+account;if(pref.get(key,'')===state.today)return;pref.set(key,state.today);
+  const key='greeting-dismiss-'+account;if(pref.get(key,'')===state.today)return;
+  if(window.ccaClaimPopup&&!window.ccaClaimPopup('greeting'))return;
+  pref.set(key,state.today);
   const d=document.createElement('dialog');d.className='joy-greeting';d.setAttribute('aria-labelledby','joy-greeting-title');
   d.innerHTML=`<h2 id="joy-greeting-title">Saluto in Piazza</h2>${cowMascot('felice','Oggi c’è movimento in Piazza: tieni un Tumazzu per cominciare!')}<p>1 Tumazzu al giorno, con un saluto. Nessuna penalità se passi domani o la prossima settimana.</p><div class="joy-dialog-actions"><button data-greet>Saluta e ricevi 1 Tumazzu</button><button class="secondary" data-later>Magari dopo</button></div>`;
   d.querySelector('[data-later]').onclick=()=>d.close();d.querySelector('[data-greet]').onclick=async e=>{e.target.disabled=true;await actions['joy-greeting']();d.close();};

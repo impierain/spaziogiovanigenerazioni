@@ -92,7 +92,7 @@ const context={window:{}};
 runInNewContext(readFileSync(join(root,'dist/cozy-art.js'),'utf8'),context);
 assert.equal(Object.keys(context.window.CCAArt.avatars).length,18);
 assert.ok(context.window.CCAArt.edifici.municipio.includes('<rect'));
-const source=readFileSync(join(root,'dist/app.js'),'utf8');
+const source=(await import('node:fs')).readdirSync(join(root,'dist/app')).sort().map(f=>readFileSync(join(root,'dist/app',f),'utf8')).join('\n');
 const code=source.slice(source.indexOf('const villageThresholds='),source.indexOf('const PATHS='));
 const visual=runInNewContext(code+';({villageScene,villageCount})',context);
 const metrics=['giovani','apertura','attivita','missioni'].map(key=>({key,growthStage:3}));

@@ -19,3 +19,7 @@ migrations_dir = "migrations"
 # Promemoria e riepilogo settimanale: ogni giorno alle 07:00 UTC.
 [triggers]
 crons = ["0 7 * * *", "*/15 * * * *"]
+
+# Log del Worker e degli errori segnalati dal sito, consultabili nella dashboard di Cloudflare (Workers → Logs).
+[observability]
+enabled = true

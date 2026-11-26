@@ -58,7 +58,7 @@ window.CCAJoy=(()=>{
   const o=state.onboarding,l=level(S.totals.xp),onboarding=o.done<o.total,pct=onboarding?o.done/o.total*100:l.top?100:l.progress/l.range*100,next=o.steps.find(s=>!s[1]);
   const el=document.createElement('a');el.id='journey-bar';el.className='journey-bar';el.href='#'+(onboarding?'profilo': 'trofei');
   el.setAttribute('aria-label',`${S.totals.xp} XP. ${onboarding?`Primi passi: ${o.done} su ${o.total}. Prossimo: ${next[0]}`:`Livello ${l.number}: ${l.name}`}`);
-  el.innerHTML=`<span class="journey-numbers"><strong data-joy-xp>${S.totals.xp}</strong> XP <small>${onboarding?`${o.done}/${o.total} primi passi`:`Livello ${l.number} · ${l.name}`}</small></span><span class="journey-track" role="progressbar" aria-label="${onboarding?'Primi passi':'Progresso del livello'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct}%"></i></span><span class="journey-next">${onboarding?(o.done===1?'Profilo creato!':next[0]):l.top?'Gran riserva':`${l.left} XP al prossimo livello`}</span>`;
+  el.innerHTML=`<span class="journey-level" aria-hidden="true">${onboarding?'★':l.number}</span><span class="journey-numbers"><strong data-joy-xp>${S.totals.xp}</strong> XP <small>${onboarding?`Primi passi ${o.done}/${o.total}`:esc(l.name)}</small></span><span class="journey-track" role="progressbar" aria-label="${onboarding?'Primi passi':'Progresso del livello'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct}%"></i></span><span class="journey-next">${onboarding?(o.done===1?'Profilo creato!':next[0]):l.top?'Gran riserva':`${l.left} XP al prossimo livello`}</span>`;
   document.body.append(el);
  }
  function weeklyPanel(){
@@ -87,7 +87,9 @@ window.CCAJoy=(()=>{
  const settings=()=>`<label><input type="checkbox" id="joy-effects" ${pref.get('effects','on')==='on'?'checked':''}> Effetti di ricompensa e numeri animati</label><label><input type="checkbox" id="joy-haptic" ${pref.get('haptic','off')==='on'?'checked':''}> Micro-vibrazioni, se supportate dal telefono</label><p class="muted">Le animazioni ridotte del dispositivo hanno sempre la precedenza. Le vibrazioni non sono disponibili su tutti i browser.</p>`;
  function showGreeting(){
   if(!state?.greeting||location.hash!=='#home'||document.querySelector('dialog[open],.celebration:not([hidden])'))return;
-  const key='greeting-dismiss-'+account;if(pref.get(key,'')===state.today)return;pref.set(key,state.today);
+  const key='greeting-dismiss-'+account;if(pref.get(key,'')===state.today)return;
+  if(window.ccaClaimPopup&&!window.ccaClaimPopup('greeting'))return;
+  pref.set(key,state.today);
   const d=document.createElement('dialog');d.className='joy-greeting';d.setAttribute('aria-labelledby','joy-greeting-title');
   d.innerHTML=`<h2 id="joy-greeting-title">Saluto in Piazza</h2>${cowMascot('felice','Oggi c’è movimento in Piazza: tieni un Tumazzu per cominciare!')}<p>1 Tumazzu al giorno, con un saluto. Nessuna penalità se passi domani o la prossima settimana.</p><div class="joy-dialog-actions"><button data-greet>Saluta e ricevi 1 Tumazzu</button><button class="secondary" data-later>Magari dopo</button></div>`;
   d.querySelector('[data-later]').onclick=()=>d.close();d.querySelector('[data-greet]').onclick=async e=>{e.target.disabled=true;await actions['joy-greeting']();d.close();};

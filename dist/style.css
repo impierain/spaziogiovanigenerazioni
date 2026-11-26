@@ -733,13 +733,13 @@ html[data-theme="night"] .site-foot .project-logos .logo-day { display:none; }
 html[data-theme="night"] .site-foot .project-logos .logo-night { display:block; background:transparent; padding:0; }
 
 .header-controls { align-items:center; }
-.header-controls :is(#wallet-link,#notifications,#theme-toggle) {
+.header-controls :is(#wallet-link,#notifications,#settings-link,#theme-toggle) {
  display:inline-flex; align-items:center; justify-content:center;
  box-sizing:border-box; height:52px; min-height:52px; min-width:52px;
  padding:8px; border:3px solid var(--ink); box-shadow:3px 3px var(--ink);
 }
 .header-controls #theme-toggle { width:52px; flex-shrink:0; }
-.header-controls :is(#wallet-link,#notifications,#theme-toggle) .pixel-icon,
+.header-controls :is(#wallet-link,#notifications,#settings-link,#theme-toggle) .pixel-icon,
 .header-controls #theme-toggle svg { width:24px; height:24px; flex-shrink:0; }
 .header-controls [hidden] { display:none; }
 
@@ -750,7 +750,7 @@ html[data-theme="night"] .site-foot .project-logos .logo-night { display:block; 
 .top .brand > span { display:flex; flex-direction:column; justify-content:center; min-height:64px; gap:5px; }
 .top .brand small, .top .brand .project-code { margin:0; }
 .top .header-controls { align-items:center; }
-.top .header-controls :is(#wallet-link,#notifications,#theme-toggle) {
+.top .header-controls :is(#wallet-link,#notifications,#settings-link,#theme-toggle) {
  height:64px; min-height:64px; min-width:64px;
 }
 .top .header-controls #theme-toggle { width:64px; }
@@ -768,7 +768,7 @@ html[data-theme="night"] .site-foot .project-logos .logo-night { display:block; 
  .top .brand, .top .brand > span { min-height:52px; }
  .top .brand img { width:52px; height:52px; }
  .top .header-controls { gap:6px; }
- .top .header-controls :is(#wallet-link,#notifications,#theme-toggle) { height:52px; min-height:52px; min-width:44px; padding:5px; }
+ .top .header-controls :is(#wallet-link,#notifications,#settings-link,#theme-toggle) { height:52px; min-height:52px; min-width:44px; padding:5px; }
  .top .header-controls #theme-toggle { width:44px; }
  .top #wallet-link span { font-size:1.1rem; }
 }
@@ -824,3 +824,5 @@ html[data-theme="night"] .village .lamp-glow { opacity:.4; }
 .stars label { display: inline-flex; margin-right: 0; padding: 0 .3rem; }
 .feedback-prompt h2 { font-size: 1.3rem; margin-bottom: .4rem; }
 .feedback-prompt form { display: grid; gap: .6rem; }
+.offline-banner{position:sticky;top:0;z-index:50;margin:0;padding:8px 12px;background:#3a3a3a;color:#fff;text-align:center;font-size:.9rem}
+.settings-group{margin-top:2rem}.gear-icon{vertical-align:-3px}

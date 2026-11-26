@@ -612,7 +612,7 @@ async function homeMember(){
   const waiting=pending.chores.filter(c=>c.memberId!==S.me.id).length;
   extra=`<section class="admin-compact"><h2>Da gestire (per i referenti)</h2><div class="admin-chips"><a href="#referenti/presenze">${pixelIcon(navIcons.comunita)}<strong>${inside.presenti.length}</strong><span>In sede →</span></a><a href="#referenti/missioni">${pixelIcon(navIcons.missioni)}<strong>${waiting}</strong><span>Da verificare →</span></a></div></section>`;
  }
- return homeIntro()+presenceCta(pres)+await aulaCard(false)+(window.CCAJoy?.homePanel()||'')+
+ return homeIntro()+presenceCta(pres)+await pushNudge()+await aulaCard(false)+(window.CCAJoy?.homePanel()||'')+
  `<div class="grid stats home-stats" aria-label="Personaggio, Tumazzi, orari e partecipazione settimanale">${card(profileChip()+`<a class="profile-wallet" href="#putia" aria-label="${tumazzi(S.totals.cheese)} · apri A Putìa">${pixelIcon(cheese)}<span>Tumazzi</span><strong>${S.totals.cheese}</strong></a>`,'profile-stat')}
  ${openingCard(st)}${streakPanel(streak)}</div>`+
  worldMap()+monthlyGoal(community?.monthlyGoal)+homeShortcuts()+extra+await dailyWheelPanel()+await achievementBoard()+
@@ -828,6 +828,48 @@ async function aulaCard(always){
  if(always)return card(`<h3>Avviso «aula studio aperta»</h3><p>${d.enabled?'Ricevi una notifica quando in sede arriva qualcuno e l’aula studio è aperta (da lunedì a venerdì pomeriggio, una volta al giorno).':'Vuoi sapere quando l’aula studio è aperta? Ti mandiamo una notifica sul telefono quando arriva qualcuno in sede.'}</p>${btn(d.enabled?'Disattiva l’avviso':'Attiva l’avviso',d.enabled?'aula-no':'aula-si','',{secondary:d.enabled})}`);
  return card(`<h3>Vuoi sapere quando l’aula studio è aperta? 📚</h3><p>Appena arriva qualcuno in sede nel pomeriggio ti mandiamo una notifica sul telefono: una al giorno, mai di più. Puoi cambiare idea dal profilo.</p>${btn('Sì, avvisami','aula-si')} ${btn('Non ora','aula-no','',{secondary:true})}`,'aula-ask');
 }
+/* ---- invito a installare l'app e ad attivare le notifiche ---- */
+let installEvent=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvent=e;});
+const isStandalone=()=>!!(navigator.standalone||matchMedia('(display-mode: standalone)').matches);
+const isMobile=()=>/Android|iPhone|iPad|iPod/.test(navigator.userAgent);
+const isIos=()=>/iPhone|iPad|iPod/.test(navigator.userAgent);
+const snoozed=(key,days)=>Date.now()-Number(pref.get(key,0))<days*864e5;
+// Con l'app installata ma senza notifiche: serve a far comparire l'invito nella home e nel pop-up.
+async function wantsPushPrompt(){
+ return isStandalone()&&pushSupported()&&Notification.permission!=='denied'&&!await pushOn();
+}
+async function pushNudge(){
+ if(!S.me||!await wantsPushPrompt())return '';
+ return card(`<h3>Attiva le notifiche 🔔</h3><p>Hai l’app: attiva le notifiche per non perdere promemoria, aula studio aperta e novità. Se ti arriva la notifica di prova e la confermi, ricevi <strong>1 Tumazzu</strong> in regalo.</p>${btn('Attiva le notifiche','push-toggle')}`,'push-nudge');
+}
+let appPromptShown=false;
+async function appPrompt(page){
+ if(appPromptShown||page!=='home'||!S.me)return;
+ let kind='';
+ if(!isStandalone()){if(isMobile()&&!snoozed('install-later',7))kind='install';}
+ else if(!snoozed('push-later',3)&&await wantsPushPrompt())kind='push';
+ if(!kind)return;
+ // Se è già aperto un altro pop-up (es. il saluto del giorno) aspetto che si chiuda.
+ const busy=document.querySelector('dialog[open]');
+ if(busy){busy.addEventListener('close',()=>setTimeout(()=>{if(['','#home'].includes(location.hash))appPrompt(page).catch(()=>{});},500),{once:true});return;}
+ appPromptShown=true;
+ const dialog=document.createElement('dialog');dialog.className='confirm-dialog';dialog.setAttribute('aria-labelledby','app-prompt-title');
+ const steps=isIos()?'<ol><li>Apri questo sito in <strong>Safari</strong>.</li><li>Tocca <strong>Condividi</strong> (il quadrato con la freccia).</li><li>Scegli <strong>«Aggiungi alla schermata Home»</strong>.</li><li>Apri <strong>CCA SIEMMU</strong> dalla Home: lì potrai anche attivare le notifiche.</li></ol>'
+  :'<ol><li>Tocca il menu del browser (<strong>⋮</strong>).</li><li>Scegli <strong>«Installa app»</strong> o <strong>«Aggiungi a schermata Home»</strong>.</li><li>Apri <strong>CCA SIEMMU</strong> dalla Home.</li></ol>';
+ dialog.innerHTML=kind==='install'
+  ?`<h2 id="app-prompt-title">Porta l’app con te 📲</h2><p>Aggiungi CCA SIEMMU alla schermata Home: si apre come un’app, più veloce, e potrai ricevere le notifiche.</p>${installEvent?'':steps}<form method="dialog">${installEvent?'<button type="button" data-do="install">Installa l’app</button>':''}<button value="later" class="secondary">Più tardi</button></form>`
+  :`<h2 id="app-prompt-title">Attiva le notifiche 🔔</h2><p>Ti avvisiamo di promemoria, aula studio aperta e novità, anche a sito chiuso. Se confermi la notifica di prova ricevi <strong>1 Tumazzu</strong> in regalo.</p><form method="dialog"><button type="button" data-do="push">Attiva le notifiche</button><button value="later" class="secondary">Più tardi</button></form>`;
+ dialog.addEventListener('click',async e=>{
+  const what=e.target.closest('[data-do]')?.dataset.do;if(!what)return;
+  if(what==='install'){try{installEvent.prompt();await installEvent.userChoice;}catch{}dialog.close();return;}
+  try{say(await togglePush());}catch(err){say(err.message||'Non sono riuscito ad attivarle.',true);}
+  dialog.close();render();
+ });
+ dialog.addEventListener('close',()=>{pref.set(kind==='install'?'install-later':'push-later',String(Date.now()));dialog.remove();},{once:true});
+ document.body.append(dialog);dialog.showModal();
+}
+
 async function pushCard(){
  if(iosNotInstalled())return card('<h3>Notifiche sul telefono</h3><p class="muted">Su iPhone funzionano dopo aver aggiunto il sito alla schermata Home: in Safari tocca Condividi → «Aggiungi alla schermata Home», poi apri CCA SIEMMU da lì.</p>');
  if(!pushSupported())return card('<h3>Notifiche sul telefono</h3><p class="muted">Questo browser non supporta le notifiche. Continuerai a ricevere i promemoria via email.</p>');
@@ -1175,7 +1217,7 @@ async function render(focus=false){
  if(!['tv','cartello'].includes(page))main.insertAdjacentHTML('beforeend',`<footer class="foot site-foot">${document.querySelector('#project-logos').innerHTML}${S.me?feedbackLink+' · ':''}${privacyLink}</footer>`);
  if(!['tv','cartello'].includes(page)&&!main.querySelector('#mu-popover'))main.insertAdjacentHTML('beforeend',mu(page));
  main.removeAttribute('aria-busy');
- if(!['tv','cartello','ingresso','imposta-password'].includes(page))feedbackPrompt();
+ if(!['tv','cartello','ingresso','imposta-password'].includes(page))appPrompt(page).catch(()=>{}).then(feedbackPrompt);
  if(page==='tv')fitTv();
  window.CCAJoy?.afterRender();
  if(focus){

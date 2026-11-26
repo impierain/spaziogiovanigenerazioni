@@ -22,6 +22,7 @@ import * as feedback from './routes/feedback.mjs';
 import * as joy from './routes/joy.mjs';
 import * as push from './routes/push.mjs';
 import * as aula from './routes/aula.mjs';
+import * as sede from './routes/sede.mjs';
 import * as errori from './routes/errori.mjs';
 import * as privacy from './routes/privacy.mjs';
 import {runDaily, runFrequent} from './jobs.mjs';
@@ -132,6 +133,8 @@ const routes = [
 
  ['GET', '/api/aula/preferenza', 'member', aula.get],
  ['PUT', '/api/aula/preferenza', 'member', aula.set],
+ ['GET', '/api/sede/stato', 'member', sede.stato],
+ ['POST', '/api/sede/risposta', 'member', sede.risposta],
  ['GET', '/api/push/key', 'member', push.key],
  ['POST', '/api/push/subscribe', 'member', push.subscribe],
  ['POST', '/api/push/received', 'member', push.received],

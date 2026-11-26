@@ -21,6 +21,13 @@ const loadQr=()=>window.qrcode?Promise.resolve():new Promise((ok,ko)=>{const s=d
 function qrSvg(text,label){const q=window.qrcode(0,'M');q.addData(text);q.make();return `<div class="qr-box" role="img" aria-label="${esc(label||'QR code')}">${q.createSvgTag({scalable:true,margin:2})}</div>`;}
 const checkinUrl=code=>`${location.origin}/#ingresso/${code}`;
 let scan=null;
+// Pagina aperta dalla notifica «Sei ancora in sede?» (e su iPhone, dove i pulsanti della notifica non ci sono).
+async function ancoraInSede(){
+ if(!S.me)return needLogin();
+ const d=await api('/sede/stato');
+ if(!d.inside)return title('Sei ancora in sede?','')+card('<p>Risulti già fuori dalla sede: non serve fare altro. Grazie!</p>'+link('Vai alla home','#home'));
+ return title('Sei ancora in sede?','')+card(`<p>Hai registrato l’ingresso alle ${fmt(d.at,{hour:'2-digit',minute:'2-digit'})}. Sei ancora dentro?</p><div class="actions">${btn('Sì, sono ancora dentro','sede-ancora',d.id)} ${btn('No, sono uscito','sede-uscito',d.id,{secondary:true})}</div>`);
+}
 async function ingressoPage(code){
  if(!code)return title('Ingresso in sede','')+card('<p>Inquadra il QR code all’ingresso con la fotocamera del telefono: il sito segna il tuo ingresso o la tua uscita.</p>');
  if(!S.me){
@@ -95,7 +102,7 @@ async function render(focus=false){
  if(!S.loaded)await loadSession();
  else if(S.me){await refreshTotals();checkLevelUp();}
  document.body.classList.toggle('tv',page==='tv');
- const known=['comunita','assemblea','trofei','mercato','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','suggerimenti','notifiche-ok','imposta-password','impostazioni'];
+ const known=['comunita','assemblea','trofei','mercato','putia','banca','proposte','paese','notifiche','home','calendario','spazio','accedi','missioni','presenze','profilo','referenti','privacy','suggerimenti','notifiche-ok','imposta-password','impostazioni','ancora-in-sede'];
  const active=known.includes(page)?page:'';
  renderChrome(active);
  await recordAppDay();
@@ -121,6 +128,7 @@ async function render(focus=false){
   else if(page==='suggerimenti')html=await suggerimenti();
   else if(page==='notifiche-ok')html=await notificheOk(detail);
   else if(page==='tv')html=await tvPage();
+  else if(page==='ancora-in-sede')html=await ancoraInSede();
   else if(page==='ingresso')html=await ingressoPage(detail);
   else if(page==='cartello')html=await cartello(detail);
   else if(page==='accedi')html=accedi(detail);

@@ -136,9 +136,11 @@ async function teamTrophies(){
 let loggedAppDay='';
 async function recordAppDay(){
  if(!S.me||document.visibilityState==='hidden')return;
- const key=S.me.id+'-'+new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome'}).format(new Date());
+ const standalone=!!(navigator.standalone||matchMedia('(display-mode: standalone)').matches);
+ if(standalone){pref.set('app-installed','1');S.appInstalled=true;}
+ const key=standalone+S.me.id+'-'+new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome'}).format(new Date());
  if(loggedAppDay===key)return;
- try{await api('/my/app-visit',{method:'POST',body:{}});loggedAppDay=key;}catch{}
+ try{await api('/my/app-visit',{method:'POST',body:{standalone}});loggedAppDay=key;}catch{}
 }
 function getStreaks(){return api('/my/streaks').catch(()=>null);}
 function streakPanel(d){

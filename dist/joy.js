@@ -58,7 +58,7 @@ window.CCAJoy=(()=>{
   const o=state.onboarding,l=level(S.totals.xp),onboarding=o.done<o.total,pct=onboarding?o.done/o.total*100:l.top?100:l.progress/l.range*100,next=o.steps.find(s=>!s[1]);
   const el=document.createElement('a');el.id='journey-bar';el.className='journey-bar';el.href='#'+(onboarding?'profilo': 'trofei');
   el.setAttribute('aria-label',`${S.totals.xp} XP. ${onboarding?`Primi passi: ${o.done} su ${o.total}. Prossimo: ${next[0]}`:`Livello ${l.number}: ${l.name}`}`);
-  el.innerHTML=`<span class="journey-numbers"><strong data-joy-xp>${S.totals.xp}</strong> XP <small>${onboarding?`${o.done}/${o.total} primi passi`:`Livello ${l.number} · ${l.name}`}</small></span><span class="journey-track" role="progressbar" aria-label="${onboarding?'Primi passi':'Progresso del livello'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct}%"></i></span><span class="journey-next">${onboarding?(o.done===1?'Profilo creato!':next[0]):l.top?'Gran riserva':`${l.left} XP al prossimo livello`}</span>`;
+  el.innerHTML=`<span class="journey-level" aria-hidden="true">${onboarding?'★':l.number}</span><span class="journey-numbers"><strong data-joy-xp>${S.totals.xp}</strong> XP <small>${onboarding?`Primi passi ${o.done}/${o.total}`:esc(l.name)}</small></span><span class="journey-track" role="progressbar" aria-label="${onboarding?'Primi passi':'Progresso del livello'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct}%"></i></span><span class="journey-next">${onboarding?(o.done===1?'Profilo creato!':next[0]):l.top?'Gran riserva':`${l.left} XP al prossimo livello`}</span>`;
   document.body.append(el);
  }
  function weeklyPanel(){

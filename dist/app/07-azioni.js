@@ -388,7 +388,12 @@ function applyTheme(night){
  themeControl.innerHTML=pixelIcon(night?shapes.sun:shapes.moon);
  themeControl.setAttribute('aria-label',night?'Passa alla modalità giorno':'Passa alla modalità notte');
 }
-let night=false;
-try{night=(localStorage.getItem('cca-theme')??(window.matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'))==='night';}catch{}
+// Tema: 'auto' segue il telefono (anche quando cambia da solo la sera), 'day' e 'night' sono scelte fisse.
+const systemDark=window.matchMedia('(prefers-color-scheme: dark)');
+function themeMode(){try{return localStorage.getItem('cca-theme')||'auto';}catch{return 'auto';}}
+function setThemeMode(mode){try{if(mode==='auto')localStorage.removeItem('cca-theme');else localStorage.setItem('cca-theme',mode);}catch{}night=mode==='auto'?systemDark.matches:mode==='night';applyTheme(night);}
+let night=themeMode()==='auto'?systemDark.matches:themeMode()==='night';
 applyTheme(night);
-themeControl.addEventListener('click',()=>{night=!night;applyTheme(night);try{localStorage.setItem('cca-theme',night?'night':'day');}catch{}});
+systemDark.addEventListener?.('change',()=>{if(themeMode()==='auto'){night=systemDark.matches;applyTheme(night);}});
+themeControl.addEventListener('click',()=>{setThemeMode(night?'day':'night');document.querySelectorAll('input[name=theme-mode]').forEach(i=>{i.checked=i.value===themeMode();});});
+document.addEventListener('change',e=>{if(e.target.matches?.('input[name=theme-mode]')){setThemeMode(e.target.value);say(e.target.value==='auto'?'Il tema seguirà il telefono.':e.target.value==='night'?'Tema scuro.':'Tema chiaro.');}});

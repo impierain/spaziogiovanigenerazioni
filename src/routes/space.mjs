@@ -2,7 +2,7 @@ import {romeDay, romeOffset} from '../lib/time.mjs';
 import {fail, integer, json, readJson, text} from '../lib/http.mjs';
 import {announceToAll} from '../lib/notify.mjs';
 
-async function getSetting(db, key) {
+export async function getSetting(db, key) {
  const row = await db.prepare('SELECT text_value FROM app_settings WHERE key = ?').bind(key).first();
  return row ? JSON.parse(row.text_value) : null;
 }
@@ -53,23 +53,49 @@ function meetingTime(value) {
  return integer(instant / 1000, 'Data e ora', {min: Math.floor(Date.now() / 1000), max: 4102444800});
 }
 
-export async function saveAssembly({request, db}) {
+const assemblyWhen = sec => new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(sec * 1000));
+
+export async function saveAssembly({request, env, db, member}) {
  const body = await readJson(request);
+ const before = await getSetting(db, 'next_assembly');
  const meeting = body.clear === true ? null : {
   startsAt: meetingTime(body.startsAt),
   location: text(body.location, 'Luogo', {max: 160}),
-  agenda: lines(body.agenda, 'Ordine del giorno', 1600)
+  agenda: lines(body.agenda, 'Ordine del giorno', 1600),
+  reminders: before?.reminders ?? []
  };
  await setSetting(db, 'next_assembly', meeting);
+ // «Avvisa subito i soci»: bacheca per tutti, telefono per chi ha le notifiche.
+ if (meeting && body.notify === true) {
+  await announceToAll(env, db, member.id, `assemblea:${meeting.startsAt}`, {title: 'Assemblea dei giovani: convocazione', body: `${assemblyWhen(meeting.startsAt)} · ${meeting.location}`, url: '/#assemblea'});
+ }
  return json({meeting});
+}
+
+// Promemoria automatici a tutti i soci: fino a due, in minuti prima dell'inizio (da 5 minuti a 14 giorni).
+export async function saveAssemblyReminders({request, db}) {
+ const body = await readJson(request);
+ const meeting = await getSetting(db, 'next_assembly');
+ if (!meeting) fail(404, 'Pubblica prima la convocazione.');
+ const list = body.reminders;
+ if (!Array.isArray(list) || list.length > 2) fail(400, 'Puoi impostare al massimo due promemoria.');
+ const reminders = [];
+ for (const value of list) {
+  if (value === null || value === undefined || value === '') continue;
+  const minutes = Number(value);
+  if (!Number.isInteger(minutes) || minutes < 5 || minutes > 20160) fail(400, 'Il promemoria deve essere tra 5 minuti e 14 giorni prima.');
+  if (reminders.includes(minutes)) fail(400, 'I due promemoria devono essere a orari diversi.');
+  reminders.push(minutes);
+ }
+ await setSetting(db, 'next_assembly', {...meeting, reminders});
+ return json({meeting: {...meeting, reminders}});
 }
 
 // «Avvisa tutti i soci» sulla convocazione: bacheca per tutti, telefono per chi ha le notifiche.
 export async function notifyAssembly({env, db, member}) {
  const meeting = await getSetting(db, 'next_assembly');
  if (!meeting || meeting.startsAt * 1000 < Date.now()) fail(404, 'Non c\'è una convocazione futura da comunicare.');
- const when = new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(meeting.startsAt * 1000));
- const sent = await announceToAll(env, db, member.id, `assemblea:${meeting.startsAt}`, {title: 'Assemblea dei giovani', body: `${when} · ${meeting.location}`, url: '/#assemblea'});
+ const sent = await announceToAll(env, db, member.id, `assemblea:${meeting.startsAt}`, {title: 'Assemblea dei giovani', body: `${assemblyWhen(meeting.startsAt)} · ${meeting.location}`, url: '/#assemblea'});
  if (!sent) fail(429, 'Hai già avvisato i soci pochi minuti fa.');
  return json(sent);
 }

@@ -63,6 +63,7 @@ const routes = [
  ['GET', '/api/assembly', 'member', space.assembly],
  ['PUT', '/api/assembly/meeting', 'organizer', space.saveAssembly],
  ['POST', '/api/assembly/notify', 'organizer', space.notifyAssembly],
+ ['PUT', '/api/assembly/reminders', 'organizer', space.saveAssemblyReminders],
  ['POST', '/api/assembly/decisions', 'organizer', space.saveDecision],
  ['PUT', '/api/assembly/decisions/:id', 'organizer', space.saveDecision],
  ['GET', '/api/auth/token', 'public', auth.checkToken],

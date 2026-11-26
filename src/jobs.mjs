@@ -3,6 +3,7 @@ import {notify} from './lib/notify.mjs';
 import {sendPush} from './lib/webpush.mjs';
 import {recordAccess} from './routes/accessi.mjs';
 import {announceIfAlreadyOpen} from './routes/aula.mjs';
+import {getSetting} from './routes/space.mjs';
 import {mailMember, stillInsideEmail} from './lib/emails.mjs';
 import {romeDay, romeWeekday} from './lib/time.mjs';
 
@@ -122,6 +123,30 @@ const STILL_INSIDE_AFTER = 2 * 3600; // promemoria dopo due ore dall'ingresso
 const STILL_INSIDE_UNTIL = 4 * 3600; // oltre le quattro ore non lo mandiamo più (cron saltato)
 const hourMinute = sec => new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit'}).format(new Date(sec * 1000));
 
+// Promemoria dell'assemblea a tutti i soci approvati, agli orari scelti dai referenti (una sola volta per socio, orario e data).
+export async function sendAssemblyReminders(env, nowMs = Date.now()) {
+ const db = env.DB;
+ const now = Math.floor(nowMs / 1000);
+ const meeting = await getSetting(db, 'next_assembly');
+ if (!meeting || !Array.isArray(meeting.reminders) || meeting.startsAt <= now) return 0;
+ let sent = 0;
+ for (const minutes of meeting.reminders) {
+  const fireAt = meeting.startsAt - minutes * 60;
+  if (fireAt > now || now - fireAt > MISSED_AFTER) continue;
+  const {results} = await db.prepare(`SELECT id FROM members WHERE status = 'approved'`).all();
+  for (const {id} of results) {
+   const res = await db.prepare(`INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id, sent_at) VALUES ('assemblea-promemoria', ?, ?, ?)`).bind(`${meeting.startsAt}:${minutes}`, id, now).run();
+   if (!res.meta.changes) continue;
+   sent++;
+   const title = `Assemblea: inizia ${lead(minutes)}`;
+   const body = `${when(meeting.startsAt)} · ${meeting.location}`;
+   await notify(db, id, {kind: 'promemoria', level: 'info', title, body});
+   await sendPush(env, db, id, {title, body, url: '/#assemblea'});
+  }
+ }
+ return sent;
+}
+
 const ASK_AGAIN_AFTER = 3 * 3600; // chi risponde «sono ancora dentro» riceve di nuovo la domanda dopo tre ore
 const ASK_AGAIN_UNTIL = 14 * 3600;
 
@@ -195,7 +220,7 @@ export async function autoCheckouts(env, nowMs = Date.now()) {
 
 // Cron ogni 15 minuti.
 export async function runFrequent(env, nowMs = Date.now()) {
- return {stillInside: await sendStillInsideReminders(env, nowMs), autoOut: await autoCheckouts(env, nowMs), aula: await announceIfAlreadyOpen(env, nowMs), custom: await sendActivityReminders(env, nowMs)};
+ return {stillInside: await sendStillInsideReminders(env, nowMs), autoOut: await autoCheckouts(env, nowMs), aula: await announceIfAlreadyOpen(env, nowMs), custom: await sendActivityReminders(env, nowMs), assemblea: await sendAssemblyReminders(env, nowMs)};
 }
 
 export async function runDaily(env, nowMs = Date.now()) {

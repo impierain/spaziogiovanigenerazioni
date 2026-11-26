@@ -250,11 +250,15 @@ const submits={
   await run(()=>api('/space/visit',{method:'PUT',body:{address:v('address'),access:v('access'),accessibility:v('accessibility')}}),'Informazioni della sede aggiornate.');
  },
  async assembly(_f,v){
-  await run(()=>api('/assembly/meeting',{method:'PUT',body:{startsAt:v('startsAt'),location:v('location'),agenda:v('agenda')}}),'Convocazione pubblicata.');
+  await run(()=>api('/assembly/meeting',{method:'PUT',body:{startsAt:v('startsAt'),location:v('location'),agenda:v('agenda'),notify:_f.elements.notify?.checked===true}}),_f.elements.notify?.checked?'Convocazione pubblicata e soci avvisati.':'Convocazione pubblicata.');
  },
  async decision(_f,v,id){
   const body={decidedOn:v('decidedOn'),title:v('title'),decision:v('decision'),reason:v('reason'),responsible:v('responsible'),status:v('status')};
   await run(()=>api(id?`/assembly/decisions/${encodeURIComponent(id)}`:'/assembly/decisions',{method:id?'PUT':'POST',body}),id?'Decisione aggiornata.':'Decisione pubblicata.');
+ },
+ async 'assembly-reminders'(f,v){
+  const minutes=n=>{const raw=v('reminder'+n).trim();return raw===''?null:Math.round(Number(raw)*Number(v('reminder'+n+'Unit')));};
+  await run(()=>api('/assembly/reminders',{method:'PUT',body:{reminders:[minutes(1),minutes(2)]}}),'Promemoria salvati.');
  },
  async 'activity-reminders'(f,v,id){
   const minutes=n=>{const raw=v('reminder'+n).trim();return raw===''?null:Math.round(Number(raw)*Number(v('reminder'+n+'Unit')));};

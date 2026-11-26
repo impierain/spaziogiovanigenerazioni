@@ -110,3 +110,24 @@ assert.equal(query("SELECT COUNT(*) AS n FROM notifications WHERE title='Assembl
 query("INSERT INTO activities (id,name,starts_at,capacity,status,verification_rule) VALUES ('x1','Serata',?,10,'published','Presenza')",[future]);
 assert.equal((await json(await request('/activities/manage/x1/notify','b','POST',{}))).body.members,2);
 console.log('OK: avviso a tutti i soci da assemblea e attività.');
+
+// Convocazione: avviso alla pubblicazione e promemoria automatici a tutti i soci
+const start=now+9*3600;
+const startRome=new Date((start+3600)*1000).toISOString().slice(0,16); // Italia = UTC+1 a fine novembre
+query("DELETE FROM app_settings WHERE key='next_assembly'");
+query("DELETE FROM notifications");
+query("DELETE FROM reminders_sent WHERE kind='avviso-tutti'");
+const pub=await json(await request('/assembly/meeting','b','PUT',{startsAt:startRome,location:'Sede',agenda:'Punto',notify:true}));
+assert.equal(pub.status,200);
+assert.equal(query("SELECT COUNT(*) AS n FROM notifications WHERE title LIKE 'Assemblea dei giovani%'",[],'first').n,2);
+assert.equal((await json(await request('/assembly/reminders','a','PUT',{reminders:[480]}))).status,403);
+assert.equal((await json(await request('/assembly/reminders','b','PUT',{reminders:[480,480]}))).status,400);
+assert.equal((await json(await request('/assembly/reminders','b','PUT',{reminders:[480,null]}))).status,200);
+// un aggiornamento della convocazione non cancella i promemoria
+await request('/assembly/meeting','b','PUT',{startsAt:startRome,location:'Piazza',agenda:'Punto'});
+assert.deepEqual((await json(await request('/assembly','a'))).body.meeting.reminders,[480]);
+assert.equal(await jobs.sendAssemblyReminders(env,Date.now()),0);               // mancano 9 ore: non è ancora ora
+assert.equal(await jobs.sendAssemblyReminders(env,(start-8*3600+60)*1000),3);   // 8 ore prima: tutti e tre i soci
+assert.equal(await jobs.sendAssemblyReminders(env,(start-8*3600+120)*1000),0);  // una sola volta
+assert.equal(query("SELECT COUNT(*) AS n FROM notifications WHERE title='Assemblea: inizia tra 8 ore'",[],'first').n,3);
+console.log('OK: convocazione con avviso e promemoria a tutti i soci.');

@@ -97,8 +97,9 @@ async function panAssemblea(){
  const when=meeting?new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(meeting.startsAt*1000)).replace(' ','T'):'';
  return section('Prossima assemblea',form('assembly',field('startsAt','Data e ora (Italia)','datetime-local',`required value="${esc(when)}"`)+
   field('location','Luogo','text',`required maxlength="160" value="${esc(meeting?.location)}"`)+
-  textArea('agenda','Ordine del giorno',1600,meeting?.agenda,true),'Pubblica convocazione')+
-  (meeting?`<div class="row">${btn('Avvisa tutti i soci','assembly-notify')}${btn('Rimuovi convocazione','assembly-clear','',{secondary:true})}</div><p class="muted">«Avvisa tutti i soci» manda subito una notifica in bacheca a tutti e sul telefono a chi le ha attivate.</p>`:''))+
+  textArea('agenda','Ordine del giorno',1600,meeting?.agenda,true)+
+  '<label class="sound-setting"><input name="notify" type="checkbox" checked> Avvisa subito tutti i soci (bacheca e notifica sul telefono)</label>',meeting?'Aggiorna convocazione':'Pubblica convocazione')+
+  (meeting?section('Promemoria ai soci',form('assembly-reminders',reminderFields({reminder1:meeting.reminders?.[0],reminder2:meeting.reminders?.[1]},'Arrivano a tutti i soci, in bacheca e sul telefono, prima dell’inizio. Per esempio 8 ore prima. Vuoto = nessuno.'),'Salva promemoria'))+`<div class="row">${btn('Avvisa tutti i soci','assembly-notify')}${btn('Rimuovi convocazione','assembly-clear','',{secondary:true})}</div><p class="muted">«Avvisa tutti i soci» manda subito una notifica in bacheca a tutti e sul telefono a chi le ha attivate.</p>`:''))+
  section('Registra una decisione',card('<p>Riporta una decisione già presa in assemblea. Usa il nome di un gruppo o di un ruolo ed evita dati personali.</p>'+decisionForm()))+
  section('Decisioni pubblicate',decisions.length?grid(decisions.map(d=>card(`<details class="disclosure"><summary>${esc(d.title)} · ${decisionStates[d.status]}</summary>${decisionForm(d)}</details>`)),'two'):card('<p>Ancora nessuna decisione.</p>'));
 }
@@ -108,13 +109,13 @@ function activityAccessFields(a={}){
  <label class="sound-setting"><input name="publicEvent" type="checkbox"${a.publicEvent?' checked':''}> Mostra come evento pubblico</label>`;
 }
 
-function reminderFields(a={}){
+function reminderFields(a={},hint='Un promemoria arriva ai soci con la prenotazione confermata, prima dell’inizio. Se non ne imposti nessuno, resta quello automatico del giorno prima.'){
  const row=(n,minutes)=>{
   const unit=minutes&&minutes%1440===0?1440:(minutes&&minutes%60===0?60:(minutes?1:60));
   const value=minutes?minutes/unit:'';
   return `<label>Promemoria ${n}<span class="row"><input name="reminder${n}" type="number" min="1" max="20160" inputmode="numeric" value="${value}" placeholder="vuoto = nessuno" aria-label="Promemoria ${n}: quanto tempo prima"><select name="reminder${n}Unit" aria-label="Unità"><option value="1"${unit===1?' selected':''}>minuti</option><option value="60"${unit===60?' selected':''}>ore</option><option value="1440"${unit===1440?' selected':''}>giorni</option></select></span></label>`;
  };
- return `<p class="muted">Un promemoria arriva ai soci con la prenotazione confermata, prima dell’inizio. Se non ne imposti nessuno, resta quello automatico del giorno prima.</p>${row(1,a.reminder1)}${row(2,a.reminder2)}`;
+ return `<p class="muted">${hint}</p>${row(1,a.reminder1)}${row(2,a.reminder2)}`;
 }
 async function panAttivita(id){
  if(id){

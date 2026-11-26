@@ -91,6 +91,7 @@ assert.equal((await call('/proposals/1/schedule',{actor:'b',method:'POST',body:{
 query("INSERT INTO members (id,email,pseudonym,role,status) VALUES ('b2','b2@example.test','Referente2','organizer','approved')");
 {const t=await newToken();query('INSERT INTO sessions (token_hash, member_id, expires_at) VALUES (?,?,unixepoch()+1800)',[t.hash,'b2']);sessions.b2=t.token;}
 const when=Math.floor(Date.now()/1000)+86400;
+assert.equal((await call('/proposals/2/schedule',{actor:'b',method:'POST',body:{startsAt:Math.floor(Date.now()/1000)-5}})).status,400);   // data già passata: errore chiaro, nessuna bozza
 const sched=await Promise.all([call('/proposals/2/schedule',{actor:'b',method:'POST',body:{startsAt:when}}),call('/proposals/2/schedule',{actor:'b2',method:'POST',body:{startsAt:when}})]);
 assert.equal(sched.filter(r=>r.status===201).length,1);
 assert.equal(query("SELECT COUNT(*) AS n FROM awards WHERE source='proposta' AND ref='2'",[],'first').n,1);

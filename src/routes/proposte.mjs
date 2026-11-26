@@ -51,7 +51,10 @@ export async function schedule({request, env, db, member, params}) {
  if (!p) fail(404, 'Proposta non trovata o già chiusa.');
  if (p.member_id === member.id) fail(409, 'Una proposta tua la porta in calendario un altro referente.');
  const now = Math.floor(Date.now() / 1000);
- const startsAt = integer(body.startsAt, 'Data', {min: now, max: now + 365 * 86400});
+ const startsAt = Number(body.startsAt);
+ if (!Number.isInteger(startsAt)) fail(400, 'Scegli la data e l’ora dell’evento.');
+ if (startsAt <= now) fail(400, 'La data scelta è già passata: scegli un giorno e un’ora futuri.');
+ if (startsAt > now + 365 * 86400) fail(400, 'La data è troppo lontana: scegli un giorno entro un anno.');
  const activityId = crypto.randomUUID();
  const results = await db.batch([
   db.prepare(`INSERT INTO activities (id, name, starts_at, capacity, status, verification_rule, xp, cheese, description) VALUES (?, ?, ?, 20, 'draft', ?, 30, 3, ?)`).bind(

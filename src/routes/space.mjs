@@ -1,5 +1,6 @@
 import {romeDay, romeOffset} from '../lib/time.mjs';
 import {fail, integer, json, readJson, text} from '../lib/http.mjs';
+import {announceToAll} from '../lib/notify.mjs';
 
 async function getSetting(db, key) {
  const row = await db.prepare('SELECT text_value FROM app_settings WHERE key = ?').bind(key).first();
@@ -61,6 +62,16 @@ export async function saveAssembly({request, db}) {
  };
  await setSetting(db, 'next_assembly', meeting);
  return json({meeting});
+}
+
+// «Avvisa tutti i soci» sulla convocazione: bacheca per tutti, telefono per chi ha le notifiche.
+export async function notifyAssembly({env, db, member}) {
+ const meeting = await getSetting(db, 'next_assembly');
+ if (!meeting || meeting.startsAt * 1000 < Date.now()) fail(404, 'Non c\'è una convocazione futura da comunicare.');
+ const when = new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(meeting.startsAt * 1000));
+ const sent = await announceToAll(env, db, member.id, `assemblea:${meeting.startsAt}`, {title: 'Assemblea dei giovani', body: `${when} · ${meeting.location}`, url: '/#assemblea'});
+ if (!sent) fail(429, 'Hai già avvisato i soci pochi minuti fa.');
+ return json(sent);
 }
 
 export async function saveDecision({request, db, params}) {

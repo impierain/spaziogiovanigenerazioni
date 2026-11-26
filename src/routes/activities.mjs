@@ -1,5 +1,5 @@
 import {fail, json, readJson, integer, text} from '../lib/http.mjs';
-import {pushAllMembers} from '../lib/notify.mjs';
+import {announceToAll, pushAllMembers} from '../lib/notify.mjs';
 
 const STATUSES = ['draft', 'published', 'cancelled'];
 const PATH_IDS = ['studio', 'creativita', 'socialita', 'cittadinanza', 'solidarieta'];
@@ -121,6 +121,18 @@ export async function update({request, env, db, member, params}) {
  const updated = await db.prepare(`${manageSql} WHERE a.id = ?`).bind(params.id).first();
  if (body.status === 'published' && before && before.status !== 'published') await announceActivity(env, db, member.id, updated);
  return json({activity: updated});
+}
+
+// «Avvisa tutti i soci», anche senza prenotazioni: bacheca per tutti, telefono per chi ha le notifiche.
+export async function notifyAll({env, db, member, params}) {
+ const a = await db.prepare('SELECT id, name, starts_at AS startsAt, status FROM activities WHERE id = ?').bind(params.id).first();
+ if (!a) fail(404, 'Attività non trovata.');
+ if (a.status !== 'published') fail(400, 'Si può avvisare solo per un\'attività pubblicata.');
+ if (a.startsAt * 1000 < Date.now()) fail(400, 'L\'attività è già iniziata.');
+ const when = new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'}).format(new Date(a.startsAt * 1000));
+ const sent = await announceToAll(env, db, member.id, `attivita:${a.id}:${a.startsAt}`, {title: a.name, body: when, url: '/#calendario'});
+ if (!sent) fail(429, 'Hai già avvisato i soci pochi minuti fa.');
+ return json(sent);
 }
 
 export async function bookings({db, params}) {

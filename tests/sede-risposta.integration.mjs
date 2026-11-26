@@ -97,3 +97,16 @@ assert.equal((await json(await request('/auth/me','b'))).body.appInstalled,false
 await request('/my/app-visit','b','POST',{standalone:true});
 assert.equal((await json(await request('/auth/me','b'))).body.appInstalled,true);
 console.log('OK: risposta «ancora dentro»/«sono uscito», domanda ripetuta dopo tre ore, app installata ricordata.');
+
+// «Avvisa tutti i soci»: assemblea e attività, anche senza prenotazioni; solo referenti; niente doppio invio
+query("INSERT INTO members (id,email,pseudonym,role,status) VALUES ('c','c@example.test','Terzo','participant','approved')");
+const future=now+86400;
+query("INSERT INTO app_settings (key,text_value) VALUES ('next_assembly',?)",[JSON.stringify({startsAt:future,location:'Sede',agenda:[]})]);
+assert.equal((await json(await request('/assembly/notify','a','POST',{}))).status,403);
+const r1=await json(await request('/assembly/notify','b','POST',{}));
+assert.deepEqual([r1.status,r1.body.members],[200,2]);
+assert.equal((await json(await request('/assembly/notify','b','POST',{}))).status,429);
+assert.equal(query("SELECT COUNT(*) AS n FROM notifications WHERE title='Assemblea dei giovani'",[],'first').n,2);
+query("INSERT INTO activities (id,name,starts_at,capacity,status,verification_rule) VALUES ('x1','Serata',?,10,'published','Presenza')",[future]);
+assert.equal((await json(await request('/activities/manage/x1/notify','b','POST',{}))).body.members,2);
+console.log('OK: avviso a tutti i soci da assemblea e attività.');

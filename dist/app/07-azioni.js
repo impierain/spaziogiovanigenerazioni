@@ -139,6 +139,8 @@ const actions={
   const trophy=(S.trophies||[]).find(t=>String(t.id)===id&&t.earned);
   if(trophy)return shareProgress(trophy);
  },
+ async 'assembly-notify'(){let msg='';if(await run(async()=>{const d=await api('/assembly/notify',{method:'POST',body:{}});msg=`Avviso inviato a ${d.members} soci (${d.pushed} sul telefono).`;},null,{rerender:false}))say(msg);},
+ async 'activity-notify'(id){let msg='';if(await run(async()=>{const d=await api('/activities/manage/'+encodeURIComponent(id)+'/notify',{method:'POST',body:{}});msg=`Avviso inviato a ${d.members} soci (${d.pushed} sul telefono).`;},null,{rerender:false}))say(msg);},
  async 'assembly-clear'(){await run(()=>api('/assembly/meeting',{method:'PUT',body:{clear:true}}),'Convocazione rimossa.');},
  reload:()=>render(),
  trophy(id){const t=(S.trophies||[]).find(x=>x.id===id);if(t)openTrophy(t);},
@@ -203,6 +205,8 @@ const destructiveActions={
  'team-leave':'Ritirare la tua iscrizione? La squadra potrebbe tornare in formazione.',
  'team-cancel':'Annullare questa impresa per tutta la squadra?',
  'assembly-clear':'Rimuovere la convocazione dell’assemblea?',
+ 'assembly-notify':'Mandare ora una notifica a tutti i soci?',
+ 'activity-notify':'Mandare ora una notifica a tutti i soci?',
  cancel:'Annullare la prenotazione? Potresti perdere il posto.',
  redeemCancel:'Annullare il riscatto e restituire i Tumazzi?',
  xCancel:'Annullare questo scambio?', xDecline:'Rifiutare questa richiesta di scambio?',

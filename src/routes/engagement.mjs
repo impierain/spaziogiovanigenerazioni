@@ -13,8 +13,11 @@ export function calendarStreak(days, today) {
  while(have.has(new Date(cursor).toISOString().slice(0,10))){current++;cursor-=step;}
  return {current,best};
 }
-export async function visit({db, member}) {
+export async function visit({request, db, member}) {
  const today=romeDay(Date.now());
+ // Se la visita arriva dall'app installata lo ricordiamo: dal browser, sullo stesso account, non si propone più di installarla.
+ const body=await request.json().catch(()=>({}));
+ if(body?.standalone===true)await db.prepare("INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id) VALUES ('app-installata', 'si', ?)").bind(member.id).run();
  await db.prepare('INSERT OR IGNORE INTO app_visit_days (member_id, day) VALUES (?, ?)').bind(member.id,today).run();
  return json({saved:true,day:today});
 }

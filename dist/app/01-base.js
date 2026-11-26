@@ -47,7 +47,7 @@ async function api(path,{method='GET',body}={}){
  }finally{endLoading();}
 }
 async function loadSession(){
- try{const d=await api('/auth/me');S.me=d.member;S.totals=d.totals??{xp:0,cheese:0};S.unread=d.unread??0;}
+ try{const d=await api('/auth/me');S.me=d.member;S.totals=d.totals??{xp:0,cheese:0};S.unread=d.unread??0;S.appInstalled=!!d.appInstalled;}
  catch{S.me=null;}
  S.loaded=true;
  checkLevelUp();

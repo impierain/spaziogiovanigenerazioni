@@ -103,6 +103,8 @@ const actions={
  async 'push-confirm'(){let msg='';if(await run(async()=>{const d=await api('/push/confirm',{method:'POST',body:{}});if(d.reward)await refreshTotals();msg=d.reward?'Notifiche verificate! Ti abbiamo regalato 1 Tumazzu.':'Notifiche verificate.';},null))say(msg);},
  async 'push-resend'(){let msg='';if(await run(async()=>{const sub=await (await navigator.serviceWorker.ready).pushManager.getSubscription();if(!sub)throw new Error('Attiva prima le notifiche.');const d=await api('/push/subscribe',{method:'POST',body:sub.toJSON()});msg=d.testSent?'Notifica di prova inviata: toccala per confermare.':'Non siamo riusciti a mandare la prova. Riprova tra poco.';},null))say(msg);},
  async 'aula-si'(){let msg='';if(await run(async()=>{await api('/aula/preferenza',{method:'PUT',body:{enabled:true}});msg='Fatto: ti avvisiamo quando l’aula studio è aperta.';if(pushSupported()&&!iosNotInstalled()&&!await pushOn()){try{msg=await togglePush()+' '+msg;}catch{msg+=' Per riceverla sul telefono attiva le notifiche dal profilo.';}}},null,{rerender:true}))say(msg);},
+ async 'sede-ancora'(id){await run(()=>api('/sede/risposta',{method:'POST',body:{id:Number(id),answer:'ancora'}}),'Va bene, ti lasciamo in sede. Ti richiediamo tra qualche ora.',{rerender:true});},
+ async 'sede-uscito'(id){await run(()=>api('/sede/risposta',{method:'POST',body:{id:Number(id),answer:'uscito'}}),'Uscita registrata. A presto!',{rerender:true});},
  async 'aula-no'(){await run(()=>api('/aula/preferenza',{method:'PUT',body:{enabled:false}}),'Va bene: l’avviso è disattivato.',{rerender:true});},
  async 'push-toggle'(){let msg='';if(await run(async()=>{msg=await togglePush();},null))say(msg);},
  'mission-category'(id){missionCategory=id;missionPage=0;refreshMissionChoices();},
@@ -140,7 +142,7 @@ const actions={
  async 'assembly-clear'(){await run(()=>api('/assembly/meeting',{method:'PUT',body:{clear:true}}),'Convocazione rimossa.');},
  reload:()=>render(),
  trophy(id){const t=(S.trophies||[]).find(x=>x.id===id);if(t)openTrophy(t);},
- theme(){document.querySelector('#theme-toggle').click();render();},
+ theme(){setThemeMode(night?'day':'night');render();},
  tvzoom(id){const z=tvZoom(tvZoom(pref.get('tvzoom',1))+(id==='up'?.05:-.05));pref.set('tvzoom',z.toFixed(2));const el=document.querySelector('.tv-screen');if(el)el.style.setProperty('--tvz',z);},
  async checkin(){const ok=await run(()=>api('/checkin',{method:'POST',body:{direction:'IN'}}),'Check-in registrato.');if(ok){taskFeedback('✓ Sei in sede!', 'Ti va di dare una mano? Scegli una missione: i premi arrivano dopo la verifica.',true);window.CCAJoy?.stamp('INGRESSO REGISTRATO',false);}},
  print:()=>window.print(),
@@ -381,12 +383,8 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('hashchange',()=>{if(location.hash==='#main')return;if(goingBack)goingBack=false;else if(routeTrail.at(-1)!==location.hash)routeTrail.push(location.hash||'#home');render(true);});
 render();
 
-const themeControl=document.querySelector('#theme-toggle');
 function applyTheme(night){
  document.documentElement.dataset.theme=night?'night':'day';
- themeControl.setAttribute('aria-pressed',String(night));
- themeControl.innerHTML=pixelIcon(night?shapes.sun:shapes.moon);
- themeControl.setAttribute('aria-label',night?'Passa alla modalità giorno':'Passa alla modalità notte');
 }
 // Tema: 'auto' segue il telefono (anche quando cambia da solo la sera), 'day' e 'night' sono scelte fisse.
 const systemDark=window.matchMedia('(prefers-color-scheme: dark)');
@@ -395,5 +393,4 @@ function setThemeMode(mode){try{if(mode==='auto')localStorage.removeItem('cca-th
 let night=themeMode()==='auto'?systemDark.matches:themeMode()==='night';
 applyTheme(night);
 systemDark.addEventListener?.('change',()=>{if(themeMode()==='auto'){night=systemDark.matches;applyTheme(night);}});
-themeControl.addEventListener('click',()=>{setThemeMode(night?'day':'night');document.querySelectorAll('input[name=theme-mode]').forEach(i=>{i.checked=i.value===themeMode();});});
 document.addEventListener('change',e=>{if(e.target.matches?.('input[name=theme-mode]')){setThemeMode(e.target.value);say(e.target.value==='auto'?'Il tema seguirà il telefono.':e.target.value==='night'?'Tema scuro.':'Tema chiaro.');}});

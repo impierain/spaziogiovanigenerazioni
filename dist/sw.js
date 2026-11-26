@@ -1,4 +1,4 @@
-// Riceve le notifiche push, apre l'app quando si tocca la notifica e tiene una copia delle pagine per usarle senza rete. Versione 4.
+// Riceve le notifiche push, apre l'app quando si tocca la notifica e tiene una copia delle pagine per usarle senza rete. Versione 5.
 // La nuova versione si attiva subito, senza aspettare che tutte le finestre dell'app si chiudano (su iPhone restano aperte a lungo).
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
@@ -28,7 +28,7 @@ self.addEventListener('push', event => {
  try { data = event.data ? event.data.json() : {}; } catch { /* messaggio non valido */ }
  const shown = self.registration.showNotification(data.title || 'CCA SIEMMU', {
   body: data.body || '', icon: 'icon-192.png', badge: 'icon-192.png', tag: data.tag || 'cca',
-  actions: Array.isArray(data.actions) ? data.actions.slice(0, 2) : [], data: {url: data.url || '/', token: data.token || ''}
+  actions: Array.isArray(data.actions) ? data.actions.slice(0, 2) : [], data: {url: data.url || '/', token: data.token || '', ref: data.ref || ''}
  });
  // Notifica di prova: il dispositivo avvisa da solo il sito che è arrivata (verifica tecnica, senza bisogno di toccarla).
  const ack = data.token ? post('/api/push/received', data.token).catch(() => {}) : Promise.resolve();
@@ -44,11 +44,18 @@ const openApp = url => self.clients.matchAll({type: 'window', includeUncontrolle
 });
 self.addEventListener('notificationclick', event => {
  event.notification.close();
- const {url, token} = event.notification.data || {};
+ const {url, token, ref} = event.notification.data || {};
  // Pulsante «Sì, tutto ok»: conferma senza aprire l'app (dove il browser mostra i pulsanti); altrimenti si apre la pagina di conferma.
  if (event.action === 'ok' && token) {
   event.waitUntil(post('/api/push/confirm', token)
    .then(r => r.ok ? self.registration.showNotification('Perfetto!', {body: 'Notifiche verificate. Il tuo Tumazzu è nell’app.', tag: 'cca-prova-ok', icon: 'icon-192.png'}) : openApp(url))
+   .catch(() => openApp(url)));
+  return;
+ }
+ // Pulsanti di «Sei ancora in sede?»: la risposta parte senza aprire l'app; se non riesce si apre la pagina con gli stessi pulsanti.
+ if ((event.action === 'ancora' || event.action === 'uscito') && ref) {
+  event.waitUntil(fetch('/api/sede/risposta', {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id: Number(ref), answer: event.action})})
+   .then(r => r.ok ? self.registration.showNotification(event.action === 'uscito' ? 'Uscita registrata' : 'Va bene, ti lasciamo in sede', {body: event.action === 'uscito' ? 'Grazie! A presto in sede.' : 'Ti richiediamo tra qualche ora.', tag: 'cca-sede', icon: 'icon-192.png'}) : openApp(url))
    .catch(() => openApp(url)));
   return;
  }

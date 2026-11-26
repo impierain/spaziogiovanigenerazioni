@@ -122,6 +122,9 @@ async function aulaCard(always){
 /* ---- invito a installare l'app e ad attivare le notifiche ---- */
 let installEvent=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvent=e;});
+addEventListener('appinstalled',()=>{pref.set('app-installed','1');if(S.me)S.appInstalled=true;});
+// L'app è già sul telefono: lo sappiamo dall'account (visite fatte dall'app) o da questo browser.
+const hasApp=()=>pref.get('app-installed','')==='1'||!!S.appInstalled;
 const isStandalone=()=>!!(navigator.standalone||matchMedia('(display-mode: standalone)').matches);
 const isMobile=()=>/Android|iPhone|iPad|iPod/.test(navigator.userAgent);
 const isIos=()=>/iPhone|iPad|iPod/.test(navigator.userAgent);
@@ -144,7 +147,7 @@ function claimPopup(kind){
 window.ccaClaimPopup=claimPopup;
 async function appPromptKind(){
  if(appPromptShown||!S.me)return '';
- if(!isStandalone())return isMobile()&&!snoozed('install-later',7)?'install':'';
+ if(!isStandalone())return isMobile()&&!hasApp()&&!snoozed('install-later',7)?'install':'';
  return !snoozed('push-later',3)&&await wantsPushPrompt()?'push':'';
 }
 async function appPrompt(page){
@@ -252,7 +255,7 @@ async function impostazioni(){
  const {avatarSpecies:species,avatarColor:color}=S.me;
  const picker=`<fieldset><legend>Avatar</legend><div class="animal-picker">${Object.entries(animals).map(([id,a])=>`<label><input type="radio" name="species" value="${id}" ${id===species?'checked':''}>${avatar(id,color)}<span>${a.name}</span></label>`).join('')}</div></fieldset><fieldset><legend>Colore</legend><div class="swatches">${Object.entries(avatarColors).map(([id,[name,hex]])=>`<label><input type="radio" name="color" value="${id}" ${id===color?'checked':''}><span class="swatch" style="background:${hex}"></span><span class="swatch-name">${name}</span></label>`).join('')}</div></fieldset>`;
  const install=isStandalone()?card('<h3>App installata ✓</h3><p class="muted">Stai usando CCA SIEMMU come app.</p>')
-  :card(`<h3>Installa l’app</h3><p>Aggiungi CCA SIEMMU alla schermata Home: si apre come un’app e puoi ricevere le notifiche.</p>${installEvent?btn('Installa l’app','install-app'):installSteps()}`);
+  :card(`<h3>Installa l’app</h3>${!isStandalone()&&hasApp()?'<p>Hai già l’app sul telefono: aprila dalla schermata Home per usarla a tutto schermo e ricevere le notifiche.</p>':`<p>Aggiungi CCA SIEMMU alla schermata Home: si apre come un’app e puoi ricevere le notifiche.</p>${installEvent?btn('Installa l’app','install-app'):installSteps()}`}`);
  return title('Impostazioni','Account, notifiche, app e privacy.')+
  section('Account',grid([
   card(`<h3>${esc(S.me.fullName||S.me.pseudonym)}</h3><p>${esc(S.me.email)}</p><p>${badge(isOrganizer()?'Referente':'Socio')}</p>${btn('Esci','logout','',{secondary:true})}`),

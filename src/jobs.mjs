@@ -122,6 +122,22 @@ const STILL_INSIDE_AFTER = 2 * 3600; // promemoria dopo due ore dall'ingresso
 const STILL_INSIDE_UNTIL = 4 * 3600; // oltre le quattro ore non lo mandiamo più (cron saltato)
 const hourMinute = sec => new Intl.DateTimeFormat('it-IT', {timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit'}).format(new Date(sec * 1000));
 
+const ASK_AGAIN_AFTER = 3 * 3600; // chi risponde «sono ancora dentro» riceve di nuovo la domanda dopo tre ore
+const ASK_AGAIN_UNTIL = 14 * 3600;
+
+// Notifica con i due pulsanti: «Sì, sono ancora dentro» / «No, sono uscito». Dove i pulsanti non ci sono (iPhone) si apre la pagina con gli stessi due pulsanti.
+async function askStillInside(env, db, r, {again = false} = {}) {
+ const since = hourMinute(r.at);
+ const body = `Hai registrato l'ingresso alle ${since}. ${again ? 'Sei ancora in sede?' : 'Se sei già uscito, dillo qui: tra un\'ora lo registriamo noi.'}`;
+ await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${since}. Rispondi dalla notifica o apri l'app: se sei già uscito, registra l'uscita con il QR o chiedi a un referente.${again ? '' : " Se entro un'ora non rispondi, la registriamo noi."}`});
+ // Notifica sul telefono per chi l'ha attivata; l'email solo per gli altri.
+ const pushed = await sendPush(env, db, r.memberId, {
+  title: 'Sei ancora in sede?', body, url: '/#ancora-in-sede', tag: 'cca-sede', ref: String(r.id),
+  actions: [{action: 'ancora', title: 'Sì, sono ancora dentro'}, {action: 'uscito', title: 'No, sono uscito'}]
+ });
+ if (!pushed && !again) await mailMember(env, db, r.memberId, name => stillInsideEmail(name, {since}));
+}
+
 // «Sei ancora in sede?»: una volta per ingresso, solo se l'ultimo movimento del socio è ancora quell'ingresso.
 export async function sendStillInsideReminders(env, nowMs = Date.now()) {
  const db = env.DB;
@@ -135,10 +151,18 @@ export async function sendStillInsideReminders(env, nowMs = Date.now()) {
   const res = await db.prepare(`INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id, sent_at) VALUES ('sede', ?, ?, ?)`).bind(String(r.id), r.memberId, now).run();
   if (!res.meta.changes) continue;
   sent++;
-  await notify(db, r.memberId, {kind: 'promemoria', level: 'info', title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita con il QR o chiedi a un referente: se entro un'ora non la registri, lo facciamo noi.`});
-  // Notifica sul telefono per chi l'ha attivata; l'email solo per gli altri.
-  const pushed = await sendPush(env, db, r.memberId, {title: 'Sei ancora in sede?', body: `Hai registrato l'ingresso alle ${hourMinute(r.at)}. Se sei già uscito, registra l'uscita: tra un'ora lo facciamo noi.`, url: '/#home'});
-  if (!pushed) await mailMember(env, db, r.memberId, name => stillInsideEmail(name, {since: hourMinute(r.at)}));
+  await askStillInside(env, db, r);
+ }
+ // Chi aveva risposto «sono ancora dentro» e lo è ancora dopo tre ore: nuova domanda (senza uscita automatica).
+ const {results: again} = await db.prepare(`SELECT a.id, a.member_id AS memberId, a.at FROM reminders_sent r
+  JOIN accessi a ON a.id = CAST(r.ref AS INTEGER) AND a.member_id = r.member_id
+  JOIN members m ON m.id = a.member_id AND m.status = 'approved'
+  WHERE r.kind = 'sede-ancora' AND r.sent_at <= ? AND a.direction = 'IN' AND a.at > ?
+   AND a.id = (SELECT id FROM accessi WHERE member_id = a.member_id ORDER BY at DESC, id DESC LIMIT 1)`).bind(now - ASK_AGAIN_AFTER, now - ASK_AGAIN_UNTIL).all();
+ for (const r of again) {
+  await db.prepare(`UPDATE reminders_sent SET sent_at = ? WHERE kind = 'sede-ancora' AND ref = ? AND member_id = ?`).bind(now, String(r.id), r.memberId).run();
+  sent++;
+  await askStillInside(env, db, r, {again: true});
  }
  return sent;
 }
@@ -153,6 +177,7 @@ export async function autoCheckouts(env, nowMs = Date.now()) {
  const {results} = await db.prepare(`SELECT a.id, a.member_id AS memberId, a.at FROM reminders_sent r
   JOIN accessi a ON a.id = CAST(r.ref AS INTEGER) AND a.member_id = r.member_id
   WHERE r.kind = 'sede' AND r.sent_at <= ? AND r.sent_at > ? AND a.direction = 'IN'
+   AND NOT EXISTS (SELECT 1 FROM reminders_sent x WHERE x.kind = 'sede-ancora' AND x.ref = r.ref AND x.member_id = r.member_id)
    AND a.id = (SELECT id FROM accessi WHERE member_id = a.member_id ORDER BY at DESC, id DESC LIMIT 1)`).bind(now - AUTO_OUT_AFTER_REMINDER, now - 86400).all();
  let done = 0;
  for (const r of results) {

@@ -53,7 +53,8 @@ export async function logout({request, db}) {
 
 export async function me({member, db}) {
  if (!member) return json({member: null});
- return json({member: publicMember(member), totals: await memberTotals(db, member.id), unread: await unreadCount(db, member.id)});
+ const app = await db.prepare("SELECT 1 AS ok FROM reminders_sent WHERE kind = 'app-installata' AND member_id = ?").bind(member.id).first();
+ return json({member: publicMember(member), totals: await memberTotals(db, member.id), unread: await unreadCount(db, member.id), appInstalled: !!app});
 }
 
 async function tokenRow(db, token) {

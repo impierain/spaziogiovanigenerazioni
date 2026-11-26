@@ -37,3 +37,18 @@ export async function notifyOrganizers(db, exceptId, data) {
   for (const row of results) await notify(db, row.id, data);
  } catch { /* idem */ }
 }
+
+// Avviso a tutti i soci approvati (tranne chi lo invia): in bacheca per tutti, sul telefono per chi ha le notifiche.
+// Un secondo invio identico entro dieci minuti viene rifiutato (doppio tocco).
+export async function announceToAll(env, db, senderId, key, {title, body = '', url = '/#home'}) {
+ const bucket = Math.floor(Date.now() / 600000);
+ const res = await db.prepare(`INSERT OR IGNORE INTO reminders_sent (kind, ref, member_id) VALUES ('avviso-tutti', ?, ?)`).bind(`${key}:${bucket}`, senderId).run();
+ if (!res.meta.changes) return null;
+ const {results} = await db.prepare(`SELECT id FROM members WHERE status = 'approved' AND id <> ?`).bind(senderId).all();
+ let pushed = 0;
+ for (const row of results) {
+  await notify(db, row.id, {kind: 'promemoria', level: 'info', title, body});
+  pushed += await pushMember(env, db, row.id, {title, body, url}) ? 1 : 0;
+ }
+ return {members: results.length, pushed};
+}

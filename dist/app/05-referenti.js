@@ -98,7 +98,7 @@ async function panAssemblea(){
  return section('Prossima assemblea',form('assembly',field('startsAt','Data e ora (Italia)','datetime-local',`required value="${esc(when)}"`)+
   field('location','Luogo','text',`required maxlength="160" value="${esc(meeting?.location)}"`)+
   textArea('agenda','Ordine del giorno',1600,meeting?.agenda,true),'Pubblica convocazione')+
-  (meeting?`<p class="subpage-back">${btn('Rimuovi convocazione','assembly-clear','',{secondary:true})}</p>`:''))+
+  (meeting?`<div class="row">${btn('Avvisa tutti i soci','assembly-notify')}${btn('Rimuovi convocazione','assembly-clear','',{secondary:true})}</div><p class="muted">«Avvisa tutti i soci» manda subito una notifica in bacheca a tutti e sul telefono a chi le ha attivate.</p>`:''))+
  section('Registra una decisione',card('<p>Riporta una decisione già presa in assemblea. Usa il nome di un gruppo o di un ruolo ed evita dati personali.</p>'+decisionForm()))+
  section('Decisioni pubblicate',decisions.length?grid(decisions.map(d=>card(`<details class="disclosure"><summary>${esc(d.title)} · ${decisionStates[d.status]}</summary>${decisionForm(d)}</details>`)),'two'):card('<p>Ancora nessuna decisione.</p>'));
 }
@@ -131,7 +131,7 @@ async function panAttivita(id){
     'Registra presenza',{id:a.id}));
   }
   return section(esc(a.name),card(`<p>${activityDate(a.startsAt)} · ${statusText[a.status]} · ${a.capacity} posti</p><p class="muted">${esc(a.verificationRule)}</p><p>${a.xp} XP · ${tumazzi(a.cheese)} a chi partecipa</p>${activityDescription(a)}`)+`<p>${link('Tutte le attività','referenti/attivita')}</p>`)+
-  section('Dettagli dell’attività',form('activity-access',textArea('description','Descrizione visibile nel calendario',1600,a.description)+activityAccessFields(a),'Salva dettagli',{id:a.id}))+section('Promemoria',form('activity-reminders',reminderFields(a),'Salva promemoria',{id:a.id}))+walkIn+
+  section('Dettagli dell’attività',form('activity-access',textArea('description','Descrizione visibile nel calendario',1600,a.description)+activityAccessFields(a),'Salva dettagli',{id:a.id}))+section('Promemoria',form('activity-reminders',reminderFields(a),'Salva promemoria',{id:a.id})+(a.status==='published'?card('<h3>Avvisa tutti i soci</h3><p>Manda subito una notifica a tutti i soci, anche senza prenotazioni.</p>'+btn('Avvisa tutti i soci','activity-notify',a.id)):''))+walkIn+
   (a.accessMode==='open'?'':section('Prenotazioni',bookings.length?grid(bookings.map(b=>card(`<h3>${esc(b.name)}</h3><p>${badge(statusText[b.status])} ${b.attended?badge('Presenza registrata'):''}</p><div class="row">${b.status==='pending'?btn('Conferma','bk-confirm',a.id,{extra:`data-member="${esc(b.memberId)}"`})+btn('Rifiuta','bk-decline',a.id,{secondary:true,extra:`data-member="${esc(b.memberId)}"`}):''}${b.status==='confirmed'&&!b.attended&&b.memberId!==S.me.id?btn('Registra presenza','bk-attend',a.id,{extra:`data-member="${esc(b.memberId)}"`}):''}</div>`)),'two')+`<p class="muted">La presenza si registra dopo l’inizio dell’attività e nella stessa giornata, solo dopo averla verificata di persona.</p>`:card('<p>Nessuna prenotazione.</p>')));
  }
  const {activities}=await api('/activities/manage');
